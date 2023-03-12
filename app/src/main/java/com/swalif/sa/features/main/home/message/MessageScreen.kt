@@ -17,6 +17,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
@@ -59,44 +60,32 @@ fun MessageScreen(
     navController: NavController,
     viewModel: MessageViewModel = hiltViewModel()
 ) {
-    LocalViewModelStoreOwner
     val state by viewModel.state.collectAsState()
     val animateSendColor by animateColorAsState(targetValue = if (state.text.isEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary)
     Scaffold(
         topBar = {
             TopAppBar(colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)),
+                // TODO: change to create chat Info UI
                 title = {
-                    Row {
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         AsyncImage(
                             model = state.chatInfo.imageUri,
                             contentDescription = "",
                             modifier = Modifier
-                                .size(50.dp)
+                                .size(40.dp)
                                 .clip(CircleShape),
                             contentScale = ContentScale.Crop
                         )
-                        Text(text = state.chatInfo.userName)
-                        val userStatus = state.chatInfo.userStatus
-                        when(userStatus){
-                            is UserStatus.Offline -> {
-                                Text(text = userStatus.lastSeen.toString())
-                            }
-                            UserStatus.Online -> {
-                                Text(text = "Onling")
-                            }
-                            UserStatus.TYPING -> {
-                                Text(text = "Typing")
-                            }
-                            null -> {
 
-                            }
+                        Column(modifier = Modifier, verticalArrangement = Arrangement.SpaceAround) {
+                            Text(text = state.chatInfo.userName,style = MaterialTheme.typography.labelMedium)
+                            Text(text = state.chatInfo.localizeStatusUser(),style = MaterialTheme.typography.labelSmall)
                         }
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack()}) {
-
-                        Icon(Icons.Default.ArrowBack,"")
+                        Icon(rememberVectorPainter(image = Icons.Default.ArrowBack,),"")
                     }
                 }
             )
