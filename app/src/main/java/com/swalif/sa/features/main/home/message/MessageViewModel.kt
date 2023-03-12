@@ -46,6 +46,7 @@ class MessageViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MessageState())
 
     init {
+
         viewModelScope.launch(Dispatchers.IO) {
             delay(5000)
             chatInfo.update {
@@ -55,21 +56,9 @@ class MessageViewModel @Inject constructor(
                     userStatus = UserStatus.Online
                 )
             }
-            while (true) {
-                delay(3000)
-                chatInfo.update {
-                    it.copy(userStatus = it.userStatus?.getNextStatus())
-                }
-            }
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        logcat {
-            "called"
-        }
-    }
     private var isMe = true
     fun sendMessage(message: String) {
         val i = if (isMe) {

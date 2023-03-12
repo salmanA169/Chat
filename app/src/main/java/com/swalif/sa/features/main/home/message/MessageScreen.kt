@@ -64,7 +64,7 @@ fun MessageScreen(
     val animateSendColor by animateColorAsState(targetValue = if (state.text.isEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary)
     Scaffold(
         topBar = {
-            TopAppBar(
+            TopAppBar(colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)),
                 title = {
                     Row {
                         AsyncImage(
@@ -176,12 +176,12 @@ fun MessageItem(
             modifier = Modifier.width(IntrinsicSize.Max),
             shape = if (isMessageFromMe) getShapeMessageItemMe() else getShapeMessageItemSender(),
             colors = CardDefaults.cardColors(
-                containerColor = if (isMessageFromMe) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
+                containerColor = if (isMessageFromMe) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f) else MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
             ),
             onClick = {
             }
         ) {
-            ContentMessage(Modifier.padding(6.dp), message.message, message.statusMessage)
+            ContentMessage(Modifier.padding(6.dp), message.message, message.statusMessage,isMessageFromMe)
         }
     }
 }
@@ -190,11 +190,12 @@ fun MessageItem(
 fun ContentMessage(
     modifier: Modifier = Modifier,
     text: String,
-    messageStatus: MessageStatus
+    messageStatus: MessageStatus,
+    isMessageFromMe:Boolean
 ) {
     val animate =
         animateColorAsState(
-            targetValue = if (messageStatus == MessageStatus.SEEN) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onBackground
+            targetValue = if (messageStatus == MessageStatus.SEEN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
         )
     Column() {
         Text(
@@ -210,27 +211,29 @@ fun ContentMessage(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = "08:53", style = MaterialTheme.typography.labelSmall)
-            Crossfade(targetState = messageStatus) {
-                when (it) {
-                    MessageStatus.SENT -> {
-                        Icon(
-                            painter = painterResource(id = R.drawable.check_icon),
-                            contentDescription = "",
-                            modifier = Modifier
-                                .size(24.dp)
-                        )
-                    }
-                    MessageStatus.DELIVERED, MessageStatus.SEEN -> {
-                        Icon(
-                            painter = painterResource(id = R.drawable.double_check_icon),
-                            contentDescription = "",
-                            tint = animate.value,
-                            modifier = Modifier
-                                .size(24.dp)
-                        )
-                    }
+            if (isMessageFromMe){
+                Crossfade(targetState = messageStatus) {
+                    when (it) {
+                        MessageStatus.SENT -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.check_icon),
+                                contentDescription = "",
+                                modifier = Modifier
+                                    .size(24.dp)
+                            )
+                        }
+                        MessageStatus.DELIVERED, MessageStatus.SEEN -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.double_check_icon),
+                                contentDescription = "",
+                                tint = animate.value,
+                                modifier = Modifier
+                                    .size(24.dp)
+                            )
+                        }
 
-                    else -> {}
+                        else -> {}
+                    }
                 }
             }
         }
