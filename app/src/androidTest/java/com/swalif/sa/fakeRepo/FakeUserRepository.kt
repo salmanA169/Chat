@@ -2,8 +2,8 @@ package com.swalif.sa.fakeRepo
 
 import com.swalif.sa.datasource.local.dao.UserDao
 import com.swalif.sa.datasource.local.entity.UserEntity
-import com.swalif.sa.mapper.UserInfo
 import com.swalif.sa.mapper.toUserInfo
+import com.swalif.sa.model.LoginInfo
 import com.swalif.sa.repository.userRepository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import logcat.logcat
@@ -23,7 +23,7 @@ class FakeUserRepository @Inject constructor(
         userDao.deleteUser(user)
     }
 
-    override suspend fun getUserByUid(uid: String): UserInfo? {
+    override suspend fun getUserByUid(uid: String): LoginInfo? {
         println("called get user")
         return userDao.getUserByUid(uid)?.toUserInfo()
     }

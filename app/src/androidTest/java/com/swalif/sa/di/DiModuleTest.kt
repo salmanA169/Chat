@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.swalif.sa.datasource.local.SwalifDatabase
 import dagger.Module
 import dagger.Provides
+import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dagger.hilt.testing.TestInstallIn
@@ -30,6 +31,10 @@ object DiModuleTest {
     @Provides
     @Singleton
     fun provideChatDao(database: SwalifDatabase) = database.chatDao
+
+    @Provides
+    @Singleton
+    fun provideMessageDao(database: SwalifDatabase) = database.messageDao
 
 }
 

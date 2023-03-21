@@ -17,6 +17,48 @@
             </AndroidTestResultsTableState>
           </value>
         </entry>
+        <entry key="-1219665383">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RZ8T400K75J-WQa2Dp._adb-tls-connect._tcp" value="120" />
+                  <entry key="samsung&#10; SM-A135F" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="-1218738297">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RZ8T400K75J-WQa2Dp._adb-tls-connect._tcp" value="120" />
+                  <entry key="samsung&#10; SM-A135F" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="-390479191">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Tests" value="360" />
+                  <entry key="adb-RZ8T400K75J-WQa2Dp._adb-tls-connect._tcp" value="120" />
+                  <entry key="samsung&#10; SM-A135F" value="120" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
       </map>
     </option>
   </component>

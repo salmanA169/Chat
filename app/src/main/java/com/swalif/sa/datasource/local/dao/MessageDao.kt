@@ -12,7 +12,9 @@ interface MessageDao {
     @Query("SELECT * FROM ChatEntity WHERE chatId =:chatId")
     fun getMessage(chatId:Int):Flow<ChatWithMessages>
 
-    @Insert
+    @Query("SELECT * FROM MessageEntity ")
+    fun getMessage():Flow<MessageEntity>
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addMessage(messageEntity: MessageEntity):Long
 
     @Update
