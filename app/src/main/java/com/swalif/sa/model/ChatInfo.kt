@@ -3,18 +3,22 @@ package com.swalif.sa.model
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.swalif.sa.R
+import com.swalif.sa.utils.formatDateTime
 import java.time.LocalDateTime
 
 data class ChatInfo(
     val userName: String = "",
     val userStatus: UserStatus? = null,
-    val uidUser:String = "",
-    val imageUri:String = ""
-){
+    val uidUser: String = "",
+    val imageUri: String = ""
+) {
     @Composable
-    fun localizeStatusUser():String {
-         return when(userStatus){
-            is UserStatus.Offline -> ""// TODO: format date string
+    fun localizeStatusUser(): String {
+        return when (userStatus) {
+            is UserStatus.Offline -> stringResource(
+                id = R.string.last_seen,
+                userStatus.lastSeen.formatDateTime()
+            )
             UserStatus.Online -> {
                 stringResource(id = R.string.online)
             }
@@ -27,14 +31,7 @@ data class ChatInfo(
 
 sealed class UserStatus {
     object Online : UserStatus()
-    class Offline (val lastSeen:LocalDateTime): UserStatus()
-    object TYPING:UserStatus()
+    class Offline(val lastSeen: LocalDateTime) : UserStatus()
+    object TYPING : UserStatus()
 
-    fun getNextStatus():UserStatus{
-        return when(this){
-            is Offline -> TYPING
-            Online -> Offline(LocalDateTime.now())
-            TYPING -> Online
-        }
-    }
 }

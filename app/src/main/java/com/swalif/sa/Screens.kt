@@ -10,10 +10,13 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import logcat.logcat
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 const val ON_BOARDING_SCREEN = "onboard_route"
  const val MY_UID_ARG = "my_UID"
  const val CHANNEL_ID_ARG = "channel_id"
+const val PREVIEW_IMAGE_ARG = "preview_image_arg"
 
 sealed class Screens(val route: String) {
 
@@ -43,9 +46,23 @@ sealed class Screens(val route: String) {
         }
     }
 
+    object PreviewScreen:Screens("preview_route"){
+        override val args: List<NamedNavArgument>
+            get() = listOf(navArgument(PREVIEW_IMAGE_ARG){
+                type = NavType.StringType
+            })
+        val formattedPreviewRoute = "$route/{$PREVIEW_IMAGE_ARG}"
 
-    init {
-        logcat { route }
+        fun navigateToPreview(image:String):String{
+            val encodedUri = URLEncoder.encode(image,StandardCharsets.UTF_8.toString())
+            return buildString {
+                append(route)
+                val args = listOf(encodedUri)
+                args.forEach {
+                    append("/$it")
+                }
+            }
+        }
     }
     object MessageScreen : Screens("message_rout"){
 

@@ -9,21 +9,25 @@ data class Message(
     val senderUid:String,
     val message:String,
     val dateTime:LocalDateTime,
-    val statusMessage:MessageStatus
+    val mediaUri:String? = null,
+    val statusMessage:MessageStatus,
+    val messageType : MessageType
 ){
+    init {
+        check(messageType.isMedia() && mediaUri != null){
+            "Media uri must not be null with media type"
+        }
+
+    }
     fun isMessageFromMe(uid:String) :Boolean{
         return senderUid == uid
     }
 }
+enum class MessageType{
+    TEXT,IMAGE,AUDIO;
 
+    fun isMedia() = this == IMAGE || this == AUDIO
+}
 enum class MessageStatus{
     SENT,DELIVERED,SEEN;
-
-    fun after():MessageStatus{
-        return when(this){
-            SENT -> DELIVERED
-            DELIVERED -> SEEN
-            SEEN -> SENT
-        }
-    }
 }

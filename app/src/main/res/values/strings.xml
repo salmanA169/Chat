@@ -7,5 +7,6 @@
     <string name="account">account</string>
     <string name="search">search</string>
     <string name="online">online</string>
-    <string name="typing">typing...</string>
+    <string name="typing">typing…</string>
+    <string name="last_seen">"last seen %1$s"</string>
 </resources>

@@ -4,9 +4,12 @@ import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material.icons.Icons
@@ -19,14 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -37,8 +40,10 @@ import com.swalif.sa.Screens
 import com.swalif.sa.model.ChatInfo
 import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageStatus
-import com.swalif.sa.model.UserStatus
+import com.swalif.sa.model.MessageType
 import com.swalif.sa.ui.theme.ChatAppTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 fun NavGraphBuilder.messageDest(navController: NavController) {
     composable(
@@ -64,12 +69,25 @@ fun MessageScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val animateSendColor by animateColorAsState(targetValue = if (state.text.isEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary)
+    val lazyColumnState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(true) {
+                detectTapGestures {
+                    focusManager.clearFocus()
+                }
+            }
     ) {
-        ChatInfoSection(navController = navController, chatInfo = state.chatInfo,modifier = Modifier.fillMaxWidth())
+        ChatInfoSection(
+            navController = navController,
+            chatInfo = state.chatInfo,
+            modifier = Modifier.fillMaxWidth()
+        )
         LazyColumn(
+            state = lazyColumnState,
             reverseLayout = true,
             modifier = Modifier
                 .fillMaxSize()
@@ -94,9 +112,14 @@ fun MessageScreen(
             },
             trailingIcon = {
                 IconButton(onClick = {
-                    viewModel.sendMessage(
+                    viewModel.sendTextMessage(
                         state.text
                     )
+                    coroutineScope.launch {
+                        // TODO: improve it to viewModel when receive or send messages
+                        delay(500)
+                        lazyColumnState.animateScrollToItem(0)
+                    }
                 }, enabled = state.text.isNotEmpty()) {
                     Icon(
                         imageVector = Icons.Default.Send,
@@ -135,13 +158,16 @@ fun ChatInfoSection(
             model = chatInfo.imageUri,
             contentDescription = "",
             modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape),
+                .size(45.dp)
+                .clip(CircleShape)
+                .clickable {
+                    navController.navigate(Screens.PreviewScreen.navigateToPreview(chatInfo.imageUri))
+                },
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
-            Text(text = chatInfo.userName, style = MaterialTheme.typography.labelLarge)
+            Text(text = chatInfo.userName, style = MaterialTheme.typography.titleMedium)
             Text(text = chatInfo.localizeStatusUser(), style = MaterialTheme.typography.labelSmall)
         }
     }
@@ -180,8 +206,7 @@ fun MessageItem(
         ) {
             ContentMessage(
                 Modifier.padding(6.dp),
-                message.message,
-                message.statusMessage,
+                message,
                 isMessageFromMe
             )
         }
@@ -191,23 +216,27 @@ fun MessageItem(
 @Composable
 fun ContentMessage(
     modifier: Modifier = Modifier,
-    text: String,
-    messageStatus: MessageStatus,
+    message: Message,
     isMessageFromMe: Boolean
 ) {
     val animate =
         animateColorAsState(
-            targetValue = if (messageStatus == MessageStatus.SEEN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+            targetValue = if (message.statusMessage == MessageStatus.SEEN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
         )
     Column() {
-        Text(
-            text = text,
-            modifier
-                .widthIn(max = 290.dp)
-                .fillMaxWidth()
-                .padding(horizontal = 4.dp),
-            style = LocalTextStyle.current.copy(textDirection = TextDirection.Content)
-        )
+        when(message.messageType){
+            MessageType.TEXT -> Text(
+                text = message.message,
+                modifier
+                    .widthIn(max = 290.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                style = LocalTextStyle.current.copy(textDirection = TextDirection.Content)
+            )
+            MessageType.IMAGE -> AsyncImage(model = message.mediaUri, contentDescription = "")
+            MessageType.AUDIO -> TODO()
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -217,7 +246,7 @@ fun ContentMessage(
         ) {
             Text(text = "08:53", style = MaterialTheme.typography.labelSmall)
             if (isMessageFromMe) {
-                Crossfade(targetState = messageStatus) {
+                Crossfade(targetState = message.statusMessage) {
                     when (it) {
                         MessageStatus.SENT -> {
                             Icon(

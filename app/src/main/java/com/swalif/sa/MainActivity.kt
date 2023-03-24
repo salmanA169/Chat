@@ -29,6 +29,7 @@ import androidx.navigation.compose.rememberNavController
 import com.swalif.sa.component.*
 import com.swalif.sa.features.main.home.homeDest
 import com.swalif.sa.features.main.home.message.messageDest
+import com.swalif.sa.features.main.home.message.previewImage.previewNavDest
 import com.swalif.sa.features.onboarding.onBoardingNavigation
 import com.swalif.sa.ui.theme.ChatAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -107,12 +108,11 @@ class MainActivity : ComponentActivity() {
                         navController = navController,
                         startDestination = Screens.MainScreens.HomeScreen.route
                     ) {
-                        
                         homeDest(navController,paddingValues,scrollTopBar.nestedScrollConnection)
                         onBoardingNavigation(navController)
                         messageDest(navController)
+                        previewNavDest(navController)
                         composable(Screens.MainScreens.SearchScreen.route){
-
                         }
                         composable(Screens.MainScreens.AccountScreen.route){
                             Button(modifier = Modifier.padding(paddingValues),onClick = {
