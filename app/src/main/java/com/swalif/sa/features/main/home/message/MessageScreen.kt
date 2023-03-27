@@ -42,6 +42,7 @@ import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
 import com.swalif.sa.ui.theme.ChatAppTheme
+import com.swalif.sa.utils.formatShortTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -244,7 +245,7 @@ fun ContentMessage(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "08:53", style = MaterialTheme.typography.labelSmall)
+            Text(text = message.dateTime.formatShortTime(), style = MaterialTheme.typography.labelSmall)
             if (isMessageFromMe) {
                 Crossfade(targetState = message.statusMessage) {
                     when (it) {

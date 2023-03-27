@@ -14,7 +14,7 @@ data class Message(
     val messageType : MessageType
 ){
     init {
-        check(messageType.isMedia() && mediaUri != null){
+        check(!messageType.isMedia() && mediaUri == null){
             "Media uri must not be null with media type"
         }
 

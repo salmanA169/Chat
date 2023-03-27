@@ -16,3 +16,5 @@ fun LocalDateTime.toSeconds() = toEpochSecond(ZoneOffset.UTC)
  */
 
 fun LocalDateTime.formatDateTime(): String = format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))
+
+fun LocalDateTime.formatShortTime() = format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))
