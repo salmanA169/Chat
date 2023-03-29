@@ -1,5 +1,8 @@
 package com.swalif.sa.features.main.home.message
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -45,6 +48,7 @@ import com.swalif.sa.ui.theme.ChatAppTheme
 import com.swalif.sa.utils.formatShortTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import logcat.logcat
 
 fun NavGraphBuilder.messageDest(navController: NavController) {
     composable(
@@ -73,6 +77,14 @@ fun MessageScreen(
     val lazyColumnState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    val pickMedia = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()){
+        if (it!= null){
+            viewModel.sendImage(it.toString())
+            logcat("MessageScreen") {
+                it.toString()
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -107,7 +119,9 @@ fun MessageScreen(
         TextField(
             textStyle = LocalTextStyle.current.copy(textDirection = TextDirection.Content),
             leadingIcon = {
-                IconButton(onClick = { /*TODO*/ }) {
+                IconButton(onClick = {
+                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
+                }) {
                     Icon(imageVector = Icons.Default.Email, "")
                 }
             },
@@ -234,7 +248,12 @@ fun ContentMessage(
                     .padding(horizontal = 4.dp),
                 style = LocalTextStyle.current.copy(textDirection = TextDirection.Content)
             )
-            MessageType.IMAGE -> AsyncImage(model = message.mediaUri, contentDescription = "")
+            MessageType.IMAGE ->{
+                AsyncImage(model = message.mediaUri, contentDescription = "",modifier = Modifier.padding(2.dp))
+                logcat {
+                    message.mediaUri.toString()
+                }
+            }
             MessageType.AUDIO -> TODO()
         }
 
