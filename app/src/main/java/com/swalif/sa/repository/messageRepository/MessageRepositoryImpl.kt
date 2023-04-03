@@ -31,16 +31,19 @@ class MessageRepositoryImpl @Inject constructor(
     private val filesManager: FilesManager
 ) : MessageRepository {
     override suspend fun addMessage(message: Message) {
-        when(message.messageType){
+        when (message.messageType) {
             MessageType.TEXT -> {
                 messageDao.addMessage(message.toMessageEntity())
             }
             MessageType.IMAGE -> {
+                val id = messageDao.addMessage(message.copy(mediaUri = "").toMessageEntity())
                 val uriImage = message.mediaUri!!
                 val nameFile = UUID.randomUUID().toString().plus(".jpeg")
-                val rootDir = File(context.filesDir,nameFile).toUri().toString()
-                if (filesManager.saveImage(uriImage.toUri(),nameFile)){
-                    messageDao.addMessage(message.copy(mediaUri = rootDir).toMessageEntity())
+                val rootDir = File(context.filesDir, nameFile).toUri().toString()
+                if (filesManager.saveImage(uriImage.toUri(), nameFile)) {
+                    messageDao.updateMessage(
+                        message.copy(messageId = id.toInt(), mediaUri = rootDir).toMessageEntity()
+                    )
                 }
             }
             MessageType.AUDIO -> TODO()

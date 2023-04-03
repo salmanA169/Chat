@@ -20,6 +20,7 @@ import logcat.logcat
 import java.time.LocalDateTime
 import javax.inject.Inject
 
+// TODO: add onEvent Function 1- onNewMessage 2- onSendMessage 3- onNavigate
 @HiltViewModel
 class MessageViewModel @Inject constructor(
     private val messageRepository: MessageRepository,

@@ -2,10 +2,14 @@ package com.swalif.sa.core.storage
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Bitmap.CompressFormat
 import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import androidx.core.graphics.decodeBitmap
 import androidx.core.net.toUri
+import androidx.core.os.BuildCompat
+import com.swalif.sa.BuildConfig
 import com.swalif.sa.datasource.local.dao.MessageDao
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -22,8 +26,9 @@ class FilesManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val contentResolver = context.contentResolver
+
     // bf9c06d3-10b9-47b3-89bd-fb318d186687.jpeg
-    suspend fun saveImage(uri: Uri,nameFile:String): Boolean {
+    suspend fun saveImage(uri: Uri, nameFile: String): Boolean {
         return try {
             withContext(Dispatchers.Default) {
                 val imageDecoder =
@@ -31,14 +36,23 @@ class FilesManager @Inject constructor(
                     }
                 context.openFileOutput(nameFile, Context.MODE_PRIVATE)
                     .use {
-                         if(!imageDecoder.compress(Bitmap.CompressFormat.JPEG, 80, it)){
-                             throw IOException("Couldn't save bitmap")
-                         }
+                        val formatImage: CompressFormat
+                        val quality: Int
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                            formatImage = CompressFormat.WEBP_LOSSY
+                            quality = 0
+                        } else {
+                            formatImage = CompressFormat.JPEG
+                            quality = 80
+                        }
+                        if (!imageDecoder.compress(formatImage, quality, it)) {
+                            throw IOException("Couldn't save bitmap")
+                        }
                     }
                 true
             }
 
-        }catch (e:Exception){
+        } catch (e: Exception) {
             logcat { e.message!! }
             false
         }

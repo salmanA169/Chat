@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -112,7 +113,8 @@ fun MessageScreen(
                 it.messageId
             }) {
                 MessageItem(
-                    message = it
+                    message = it,
+                    navController
                 )
                 Spacer(modifier = Modifier.height(4.dp))
             }
@@ -200,6 +202,7 @@ fun getShapeMessageItemSender() = MaterialTheme.shapes.medium.copy(topStart = Co
 @Composable
 fun MessageItem(
     message: Message,
+    navController: NavController
 ) {
     val isMessageFromMe = remember(message.senderUid) {
         message.isMessageFromMe("test")
@@ -221,9 +224,10 @@ fun MessageItem(
             }
         ) {
             ContentMessage(
-                Modifier.padding(6.dp),
+                Modifier,
                 message,
-                isMessageFromMe
+                isMessageFromMe,
+                navController
             )
         }
     }
@@ -233,32 +237,46 @@ fun MessageItem(
 fun ContentMessage(
     modifier: Modifier = Modifier,
     message: Message,
-    isMessageFromMe: Boolean
+    isMessageFromMe: Boolean,
+    navController: NavController
 ) {
     val animate =
         animateColorAsState(
             targetValue = if (message.statusMessage == MessageStatus.SEEN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
         )
-    Column() {
+    Column {
         when (message.messageType) {
             MessageType.TEXT -> Text(
                 text = message.message,
                 modifier
                     .widthIn(max = 290.dp)
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
+                    .padding(vertical = 2.dp, horizontal = 6.dp),
                 style = LocalTextStyle.current.copy(textDirection = TextDirection.Content)
             )
 
             MessageType.IMAGE -> {
-                AsyncImage(
-                    model = message.mediaUri,
-                    contentDescription = "",
-                    modifier = Modifier.padding(2.dp),
-                    placeholder = painterResource(id = R.drawable.check_icon)
-                )
-                logcat {
-                    message.mediaUri.toString()
+                val imageUri = message.mediaUri
+                if (imageUri != null) {
+                    if (imageUri.isEmpty()) {
+                        CircularProgressIndicator(modifier = Modifier.align(CenterHorizontally).padding(8.dp))
+                    } else {
+                        AsyncImage(
+                            model = message.mediaUri,
+                            contentDescription = "",
+                            modifier = Modifier
+                                .size(150.dp)
+                                .padding(2.dp)
+                                .clickable {
+                                    navController.navigate(
+                                        Screens.PreviewScreen.navigateToPreview(
+                                            message.mediaUri ?: ""
+                                        )
+                                    )
+                                },
+                            contentScale = ContentScale.Crop
+                        )
+                    }
                 }
             }
             MessageType.AUDIO -> TODO()
@@ -273,7 +291,8 @@ fun ContentMessage(
         ) {
             Text(
                 text = message.dateTime.formatShortTime(),
-                style = MaterialTheme.typography.labelSmall
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(3.dp)
             )
             if (isMessageFromMe) {
                 Crossfade(targetState = message.statusMessage) {
