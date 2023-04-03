@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDirection
@@ -38,6 +39,8 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.swalif.sa.R
 import com.swalif.sa.Screens
 import com.swalif.sa.model.ChatInfo
@@ -77,14 +80,12 @@ fun MessageScreen(
     val lazyColumnState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
-    val pickMedia = rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()){
-        if (it!= null){
-            viewModel.sendImage(it.toString())
-            logcat("MessageScreen") {
-                it.toString()
+    val pickMedia =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) {
+            if (it != null) {
+                viewModel.sendImage(it.toString())
             }
         }
-    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -239,7 +240,7 @@ fun ContentMessage(
             targetValue = if (message.statusMessage == MessageStatus.SEEN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
         )
     Column() {
-        when(message.messageType){
+        when (message.messageType) {
             MessageType.TEXT -> Text(
                 text = message.message,
                 modifier
@@ -248,8 +249,14 @@ fun ContentMessage(
                     .padding(horizontal = 4.dp),
                 style = LocalTextStyle.current.copy(textDirection = TextDirection.Content)
             )
-            MessageType.IMAGE ->{
-                AsyncImage(model = message.mediaUri, contentDescription = "",modifier = Modifier.padding(2.dp))
+
+            MessageType.IMAGE -> {
+                AsyncImage(
+                    model = message.mediaUri,
+                    contentDescription = "",
+                    modifier = Modifier.padding(2.dp),
+                    placeholder = painterResource(id = R.drawable.check_icon)
+                )
                 logcat {
                     message.mediaUri.toString()
                 }
@@ -264,7 +271,10 @@ fun ContentMessage(
             horizontalArrangement = Arrangement.End,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = message.dateTime.formatShortTime(), style = MaterialTheme.typography.labelSmall)
+            Text(
+                text = message.dateTime.formatShortTime(),
+                style = MaterialTheme.typography.labelSmall
+            )
             if (isMessageFromMe) {
                 Crossfade(targetState = message.statusMessage) {
                     when (it) {

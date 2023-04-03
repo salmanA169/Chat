@@ -1,10 +1,13 @@
 package com.swalif.sa.features.main.home.message
 
+import android.net.Uri
+import android.provider.MediaStore
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swalif.sa.CHANNEL_ID_ARG
 import com.swalif.sa.MY_UID_ARG
+import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.mapper.toMessageList
 import com.swalif.sa.model.*
 import com.swalif.sa.repository.messageRepository.MessageRepository
@@ -13,6 +16,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import logcat.logcat
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -39,9 +43,8 @@ class MessageViewModel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MessageState())
 
     init {
-
         viewModelScope.launch(Dispatchers.IO) {
-            delay(5000)
+            delay(3000)
             chatInfo.update {
                 ChatInfo(
                     "salman",

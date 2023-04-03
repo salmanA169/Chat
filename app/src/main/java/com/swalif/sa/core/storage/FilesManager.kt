@@ -2,45 +2,47 @@ package com.swalif.sa.core.storage
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.ImageDecoder
 import android.net.Uri
-import android.os.storage.StorageManager
+import androidx.core.graphics.decodeBitmap
 import androidx.core.net.toUri
+import com.swalif.sa.datasource.local.dao.MessageDao
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import logcat.logcat
-import java.util.UUID
+import java.io.File
+import java.io.IOException
+import java.util.*
 import javax.inject.Inject
 
-class FilesManager @Inject constructor(@ApplicationContext private val context: Context) {
-    private val storageManager = context.getSystemService(StorageManager::class.java)
+class FilesManager @Inject constructor(
+    @ApplicationContext private val context: Context
+) {
     private val contentResolver = context.contentResolver
-    private val _mediaStorage = MutableStateFlow<List<MediaStorage>>(emptyList())
-    val mediaStorageFlow = _mediaStorage.asStateFlow()
+    // bf9c06d3-10b9-47b3-89bd-fb318d186687.jpeg
+    suspend fun saveImage(uri: Uri,nameFile:String): Boolean {
+        return try {
+            withContext(Dispatchers.Default) {
+                val imageDecoder =
+                    ImageDecoder.createSource(contentResolver, uri).decodeBitmap { info, source ->
+                    }
+                context.openFileOutput(nameFile, Context.MODE_PRIVATE)
+                    .use {
+                         if(!imageDecoder.compress(Bitmap.CompressFormat.JPEG, 80, it)){
+                             throw IOException("Couldn't save bitmap")
+                         }
+                    }
+                true
+            }
 
-    private val coroutineScope = CoroutineScope(Dispatchers.IO)
-    private fun updateMedia() {
-        coroutineScope.cancel()
-        coroutineScope.launch {
-            val files = context.filesDir.listFiles()
-            val mapFiles = files?.map {
-                MediaStorage(it.name, it.toUri())
-            }
-            _mediaStorage.update {
-                mapFiles ?: listOf()
-            }
+        }catch (e:Exception){
+            logcat { e.message!! }
+            false
         }
-    }
 
-    // TODO: improve saveFile with return boolean
-    fun saveFile(btm: Bitmap) {
-        context.openFileOutput(UUID.randomUUID().toString().plus(".png"), Context.MODE_PRIVATE)
-            .use {
-                btm.compress(Bitmap.CompressFormat.PNG,100,it)
-                updateMedia()
-            }
     }
 }
 
