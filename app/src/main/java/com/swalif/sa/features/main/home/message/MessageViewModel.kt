@@ -2,9 +2,7 @@ package com.swalif.sa.features.main.home.message
 
 import android.net.Uri
 import android.provider.MediaStore
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.swalif.sa.CHANNEL_ID_ARG
 import com.swalif.sa.MY_UID_ARG
 import com.swalif.sa.core.storage.FilesManager
@@ -39,9 +37,10 @@ class MessageViewModel @Inject constructor(
             message.messages.toMessageList().sortedByDescending {
                 it.dateTime
             },
-            chatInfo = chatInfo
+            chatInfo = chatInfo,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MessageState())
+
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -52,6 +51,11 @@ class MessageViewModel @Inject constructor(
                     imageUri = "https://i.pinimg.com/originals/b4/c1/fb/b4c1fbf0e913bf9365c8fa0dcc48c0c0.jpg",
                     userStatus = UserStatus.Offline(LocalDateTime.now().minusDays(1))
                 )
+            }
+        }
+        viewModelScope.launch {
+            messageRepository.getMessages(channelID).collect{
+
             }
         }
     }

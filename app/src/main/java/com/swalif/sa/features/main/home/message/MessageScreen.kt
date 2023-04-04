@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -79,8 +80,10 @@ fun MessageScreen(
     val state by viewModel.state.collectAsState()
     val animateSendColor by animateColorAsState(targetValue = if (state.text.isEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary)
     val lazyColumnState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    LaunchedEffect(key1 = state.messages.size){
+        lazyColumnState.animateScrollToItem(0)
+    }
     val pickMedia =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) {
             if (it != null) {
@@ -133,11 +136,6 @@ fun MessageScreen(
                     viewModel.sendTextMessage(
                         state.text
                     )
-                    coroutineScope.launch {
-                        // TODO: improve it to viewModel when receive or send messages
-                        delay(500)
-                        lazyColumnState.animateScrollToItem(0)
-                    }
                 }, enabled = state.text.isNotEmpty()) {
                     Icon(
                         imageVector = Icons.Default.Send,
@@ -259,7 +257,9 @@ fun ContentMessage(
                 val imageUri = message.mediaUri
                 if (imageUri != null) {
                     if (imageUri.isEmpty()) {
-                        CircularProgressIndicator(modifier = Modifier.align(CenterHorizontally).padding(8.dp))
+                        CircularProgressIndicator(modifier = Modifier
+                            .align(CenterHorizontally)
+                            .padding(8.dp))
                     } else {
                         AsyncImage(
                             model = message.mediaUri,
