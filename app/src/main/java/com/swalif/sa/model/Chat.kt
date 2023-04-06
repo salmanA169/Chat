@@ -11,5 +11,6 @@ data class Chat(
     val imageUri: String,
     // TODO: create helper class
     val lastMessageDate: LocalDateTime,
-    val messagesUnread: Int
+    val messagesUnread: Int,
+    val lastSenderUid:String
 )

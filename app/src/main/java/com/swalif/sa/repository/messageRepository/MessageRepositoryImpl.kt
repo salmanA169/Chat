@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.core.net.toUri
 import androidx.room.util.copy
 import com.swalif.sa.core.storage.FilesManager
+import com.swalif.sa.datasource.local.dao.ChatDao
 import com.swalif.sa.datasource.local.dao.MessageDao
 import com.swalif.sa.datasource.local.entity.MessageEntity
 import com.swalif.sa.datasource.local.relation.ChatWithMessages
@@ -28,7 +29,8 @@ import javax.inject.Inject
 class MessageRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val messageDao: MessageDao,
-    private val filesManager: FilesManager
+    private val filesManager: FilesManager,
+    private val chatDao:ChatDao
 ) : MessageRepository {
     override suspend fun addMessage(message: Message) {
         when (message.messageType) {
@@ -48,9 +50,23 @@ class MessageRepositoryImpl @Inject constructor(
             }
             MessageType.AUDIO -> TODO()
         }
-
+        updateChat(message.chatId,message.message,message.messageType,message.senderUid)
     }
 
+    private suspend fun updateChat(chatID:Int,text:String,messageType: MessageType,senderUid:String){
+        val getChat = chatDao.getChatById(chatID)
+        val message :String
+        when(messageType){
+            MessageType.TEXT -> {
+                message = text
+            }
+            MessageType.IMAGE -> {
+                message = "\uD83D\uDDBC️"
+            }
+            MessageType.AUDIO -> TODO()
+        }
+        chatDao.updateChat(getChat!!.copy(lastMessage = message))
+    }
     override fun getMessages(chatId: Int): Flow<ChatWithMessages> {
         return messageDao.getMessage(chatId)
     }

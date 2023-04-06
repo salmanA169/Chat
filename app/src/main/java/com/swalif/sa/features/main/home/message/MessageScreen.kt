@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
@@ -29,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDirection
@@ -41,8 +39,6 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.swalif.sa.R
 import com.swalif.sa.Screens
 import com.swalif.sa.model.ChatInfo
@@ -51,9 +47,6 @@ import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
 import com.swalif.sa.ui.theme.ChatAppTheme
 import com.swalif.sa.utils.formatShortTime
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import logcat.logcat
 
 fun NavGraphBuilder.messageDest(navController: NavController) {
     composable(
@@ -67,7 +60,10 @@ fun NavGraphBuilder.messageDest(navController: NavController) {
 @Composable
 fun Preview1() {
     ChatAppTheme() {
-        MessageScreen(navController = rememberNavController())
+
+//        MessageScreen(navController = rememberNavController())
+        Text(text = 0x1F3A8.toChar().toString())
+
     }
 }
 
@@ -81,7 +77,7 @@ fun MessageScreen(
     val animateSendColor by animateColorAsState(targetValue = if (state.text.isEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary)
     val lazyColumnState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
-    LaunchedEffect(key1 = state.messages.size){
+    LaunchedEffect(key1 = state.messages.size) {
         lazyColumnState.animateScrollToItem(0)
     }
     val pickMedia =
@@ -257,9 +253,11 @@ fun ContentMessage(
                 val imageUri = message.mediaUri
                 if (imageUri != null) {
                     if (imageUri.isEmpty()) {
-                        CircularProgressIndicator(modifier = Modifier
-                            .align(CenterHorizontally)
-                            .padding(8.dp))
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .align(CenterHorizontally)
+                                .padding(8.dp)
+                        )
                     } else {
                         AsyncImage(
                             model = message.mediaUri,

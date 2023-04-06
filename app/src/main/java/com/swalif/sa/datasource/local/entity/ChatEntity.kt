@@ -14,5 +14,6 @@ data class ChatEntity(
     val lastMessage:String,
     val imageUri:String,
     val lastMessageDate:LocalDateTime,
-    val messagesUnread:Int
+    val messagesUnread:Int,
+    val lastSenderUid:String
 )

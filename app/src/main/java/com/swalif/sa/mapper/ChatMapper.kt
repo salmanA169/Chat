@@ -12,7 +12,8 @@ fun ChatEntity.toChat() = Chat(
     lastMessage,
     imageUri,
     lastMessageDate,
-    messagesUnread
+    messagesUnread,
+    lastSenderUid
 )
 
 fun Chat.toChatEntity() = ChatEntity(
@@ -23,7 +24,8 @@ fun Chat.toChatEntity() = ChatEntity(
     lastMessage,
     imageUri,
     lastMessageDate,
-    messagesUnread
+    messagesUnread,
+    lastSenderUid
 )
 
 fun List<ChatEntity>.toChat() = map {

@@ -69,7 +69,8 @@ fun HomeScreen(
                         "كيف حالك",
                         "https://i.pinimg.com/originals/b4/c1/fb/b4c1fbf0e913bf9365c8fa0dcc48c0c0.jpg",
                         LocalDateTime.now(),
-                        2
+                        2,
+                        ""
                     )
                 )
             }) {
@@ -98,7 +99,8 @@ fun Preview1() {
                 "Hi",
                 "https://i.pinimg.com/originals/b4/c1/fb/b4c1fbf0e913bf9365c8fa0dcc48c0c0.jpg",
                 LocalDateTime.now(),
-                10
+                10,
+                ""
             ), rememberNavController()
         )
     }

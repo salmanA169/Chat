@@ -37,13 +37,16 @@ class FilesManager @Inject constructor(
                 context.openFileOutput(nameFile, Context.MODE_PRIVATE)
                     .use {
                         val formatImage: CompressFormat
-                        val quality: Int
+                        val quality: Int = 80
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                             formatImage = CompressFormat.WEBP_LOSSY
-                            quality = 0
+//                            quality = 0
                         } else {
                             formatImage = CompressFormat.JPEG
-                            quality = 80
+//                            quality = 80
+                        }
+                        logcat("FilesManager") {
+                            formatImage.toString()
                         }
                         if (!imageDecoder.compress(formatImage, quality, it)) {
                             throw IOException("Couldn't save bitmap")
