@@ -9,4 +9,5 @@
     <string name="online">online</string>
     <string name="typing">typing…</string>
     <string name="last_seen">"last seen %1$s"</string>
+    <string name="delete">delete chat</string>
 </resources>

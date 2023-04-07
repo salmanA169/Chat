@@ -2,27 +2,18 @@ package com.swalif.sa.repository.messageRepository
 
 import android.content.Context
 import androidx.core.net.toUri
-import androidx.room.util.copy
 import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.datasource.local.dao.ChatDao
 import com.swalif.sa.datasource.local.dao.MessageDao
-import com.swalif.sa.datasource.local.entity.MessageEntity
 import com.swalif.sa.datasource.local.relation.ChatWithMessages
 import com.swalif.sa.mapper.toMessageEntity
-import com.swalif.sa.mapper.toMessageList
-import com.swalif.sa.mapper.toMessageModel
 import com.swalif.sa.model.Message
-import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import logcat.logcat
 import java.io.File
+import java.time.LocalDateTime
+import java.time.ZonedDateTime
 import java.util.*
 import javax.inject.Inject
 
@@ -30,7 +21,7 @@ class MessageRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val messageDao: MessageDao,
     private val filesManager: FilesManager,
-    private val chatDao:ChatDao
+    private val chatDao: ChatDao
 ) : MessageRepository {
     override suspend fun addMessage(message: Message) {
         when (message.messageType) {
@@ -50,13 +41,13 @@ class MessageRepositoryImpl @Inject constructor(
             }
             MessageType.AUDIO -> TODO()
         }
-        updateChat(message.chatId,message.message,message.messageType,message.senderUid)
+        updateChat(message.chatId, message.message, message.messageType)
     }
 
-    private suspend fun updateChat(chatID:Int,text:String,messageType: MessageType,senderUid:String){
+    private suspend fun updateChat(chatID: Int, text: String, messageType: MessageType) {
         val getChat = chatDao.getChatById(chatID)
-        val message :String
-        when(messageType){
+        val message: String
+        when (messageType) {
             MessageType.TEXT -> {
                 message = text
             }
@@ -65,8 +56,15 @@ class MessageRepositoryImpl @Inject constructor(
             }
             MessageType.AUDIO -> TODO()
         }
-        chatDao.updateChat(getChat!!.copy(lastMessage = message))
+        chatDao.updateChat(
+            getChat!!.copy(
+                lastMessage = message,
+                messagesUnread = getChat.messagesUnread.plus(1),
+                lastMessageDate = LocalDateTime.now()
+            )
+        )
     }
+
     override fun getMessages(chatId: Int): Flow<ChatWithMessages> {
         return messageDao.getMessage(chatId)
     }
@@ -75,4 +73,8 @@ class MessageRepositoryImpl @Inject constructor(
         messageDao.updateMessage(message.toMessageEntity())
     }
 
+    override suspend fun readMessages(chatId: Int) {
+        val getChat = chatDao.getChatById(chatId)
+        chatDao.updateChat(getChat!!.copy(messagesUnread = 0))
+    }
 }

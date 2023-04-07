@@ -5,13 +5,13 @@ object Versions {
     const val android_lifecycle_runtime = "2.5.1"
     const val activity_compose_version = "1.6.1"
     const val compose_ui_version = "1.3.3"
-    const val material3_version = "1.1.0-alpha06"
+    const val material3_version = "1.1.0-beta02"
     const val jUnit_version = "4.13.2"
     const val text_jUnit_ext_version = "1.1.5"
     const val espersso_version = "3.5.1"
     const val hilt_compose_navigation_version = "1.0.0"
     const val hilt_version = "2.44"
-    const val lifecycle_version = "2.5.1"
+    const val lifecycle_version = "2.6.1"
     const val room_version = "2.5.0"
     const val dataStore_version = "1.0.0"
     const val nav_compose_version = "2.5.3"
@@ -19,6 +19,7 @@ object Versions {
     const val logger_square_version = "0.1"
     const val coil_version = "2.2.2"
     const val truth_version = "1.1.3"
+    const val saket_swipe_version = "1.1.1"
 }
 
 object Deps {
@@ -57,6 +58,7 @@ object Deps {
     const val logger_square = "com.squareup.logcat:logcat:${Versions.logger_square_version}"
     const val coil = "io.coil-kt:coil-compose:${Versions.coil_version}"
     const val truth = "com.google.truth:truth:${Versions.truth_version}"
+    const val saket_swipe = "me.saket.swipe:swipe:${Versions.saket_swipe_version}"
 }
 fun isNonStable(version: String): Boolean {
     val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }

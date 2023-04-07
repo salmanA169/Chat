@@ -1,6 +1,7 @@
 package com.swalif.sa.features.main.home
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -15,8 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -24,9 +31,12 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.swalif.sa.R
 import com.swalif.sa.Screens
 import com.swalif.sa.model.Chat
 import com.swalif.sa.ui.theme.ChatAppTheme
+import com.swalif.sa.utils.formatShortTime
+import logcat.logcat
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -80,7 +90,7 @@ fun HomeScreen(
         items(homeState.chats, key = {
             it.chatId
         }) {
-            ChatItem(chat = it,navController)
+            ChatItem(chat = it, navController)
             Divider()
         }
     }
@@ -106,6 +116,7 @@ fun Preview1() {
     }
 }
 
+// TODO: Change contextMenu to Slider layout
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatItem(
@@ -148,7 +159,7 @@ fun ChatItem(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
-                    text = chat.lastMessageDate.format(DateTimeFormatter.ISO_TIME),
+                    text = chat.lastMessageDate.formatShortTime(),
                     style = MaterialTheme.typography.labelSmall,
                 )
                 if (chat.messagesUnread > 0) {

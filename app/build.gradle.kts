@@ -42,7 +42,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.2"
+        kotlinCompilerExtensionVersion = "1.4.4"
     }
     packagingOptions {
         resources {
@@ -88,4 +88,5 @@ dependencies {
     androidTestImplementation(Deps.truth)
     testImplementation(Deps.truth)
     kaptAndroidTest(Deps.hilt_compiler_kapt)
+    implementation(Deps.saket_swipe)
 }

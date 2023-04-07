@@ -8,4 +8,5 @@ interface MessageRepository {
     suspend fun addMessage(message:Message)
     fun getMessages(chatId:Int):Flow<ChatWithMessages>
     suspend fun updateMessage(message: Message)
+    suspend fun readMessages(chatId:Int)
 }

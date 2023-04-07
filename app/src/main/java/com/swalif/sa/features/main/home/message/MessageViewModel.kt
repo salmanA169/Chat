@@ -44,7 +44,9 @@ class MessageViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            delay(3000)
+            messageRepository.readMessages(channelID)
+        }
+        viewModelScope.launch(Dispatchers.IO) {
             chatInfo.update {
                 ChatInfo(
                     "salman",
@@ -53,13 +55,8 @@ class MessageViewModel @Inject constructor(
                 )
             }
         }
-        viewModelScope.launch {
-            messageRepository.getMessages(channelID).collect{
 
-            }
-        }
     }
-
     private var isMe = true
     fun sendTextMessage(message: String) {
         val i = if (isMe) {
