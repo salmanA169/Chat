@@ -1,5 +1,6 @@
 package com.swalif.sa.features.main.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
@@ -7,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -15,6 +18,7 @@ import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
@@ -37,6 +41,8 @@ import com.swalif.sa.model.Chat
 import com.swalif.sa.ui.theme.ChatAppTheme
 import com.swalif.sa.utils.formatShortTime
 import logcat.logcat
+import me.saket.swipe.SwipeAction
+import me.saket.swipe.SwipeableActionsBox
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -116,70 +122,91 @@ fun Preview1() {
     }
 }
 
-// TODO: Change contextMenu to Slider layout
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatItem(
     chat: Chat,
     navController: NavController
 ) {
+    val deleteAction = SwipeAction(
+        onSwipe = {
 
-    ElevatedCard(onClick = {
-        navController.navigate(Screens.MessageScreen.navigateToMessageScreen("test","${chat.chatId}"))
-    }, shape = RoundedCornerShape(0.dp)) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp)
-        ) {
-            Row(
+        },
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "",
+                tint = MaterialTheme.colorScheme.onErrorContainer,
+                modifier = Modifier.padding(16.dp)
+            )
+        },
+        background = MaterialTheme.colorScheme.errorContainer
+    )
+    SwipeableActionsBox(
+        endActions = listOf(deleteAction)
+    ) {
+        ElevatedCard(onClick = {
+            navController.navigate(
+                Screens.MessageScreen.navigateToMessageScreen(
+                    "test",
+                    "${chat.chatId}"
+                )
+            )
+        }, shape = RoundedCornerShape(0.dp)) {
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(Alignment.CenterStart),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    .padding(4.dp)
             ) {
-                AsyncImage(
-                    model = chat.imageUri,
-                    contentDescription = "",
+                Row(
                     modifier = Modifier
-                        .size(50.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(text = chat.senderName, style = MaterialTheme.typography.titleMedium)
-                    Text(text = chat.lastMessage, style = MaterialTheme.typography.labelSmall)
-                }
-
-            }
-            Column(
-                modifier = Modifier.align(
-                    Alignment.CenterEnd
-                ),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = chat.lastMessageDate.formatShortTime(),
-                    style = MaterialTheme.typography.labelSmall,
-                )
-                if (chat.messagesUnread > 0) {
-                    Box(
+                        .fillMaxWidth()
+                        .align(Alignment.CenterStart),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    AsyncImage(
+                        model = chat.imageUri,
+                        contentDescription = "",
                         modifier = Modifier
-                            .defaultMinSize(minWidth = 24.dp, minHeight = 24.dp)
-                            .background(
-                                MaterialTheme.colorScheme.primary,
-                                CircleShape
+                            .size(50.dp)
+                            .clip(CircleShape),
+                        contentScale = ContentScale.Crop
+                    )
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Text(text = chat.senderName, style = MaterialTheme.typography.titleMedium)
+                        Text(text = chat.lastMessage, style = MaterialTheme.typography.labelSmall)
+                    }
+
+                }
+                Column(
+                    modifier = Modifier.align(
+                        Alignment.CenterEnd
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Text(
+                        text = chat.lastMessageDate.formatShortTime(),
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                    if (chat.messagesUnread > 0) {
+                        Box(
+                            modifier = Modifier
+                                .defaultMinSize(minWidth = 24.dp, minHeight = 24.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.primary,
+                                    CircleShape
+                                )
+                                .clip(CircleShape)
+                                .padding(horizontal = 4.dp)
+                                .align(CenterHorizontally)
+                        ) {
+                            Text(
+                                text = if (chat.messagesUnread >= 99) "99+" else chat.messagesUnread.toString(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.align(Center)
                             )
-                            .clip(CircleShape)
-                            .padding(horizontal = 4.dp)
-                            .align(CenterHorizontally)
-                    ) {
-                        Text(
-                            text = if (chat.messagesUnread >= 99) "99+" else chat.messagesUnread.toString(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.align(Center)
-                        )
+                        }
                     }
                 }
             }
