@@ -7,10 +7,13 @@ import com.swalif.sa.datasource.local.dao.ChatDao
 import com.swalif.sa.datasource.local.dao.MessageDao
 import com.swalif.sa.datasource.local.relation.ChatWithMessages
 import com.swalif.sa.mapper.toMessageEntity
+import com.swalif.sa.mapper.toMessageList
 import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
 import java.io.File
 import java.time.LocalDateTime
 import java.time.ZonedDateTime
@@ -65,6 +68,10 @@ class MessageRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun getMessages(): List<Message> {
+        return messageDao.getMessages().toMessageList()
+    }
+
     override fun getMessages(chatId: Int): Flow<ChatWithMessages> {
         return messageDao.getMessage(chatId)
     }
@@ -73,8 +80,9 @@ class MessageRepositoryImpl @Inject constructor(
         messageDao.updateMessage(message.toMessageEntity())
     }
 
-    override suspend fun readMessages(chatId: Int) {
-        val getChat = chatDao.getChatById(chatId)
-        chatDao.updateChat(getChat!!.copy(messagesUnread = 0))
+    override suspend fun deleteMessages(message: List<Message>) {
+        message.forEach {
+            messageDao.deleteMessage(it.toMessageEntity())
+        }
     }
 }

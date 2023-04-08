@@ -17,4 +17,7 @@ interface ChatDao {
 
     @Update
     suspend fun updateChat(chatEntity: ChatEntity)
+
+    @Delete
+    suspend fun deleteChatById(chat: ChatEntity)
 }

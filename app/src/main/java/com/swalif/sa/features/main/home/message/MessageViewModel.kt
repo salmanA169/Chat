@@ -8,6 +8,7 @@ import com.swalif.sa.MY_UID_ARG
 import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.mapper.toMessageList
 import com.swalif.sa.model.*
+import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import com.swalif.sa.repository.messageRepository.MessageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,7 @@ import javax.inject.Inject
 @HiltViewModel
 class MessageViewModel @Inject constructor(
     private val messageRepository: MessageRepository,
+    private val chatRepository: ChatRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _state = MutableStateFlow(MessageState())
@@ -44,7 +46,7 @@ class MessageViewModel @Inject constructor(
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
-            messageRepository.readMessages(channelID)
+            chatRepository.readMessages(channelID)
         }
         viewModelScope.launch(Dispatchers.IO) {
             chatInfo.update {

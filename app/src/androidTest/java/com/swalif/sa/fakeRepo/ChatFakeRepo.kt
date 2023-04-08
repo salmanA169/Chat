@@ -10,6 +10,14 @@ class ChatFakeRepo @Inject constructor():ChatRepository {
         TODO("Not yet implemented")
     }
 
+    override suspend fun deleteChatById(chat: Chat) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun readMessages(chatId: Int) {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun insertChat(chat: Chat) {
         TODO("Not yet implemented")
     }

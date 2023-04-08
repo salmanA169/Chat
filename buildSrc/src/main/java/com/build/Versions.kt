@@ -20,6 +20,8 @@ object Versions {
     const val coil_version = "2.2.2"
     const val truth_version = "1.1.3"
     const val saket_swipe_version = "1.1.1"
+    const val coroutine_test_version = "1.6.4"
+    const val turbine_test_flow_verstion = "0.12.3"
 }
 
 object Deps {
@@ -47,11 +49,13 @@ object Deps {
 
     const val hilt_test = "com.google.dagger:hilt-android-testing:${Versions.hilt_version}"
     const val viewModel = "androidx.lifecycle:lifecycle-viewmodel-ktx:${Versions.lifecycle_version}"
-    const val compose_viewModel = "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle_version}"
-    const val lifecycle_compiler_kapt = "androidx.lifecycle:lifecycle-compiler:${Versions.lifecycle_version}"
+    const val compose_viewModel =
+        "androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.lifecycle_version}"
+    const val lifecycle_compiler_kapt =
+        "androidx.lifecycle:lifecycle-compiler:${Versions.lifecycle_version}"
     const val room = "androidx.room:room-runtime:${Versions.room_version}"
     const val room_compiler_kapt = "androidx.room:room-compiler:${Versions.room_version}"
-    const val room_ext  = "androidx.room:room-ktx:${Versions.room_version}"
+    const val room_ext = "androidx.room:room-ktx:${Versions.room_version}"
     const val dataStore = "androidx.datastore:datastore-preferences:${Versions.dataStore_version}"
     const val nav_compose = "androidx.navigation:navigation-compose:${Versions.nav_compose_version}"
     const val splash_screen = "androidx.core:core-splashscreen:${Versions.splash_screen_version}"
@@ -59,7 +63,11 @@ object Deps {
     const val coil = "io.coil-kt:coil-compose:${Versions.coil_version}"
     const val truth = "com.google.truth:truth:${Versions.truth_version}"
     const val saket_swipe = "me.saket.swipe:swipe:${Versions.saket_swipe_version}"
+    const val coroutine_test =
+        "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.coroutine_test_version}"
+    const val turbine_test = "app.cash.turbine:turbine:${Versions.turbine_test_flow_verstion}"
 }
+
 fun isNonStable(version: String): Boolean {
     val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
     val regex = "^[0-9,.v-]+(-r)?$".toRegex()

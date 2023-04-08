@@ -64,7 +64,6 @@ dependencies {
     implementation(Deps.compose_ui_tolling_preview)
     implementation(Deps.material3)
     testImplementation(Deps.jUnit)
-    testImplementation("org.junit.jupiter:junit-jupiter")
     androidTestImplementation(Deps.test_jUnit_Ext)
     androidTestImplementation(Deps.espersso)
     androidTestImplementation(Deps.compose_ui_test)
@@ -89,4 +88,6 @@ dependencies {
     testImplementation(Deps.truth)
     kaptAndroidTest(Deps.hilt_compiler_kapt)
     implementation(Deps.saket_swipe)
+    testImplementation(Deps.coroutine_test)
+    testImplementation(Deps.turbine_test)
 }

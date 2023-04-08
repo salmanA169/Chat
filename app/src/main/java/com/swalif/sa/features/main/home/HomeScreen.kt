@@ -67,6 +67,11 @@ fun HomeScreen(
 ) {
     val homeState by viewModel.homeState.collectAsState()
 
+    val rememberOnDelete = remember{
+        {chatId:Int->
+            viewModel.deleteChatById(chatId)
+        }
+    }
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -96,7 +101,7 @@ fun HomeScreen(
         items(homeState.chats, key = {
             it.chatId
         }) {
-            ChatItem(chat = it, navController)
+            ChatItem(chat = it, navController,rememberOnDelete)
             Divider()
         }
     }
@@ -126,11 +131,12 @@ fun Preview1() {
 @Composable
 fun ChatItem(
     chat: Chat,
-    navController: NavController
+    navController: NavController,
+    onDelete: (ChatId: Int) -> Unit = {}
 ) {
     val deleteAction = SwipeAction(
         onSwipe = {
-
+            onDelete(chat.chatId)
         },
         icon = {
             Icon(

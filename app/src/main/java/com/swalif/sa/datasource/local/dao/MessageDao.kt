@@ -14,9 +14,16 @@ interface MessageDao {
 
     @Query("SELECT * FROM MessageEntity ")
     fun getMessage():Flow<MessageEntity>
+
+    @Query("SELECT * FROM MessageEntity")
+    suspend fun getMessages():List<MessageEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addMessage(messageEntity: MessageEntity):Long
 
     @Update
     suspend fun updateMessage(messageEntity: MessageEntity)
+
+    @Delete
+    suspend fun deleteMessage(messageEntity: MessageEntity)
 }
