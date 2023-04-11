@@ -4,9 +4,10 @@ import com.swalif.sa.datasource.local.relation.ChatWithMessages
 import com.swalif.sa.model.Message
 import com.swalif.sa.repository.messageRepository.MessageRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class MessageFakeRepository:MessageRepository {
-    private val messages = mutableListOf<Message>()
+    private val messages = MutableStateFlow<List<Message>>(listOf())
     override suspend fun addMessage(message: Message) {
         TODO("Not yet implemented")
     }
@@ -21,10 +22,11 @@ class MessageFakeRepository:MessageRepository {
 
 
     override suspend fun deleteMessages(message: List<Message>) {
-        messages.removeAll(message)
+//        messages.removeAll(message)
     }
 
     override suspend fun getMessages(): List<Message> {
-        return messages
+        TODO()
     }
+
 }

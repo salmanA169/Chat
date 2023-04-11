@@ -1,5 +1,7 @@
 package com.swalif.sa.di
 
+import com.swalif.sa.coroutine.DispatcherProvider
+import com.swalif.sa.coroutine.DispatcherProviderImpl
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import com.swalif.sa.repository.chatRepositoy.ChatRepositoryImpl
 import com.swalif.sa.repository.messageRepository.MessageRepository
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun provideChatRepo(
         chatRepository: ChatRepositoryImpl
     ): ChatRepository
+
+    @Singleton
+    @Binds
+    abstract fun providerDispatcherProvider(
+        dispatcherProvider: DispatcherProviderImpl
+    ):DispatcherProvider
 }

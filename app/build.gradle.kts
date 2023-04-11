@@ -90,4 +90,5 @@ dependencies {
     implementation(Deps.saket_swipe)
     testImplementation(Deps.coroutine_test)
     testImplementation(Deps.turbine_test)
+    androidTestImplementation(Deps.turbine_test)
 }

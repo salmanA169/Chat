@@ -1,11 +1,14 @@
 package com.swalif.sa.features.main.home.message
 
+import android.media.MediaPlayer
+import android.media.RingtoneManager
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.lifecycle.*
 import com.swalif.sa.CHANNEL_ID_ARG
 import com.swalif.sa.MY_UID_ARG
 import com.swalif.sa.core.storage.FilesManager
+import com.swalif.sa.coroutine.DispatcherProvider
 import com.swalif.sa.mapper.toMessageList
 import com.swalif.sa.model.*
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
@@ -24,17 +27,20 @@ import javax.inject.Inject
 class MessageViewModel @Inject constructor(
     private val messageRepository: MessageRepository,
     private val chatRepository: ChatRepository,
+    private val dispatcherProvider: DispatcherProvider,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _state = MutableStateFlow(MessageState())
     private val channelID = savedStateHandle.get<Int>(CHANNEL_ID_ARG)!!
     private val myUid = savedStateHandle.get<String>(MY_UID_ARG)!!
     private val chatInfo = MutableStateFlow(ChatInfo())
+
     val state = combine(
         _state,
         messageRepository.getMessages(channelID),
         chatInfo
     ) { state, message, chatInfo ->
+
         state.copy(
             message.messages.toMessageList().sortedByDescending {
                 it.dateTime
@@ -45,10 +51,11 @@ class MessageViewModel @Inject constructor(
 
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherProvider.io) {
             chatRepository.readMessages(channelID)
         }
-        viewModelScope.launch(Dispatchers.IO) {
+        // TODO: for test
+        viewModelScope.launch(dispatcherProvider.io) {
             chatInfo.update {
                 ChatInfo(
                     "salman",
@@ -61,6 +68,7 @@ class MessageViewModel @Inject constructor(
     }
     private var isMe = true
     fun sendTextMessage(message: String) {
+
         val i = if (isMe) {
             "test"
         } else {
@@ -86,8 +94,9 @@ class MessageViewModel @Inject constructor(
         sendMessage(message1)
     }
     private fun sendMessage(message:Message){
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatcherProvider.io) {
             messageRepository.addMessage(message)
+            chatRepository.updateChat(message.chatId, message.message, message.messageType)
         }
     }
     private fun removeTexts() {

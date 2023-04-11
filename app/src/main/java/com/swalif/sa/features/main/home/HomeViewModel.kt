@@ -2,6 +2,7 @@ package com.swalif.sa.features.main.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.swalif.sa.coroutine.DispatcherProvider
 import com.swalif.sa.mapper.toChat
 import com.swalif.sa.mapper.toChatEntity
 import com.swalif.sa.mapper.toMessageList
@@ -20,14 +21,15 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
-    private val messageRepository: MessageRepository
+    private val messageRepository: MessageRepository,
+    private val dispatchers :DispatcherProvider
 ) : ViewModel() {
     val homeState = chatRepository.getChats().map {
         HomeChatState(it)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeChatState())
 
     fun addTestChat(chat: Chat) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatchers.io) {
             chatRepository.insertChat(
                 chat
             )
@@ -35,12 +37,12 @@ class HomeViewModel @Inject constructor(
     }
 
     init {
-        viewModelScope.launch(Dispatchers.IO) {
-//            checkChatIsDeletedMessages()
+        viewModelScope.launch(dispatchers.io) {
+            checkChatIsDeletedMessages()
         }
     }
     // TODO: move it to workManager
-    private suspend fun checkChatIsDeletedMessages(){
+     private suspend fun checkChatIsDeletedMessages(){
         val chatsIDs = chatRepository.getChats().first().distinctBy {
             it.chatId
         }.map {
@@ -65,7 +67,7 @@ class HomeViewModel @Inject constructor(
         }
     }
     fun deleteChatById(chatId: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(dispatchers.io) {
             val getChat = messageRepository.getMessages(chatId).filter {
                 it.chat.chatId == chatId
             }.first()

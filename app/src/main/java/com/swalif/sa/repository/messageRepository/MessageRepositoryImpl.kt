@@ -1,7 +1,11 @@
 package com.swalif.sa.repository.messageRepository
 
 import android.content.Context
+import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaPlayer
 import androidx.core.net.toUri
+import com.swalif.sa.R
 import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.datasource.local.dao.ChatDao
 import com.swalif.sa.datasource.local.dao.MessageDao
@@ -23,9 +27,14 @@ import javax.inject.Inject
 class MessageRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val messageDao: MessageDao,
-    private val filesManager: FilesManager,
-    private val chatDao: ChatDao
+    private val filesManager: FilesManager
 ) : MessageRepository {
+    // TODO: play media in notification volume and improve it
+    private val mediaPlayer = MediaPlayer.create(context, R.raw.google_notification).apply {
+        setAudioAttributes(
+            AudioAttributes.Builder().setLegacyStreamType(AudioManager.STREAM_NOTIFICATION).build()
+        )
+    }
     override suspend fun addMessage(message: Message) {
         when (message.messageType) {
             MessageType.TEXT -> {
@@ -44,29 +53,9 @@ class MessageRepositoryImpl @Inject constructor(
             }
             MessageType.AUDIO -> TODO()
         }
-        updateChat(message.chatId, message.message, message.messageType)
+        mediaPlayer.start()
     }
 
-    private suspend fun updateChat(chatID: Int, text: String, messageType: MessageType) {
-        val getChat = chatDao.getChatById(chatID)
-        val message: String
-        when (messageType) {
-            MessageType.TEXT -> {
-                message = text
-            }
-            MessageType.IMAGE -> {
-                message = "\uD83D\uDDBC️"
-            }
-            MessageType.AUDIO -> TODO()
-        }
-        chatDao.updateChat(
-            getChat!!.copy(
-                lastMessage = message,
-                messagesUnread = getChat.messagesUnread.plus(1),
-                lastMessageDate = LocalDateTime.now()
-            )
-        )
-    }
 
     override suspend fun getMessages(): List<Message> {
         return messageDao.getMessages().toMessageList()
