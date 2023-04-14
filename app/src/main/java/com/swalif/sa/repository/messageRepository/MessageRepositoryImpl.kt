@@ -31,13 +31,13 @@ class MessageRepositoryImpl @Inject constructor(
     private val filesManager: FilesManager
 ) : MessageRepository {
     // TODO: play media in notification volume and improve it
-    private val mediaPlayer = MediaPlayer.create(context, R.raw.google_notification,AudioAttributes.Builder()
-        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-        .setLegacyStreamType(AudioManager.STREAM_NOTIFICATION)
-        .build(),1).apply {
-
-    }
+//    private val mediaPlayer = MediaPlayer.create(context, R.raw.google_notification,AudioAttributes.Builder()
+//        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+//        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+//        .setLegacyStreamType(AudioManager.STREAM_NOTIFICATION)
+//        .build(),1).apply {
+//
+//    }
 
     override suspend fun addMessage(message: Message) {
         when (message.messageType) {
@@ -57,7 +57,7 @@ class MessageRepositoryImpl @Inject constructor(
             }
             MessageType.AUDIO -> TODO()
         }
-        mediaPlayer.start()
+//        mediaPlayer.start()
     }
 
 

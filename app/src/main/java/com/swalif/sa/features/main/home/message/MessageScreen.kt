@@ -122,7 +122,7 @@ fun MessageScreen(
             textStyle = LocalTextStyle.current.copy(textDirection = TextDirection.Content),
             leadingIcon = {
                 IconButton(onClick = {
-                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageAndVideo))
+                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }) {
                     Icon(imageVector = Icons.Default.Email, "")
                 }
@@ -277,6 +277,7 @@ fun ContentMessage(
                     }
                 }
             }
+
             MessageType.AUDIO -> TODO()
         }
 
@@ -303,6 +304,7 @@ fun ContentMessage(
                                     .size(24.dp)
                             )
                         }
+
                         MessageStatus.DELIVERED, MessageStatus.SEEN -> {
                             Icon(
                                 painter = painterResource(id = R.drawable.double_check_icon),
