@@ -58,6 +58,7 @@ kapt {
 dependencies {
 
     implementation(Deps.androidx_core_dep)
+    implementation(Deps.lifecycle_runtime_compoe)
     implementation(Deps.androidx_lifecycle_runtime)
     implementation(Deps.activity_compose)
     implementation(Deps.compose_ui)

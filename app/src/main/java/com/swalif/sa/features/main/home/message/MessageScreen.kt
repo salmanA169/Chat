@@ -62,7 +62,6 @@ fun Preview1() {
     ChatAppTheme() {
 
 //        MessageScreen(navController = rememberNavController())
-        Text(text = 0x1F3A8.toChar().toString())
 
     }
 }

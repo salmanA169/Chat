@@ -22,10 +22,12 @@ object Versions {
     const val saket_swipe_version = "1.1.1"
     const val coroutine_test_version = "1.6.4"
     const val turbine_test_flow_verstion = "0.12.3"
+    const val lifecycle_runtime_compose_verstion = "2.6.0-beta01"
 }
 
 object Deps {
     const val androidx_core_dep = "androidx.core:core-ktx:${Versions.androidx_core_version}"
+    const val lifecycle_runtime_compoe = "androidx.lifecycle:lifecycle-runtime-compose:${Versions.lifecycle_runtime_compose_verstion}"
     const val androidx_lifecycle_runtime =
         "androidx.lifecycle:lifecycle-runtime-ktx:${Versions.android_lifecycle_runtime}"
     const val activity_compose =

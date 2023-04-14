@@ -31,6 +31,7 @@ import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.features.main.home.homeDest
 import com.swalif.sa.features.main.home.message.messageDest
 import com.swalif.sa.features.main.home.message.previewImage.previewNavDest
+import com.swalif.sa.features.main.search.searchScreen
 import com.swalif.sa.features.onboarding.onBoardingNavigation
 import com.swalif.sa.ui.theme.ChatAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -113,8 +114,7 @@ class MainActivity : ComponentActivity() {
                         onBoardingNavigation(navController)
                         messageDest(navController)
                         previewNavDest(navController)
-                        composable(Screens.MainScreens.SearchScreen.route){
-                        }
+                        searchScreen(navController)
                         composable(Screens.MainScreens.AccountScreen.route){
                             Button(modifier = Modifier.padding(paddingValues),onClick = {
                                 viewModel.signOut()
