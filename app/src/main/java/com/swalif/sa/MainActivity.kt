@@ -28,10 +28,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.swalif.sa.component.*
 import com.swalif.sa.core.storage.FilesManager
+import com.swalif.sa.features.main.explore.exploreDestination
 import com.swalif.sa.features.main.home.homeDest
 import com.swalif.sa.features.main.home.message.messageDest
 import com.swalif.sa.features.main.home.message.previewImage.previewNavDest
-import com.swalif.sa.features.main.search.searchScreen
+import com.swalif.sa.features.main.explore.search.searchScreen
 import com.swalif.sa.features.onboarding.onBoardingNavigation
 import com.swalif.sa.ui.theme.ChatAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -73,7 +74,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     topBar = {
                         AnimatedVisibility(visible = isMainDest) {
-                            MediumTopAppBar(scrollBehavior = scrollTopBar,title = {
+                            MediumTopAppBar(scrollBehavior = scrollTopBar, title = {
                                 Text(text = "Main screen")
                             })
                         }
@@ -105,16 +106,17 @@ class MainActivity : ComponentActivity() {
                         }
 
                     }
-                ) {paddingValues ->
+                ) { paddingValues ->
                     NavHost(
                         navController = navController,
                         startDestination = Screens.MainScreens.HomeScreen.route
                     ) {
-                        homeDest(navController,paddingValues,scrollTopBar.nestedScrollConnection)
+                        homeDest(navController, paddingValues, scrollTopBar.nestedScrollConnection)
                         onBoardingNavigation(navController)
                         messageDest(navController)
                         previewNavDest(navController)
                         searchScreen(navController)
+                        exploreDestination(navController)
                         composable(Screens.MainScreens.AccountScreen.route){
                             Button(modifier = Modifier.padding(paddingValues),onClick = {
                                 viewModel.signOut()
