@@ -12,4 +12,6 @@
     <string name="delete">delete chat</string>
     <string name="explore">explore</string>
     <string name="add_user_by_uid">Add user</string>
+    <string name="accept">Accept</string>
+    <string name="ignore">Ignore</string>
 </resources>
