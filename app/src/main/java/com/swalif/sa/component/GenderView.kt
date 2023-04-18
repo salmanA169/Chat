@@ -39,7 +39,6 @@ fun Preview() {
         }
     }
 }
-
 val maleGradient: List<Color> = listOf(Color(0xFF6D6DFF), Color.Blue)
 val femaleGradient: List<Color> = listOf(Color(0xFFEA76FF), Color.Magenta)
 @Stable
@@ -336,4 +335,13 @@ fun GenderView(
 sealed class Gender(val gender:String) {
     object Male : Gender("Male")
     object Female : Gender("Female")
+
+    @Composable
+    fun getColorByGender():Brush {
+        return when(this){
+            Female -> Brush.linearGradient(colors = femaleGradient)
+            Male -> Brush.linearGradient(colors = maleGradient)
+        }
+
+    }
 }

@@ -14,4 +14,5 @@
     <string name="add_user_by_uid">Add user</string>
     <string name="accept">Accept</string>
     <string name="ignore">Ignore</string>
+    <string name="find_users">Find users ...</string>
 </resources>

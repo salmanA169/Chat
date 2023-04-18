@@ -10,12 +10,15 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.Button
@@ -36,6 +39,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,8 +54,13 @@ import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
+import coil.transform.RoundedCornersTransformation
 import com.swalif.sa.R
 import com.swalif.sa.Screens
+import com.swalif.sa.component.Gender
 import com.swalif.sa.model.UserInfo
 import com.swalif.sa.ui.theme.ChatAppTheme
 import java.lang.Float.max
@@ -83,43 +93,57 @@ fun SearchScreen(
         ElevatedCard(
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(14.dp)
+                .fillMaxWidth(0.7f)
         ) {
-//            AsyncImage(model = Icons.Default.Email, contentDescription = "",modifier = Modifier.drawBehind {
-//                drawArc(
-//                    Color.Green,0f,260f,false,style = Stroke(2f)
-//                )
-//            })
-
-            ImageProgressIndicator(
-                Modifier
-                    .align(CenterHorizontally)
-                    .padding(4.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp),modifier = Modifier.padding(16.dp)) {
-                Button(onClick = { /*TODO*/ },colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
-                    Text(text = stringResource(id = R.string.ignore),color = MaterialTheme.colorScheme.onErrorContainer)
-
-                }
-                Button(onClick = { /*TODO*/ }) {
-                    Text(text = stringResource(id = R.string.accept))
-                }
-            }
-
+            UserStatusSection(Modifier.align(CenterHorizontally),searchState.userInfo)
         }
     }
 }
 
 @Composable
 fun UserStatusSection(
-    modifier :Modifier = Modifier,
-    userInfo: UserInfo? =null
+    modifier: Modifier = Modifier,
+    userInfo: UserInfo? = null
 ) {
-    if(userInfo !=null){
-
-    }else{
-
+    if (userInfo != null) {
+        val painter = ImageRequest.Builder(LocalContext.current)
+            .transformations(listOf(CircleCropTransformation())).data(userInfo.imageUri).build()
+        AsyncImage(
+            model = painter, contentDescription = "", modifier = modifier
+                .size(80.dp).border(
+                    1.dp, userInfo.gender.getColorByGender(),
+                    CircleShape
+                )
+        )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = modifier.padding(vertical = 8.dp)
+        ) {
+            Button(
+                onClick = { /*TODO*/ },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.ignore),
+                    color = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+            Button(onClick = { /*TODO*/ }) {
+                Text(text = stringResource(id = R.string.accept))
+            }
+        }
+    } else {
+        ImageProgressIndicator(
+            modifier
+                .padding(vertical = 8.dp)
+        )
+        Text(
+            text = stringResource(id = R.string.find_users),
+            modifier = modifier.padding(vertical = 8.dp)
+        )
     }
 }
+
 @Composable
 fun ImageProgressIndicator(modifier: Modifier = Modifier) {
     val stroke = with(LocalDensity.current) {
@@ -179,7 +203,8 @@ fun ImageProgressIndicator(modifier: Modifier = Modifier) {
                     stroke,
                     getOffsetIcon
                 )
-            }.size(80.dp)
+            }
+            .size(80.dp)
     )
 }
 

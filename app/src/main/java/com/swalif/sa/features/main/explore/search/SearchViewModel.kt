@@ -11,13 +11,7 @@ class SearchViewModel:ViewModel() {
     private val _searchState = MutableStateFlow<SearchStateUI>(SearchStateUI())
     val searchState = _searchState.asStateFlow()
 
-    fun startSearch(){
-        _searchState.update {
-            it.copy(
-                isSearching = true
-            )
-        }
-    }
+
 
 
 }
