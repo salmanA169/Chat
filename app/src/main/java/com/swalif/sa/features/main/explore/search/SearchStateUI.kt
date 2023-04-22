@@ -6,5 +6,12 @@ import com.swalif.sa.model.UserInfo
 @Immutable
 data class SearchStateUI(
     val userInfo: UserInfo? = null,
-    val isLeft : Boolean = false
-)
+    val searchStateResult : SearchStateResult = SearchStateResult.SEARCHING
+){
+}
+
+enum class SearchStateResult{
+    SEARCHING,FOUND_USER,USER_LEFT,USER_ACCEPT;
+    fun isUserLeft() = this == SearchStateResult.USER_LEFT
+
+}

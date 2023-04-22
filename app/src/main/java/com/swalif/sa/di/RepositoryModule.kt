@@ -6,6 +6,8 @@ import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import com.swalif.sa.repository.chatRepositoy.ChatRepositoryImpl
 import com.swalif.sa.repository.messageRepository.MessageRepository
 import com.swalif.sa.repository.messageRepository.MessageRepositoryImpl
+import com.swalif.sa.repository.searchRepository.SearchRepository
+import com.swalif.sa.repository.searchRepository.SearchRepositoryImpl
 import com.swalif.sa.repository.userRepository.UserRepository
 import com.swalif.sa.repository.userRepository.UserRepositoryImpl
 import dagger.Binds
@@ -41,4 +43,10 @@ abstract class RepositoryModule {
     abstract fun providerDispatcherProvider(
         dispatcherProvider: DispatcherProviderImpl
     ):DispatcherProvider
+
+    @Singleton
+    @Binds
+    abstract fun provideSearchRepository(
+        searchRepository:SearchRepositoryImpl
+    ): SearchRepository
 }

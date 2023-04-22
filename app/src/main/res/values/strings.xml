@@ -15,4 +15,5 @@
     <string name="accept">Accept</string>
     <string name="ignore">Ignore</string>
     <string name="find_users">Find users ...</string>
+    <string name="user_left">User left</string>
 </resources>
