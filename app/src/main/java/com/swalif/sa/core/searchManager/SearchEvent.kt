@@ -1,5 +1,5 @@
 package com.swalif.sa.core.searchManager
 
-fun interface SearchEvent<T> {
-    fun onEvent(data:T)
+fun interface SearchEvent {
+    fun onEvent(data:RoomEvent)
 }

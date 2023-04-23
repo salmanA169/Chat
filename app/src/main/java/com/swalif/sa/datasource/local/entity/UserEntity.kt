@@ -2,6 +2,7 @@ package com.swalif.sa.datasource.local.entity
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.swalif.sa.component.Gender
 
 @Entity
 data class UserEntity(
@@ -9,7 +10,7 @@ data class UserEntity(
     val uidUser:String,
     val userName:String,
     val email:String,
-    val gender:String,
+    val gender:Gender,
     val createdAt:Long,
     val photoUri:String
 )

@@ -6,5 +6,6 @@ data class UserInfo(
     val username:String,
     val userUid:String,
     val imageUri:String,
-    val gender : Gender
+    val gender : Gender,
+    val createAt:Long
 )

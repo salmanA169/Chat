@@ -1,14 +1,17 @@
 package com.swalif.sa.core.searchManager
 
-import com.swalif.sa.features.main.explore.search.SearchStateResult
+import com.swalif.sa.model.UserInfo
+import java.io.Closeable
 
-interface SearchManager<T> {
-     var onSearchEventListener: SearchEvent<T>?
-     fun addSearchEventListener(searchEventListener:SearchEvent<T>){
-         onSearchEventListener = searchEventListener
-     }
-     fun registerSearchEvent()
-     fun unregisterSearchEvent()
-     fun reload()
-     fun updateSearchState(searchStateResult:SearchStateEvent)
+
+interface SearchManager :Closeable {
+     var onSearchEventListener: SearchEvent?
+    fun addSearchEventListener(searchEventListener: SearchEvent) {
+        onSearchEventListener = searchEventListener
+    }
+    fun deleteRoom(roomId:String)
+    fun registerSearchEvent(userInfo: UserInfo)
+    fun unregisterSearchEvent()
+    fun updateUserStatus(userStatus: UserStatus)
+    fun reload()
 }

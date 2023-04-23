@@ -1,17 +1,13 @@
 package com.swalif.sa.repository.searchRepository
 
-import com.swalif.sa.features.main.explore.search.SearchStateResult
+import com.swalif.sa.core.searchManager.RoomEvent
 import com.swalif.sa.model.UserInfo
 import kotlinx.coroutines.flow.Flow
+import java.io.Closeable
 
 interface SearchRepository {
-
-    fun searchUser(): Flow<SearchInfo>
+    fun searchUser(userInfo:UserInfo): Flow<RoomEvent>
     suspend fun ignoreUser()
     suspend fun acceptUser()
+    fun getClosable():Closeable
 }
-
-data class SearchInfo(
-    val userInfo: UserInfo,
-    val searchStateResult: SearchStateResult
-)

@@ -7,8 +7,9 @@ import com.swalif.sa.core.data_store.updateIsFirstTime
 import com.swalif.sa.datasource.local.dao.UserDao
 import com.swalif.sa.datasource.local.entity.UserEntity
 import com.swalif.sa.mapper.toUserInfo
-import com.swalif.sa.model.LoginInfo
+import com.swalif.sa.model.UserInfo
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 
@@ -28,12 +29,18 @@ class UserRepositoryImpl @Inject constructor(
         updateUserStore("")
     }
 
-    override suspend fun getUserByUid(uid: String): LoginInfo? {
+    override suspend fun getUserByUid(uid: String): UserInfo? {
         return userDao.getUserByUid(uid)?.toUserInfo()
     }
 
     private suspend fun updateUserStore(uid:String) {
         dataStore.updateIsFirstTime(uid)
+    }
+
+    override suspend fun getCurrentUser(): UserInfo? {
+        val getCurrentUserUid = dataStore.getUserUidFlow().first()
+        val getUserInfo = userDao.getUserByUid(getCurrentUserUid)
+        return getUserInfo?.toUserInfo()
     }
 
     override fun isUserAvailable() = combine(dataStore.getUserUidFlow(),userDao.getUsersFlow()){ userUid, listUsers->

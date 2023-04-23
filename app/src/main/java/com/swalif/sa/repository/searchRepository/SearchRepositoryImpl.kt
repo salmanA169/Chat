@@ -1,30 +1,47 @@
 package com.swalif.sa.repository.searchRepository
 
+import com.swalif.sa.core.searchManager.RoomEvent
+import com.swalif.sa.core.searchManager.SearchEvent
+import com.swalif.sa.core.searchManager.SearchManager
+import com.swalif.sa.core.searchManager.UserStatus
+import com.swalif.sa.model.UserInfo
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import logcat.logcat
+import java.io.Closeable
 import javax.inject.Inject
 
 class SearchRepositoryImpl @Inject constructor(
-    private val chatRepository:ChatRepository
-):SearchRepository {
+    private val chatRepository: ChatRepository,
+    private val searchManager: SearchManager,
+) : SearchRepository {
 
-    override fun searchUser(): Flow<SearchInfo> {
-        return callbackFlow{
+    override fun getClosable(): Closeable {
+        return searchManager
+    }
 
-
+    override fun searchUser(userInfo: UserInfo): Flow<RoomEvent> {
+        return callbackFlow {
+            searchManager.addSearchEventListener(SearchEvent {
+                logcat("SearchRepository") { it.toString() }
+                trySend(it)
+            })
+            searchManager.registerSearchEvent(userInfo)
             awaitClose {
-
+                searchManager.unregisterSearchEvent()
             }
         }
     }
 
+
     override suspend fun ignoreUser() {
-        TODO("Not yet implemented")
+        searchManager.updateUserStatus(UserStatus.IGNORE)
     }
 
     override suspend fun acceptUser() {
-        TODO("Not yet implemented")
+        searchManager.updateUserStatus(UserStatus.ACCEPT)
+
     }
 }

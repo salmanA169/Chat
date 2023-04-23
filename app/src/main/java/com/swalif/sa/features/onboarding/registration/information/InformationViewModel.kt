@@ -33,7 +33,7 @@ class InformationViewModel @Inject constructor(
         }else{
             insertUser(
                 UserEntity(
-                    "test",info.name,info.email,gender.gender,500,""
+                    "test",info.name,info.email,gender,500,""
                 )
             )
             _infoEvent.update {

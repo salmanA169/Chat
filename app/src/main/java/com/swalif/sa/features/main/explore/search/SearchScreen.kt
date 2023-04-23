@@ -1,23 +1,9 @@
 package com.swalif.sa.features.main.explore.search
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.VectorConverter
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateValue
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.keyframes
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -51,6 +37,8 @@ import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import com.swalif.sa.R
 import com.swalif.sa.Screens
+import com.swalif.sa.core.searchManager.RoomEvent
+import com.swalif.sa.core.searchManager.RoomStatus
 import com.swalif.sa.model.UserInfo
 import com.swalif.sa.ui.theme.ChatAppTheme
 import java.lang.Float.max
@@ -87,8 +75,8 @@ fun SearchScreen(
         ) {
             UserStatusSection(
                 Modifier.align(CenterHorizontally),
-                searchState.userInfo,
-                searchState.searchStateResult
+                searchState.roomEvent,
+                searchState.myCurrentUser
             )
         }
     }
@@ -97,11 +85,11 @@ fun SearchScreen(
 @Composable
 fun UserStatusSection(
     modifier: Modifier = Modifier,
-    userInfo: UserInfo? = null,
-    searchStateResult: SearchStateResult
+    roomEvent: RoomEvent,
+    myCurrentUserInfo: UserInfo? = null
 ) {
-    when (searchStateResult) {
-        SearchStateResult.SEARCHING -> {
+    when (roomEvent.roomStatus) {
+        RoomStatus.WAITING_USERS -> {
             ImageProgressIndicator(
                 modifier
                     .padding(vertical = 8.dp)
@@ -111,20 +99,22 @@ fun UserStatusSection(
                 modifier = modifier.padding(vertical = 8.dp)
             )
         }
-        SearchStateResult.FOUND_USER, SearchStateResult.USER_LEFT, SearchStateResult.USER_ACCEPT -> {
+        RoomStatus.COMPLETE_USERS -> {
+            val getUser = roomEvent.users.find { it.userInfo != myCurrentUserInfo }!!
             val painter = ImageRequest.Builder(LocalContext.current)
-                .transformations(listOf(CircleCropTransformation())).data(userInfo!!.imageUri).build()
+                .transformations(listOf(CircleCropTransformation())).data(getUser.userInfo.imageUri)
+                .build()
             AsyncImage(
                 model = painter, contentDescription = "", modifier = modifier
                     .padding(top = 8.dp)
                     .size(80.dp)
                     .border(
-                        1.dp, userInfo!!.gender.getColorByGender(),
+                        1.dp, getUser.userInfo.gender.getColorByGender(),
                         CircleShape
                     )
             )
             Text(
-                text = if (searchStateResult.isUserLeft()) stringResource(id = R.string.user_left) else userInfo.username,
+                text = if (getUser.isLeft()) stringResource(id = R.string.user_left) else if(getUser.isAccept()) getUser.userInfo.username.plus(" - accepted") else getUser.userInfo.username,
                 modifier = modifier.padding(vertical = 6.dp)
             )
             Row(
@@ -138,13 +128,13 @@ fun UserStatusSection(
                         .fillMaxWidth()
                         .weight(1f)
                         .padding(horizontal = 6.dp),
-                    enabled = !searchStateResult.isUserLeft(),
+                    enabled = !getUser.isLeft(),
                     onClick = { /*TODO*/ },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer)
                 ) {
                     Text(
                         text = stringResource(id = R.string.ignore),
-                        color = if (!searchStateResult.isUserLeft()) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (!getUser.isLeft()) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 

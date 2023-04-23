@@ -3,7 +3,6 @@ package com.swalif.sa.fakeRepo
 import com.swalif.sa.datasource.local.dao.UserDao
 import com.swalif.sa.datasource.local.entity.UserEntity
 import com.swalif.sa.mapper.toUserInfo
-import com.swalif.sa.model.LoginInfo
 import com.swalif.sa.repository.userRepository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import logcat.logcat

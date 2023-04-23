@@ -1,5 +1,7 @@
 package com.swalif.sa.di
 
+import com.swalif.sa.core.searchManager.SearchManager
+import com.swalif.sa.core.searchManager.SearchManagerFakeData
 import com.swalif.sa.coroutine.DispatcherProvider
 import com.swalif.sa.coroutine.DispatcherProviderImpl
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
@@ -13,6 +15,7 @@ import com.swalif.sa.repository.userRepository.UserRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
+import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -44,9 +47,6 @@ abstract class RepositoryModule {
         dispatcherProvider: DispatcherProviderImpl
     ):DispatcherProvider
 
-    @Singleton
-    @Binds
-    abstract fun provideSearchRepository(
-        searchRepository:SearchRepositoryImpl
-    ): SearchRepository
+
+
 }
