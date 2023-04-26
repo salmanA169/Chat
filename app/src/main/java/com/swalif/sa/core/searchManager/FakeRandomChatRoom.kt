@@ -1,6 +1,5 @@
 package com.swalif.sa.core.searchManager
 
-import com.swalif.sa.component.Gender
 import com.swalif.sa.core.searchManager.exceptions.RoomMaxUsersExceptions
 import com.swalif.sa.model.UserInfo
 import kotlinx.coroutines.flow.*
@@ -21,7 +20,7 @@ class FakeRandomChatRoom : AbstractChatRoom() {
 
         _roomEvent.update {
             it.copy(
-                users = it.users + Users(userInfo, UserStatus.IDLE)
+                users = it.users + Users(userInfo, UserState.IDLE)
             )
         }
         uidUsers.add(userInfo.userUid)
@@ -36,31 +35,33 @@ class FakeRandomChatRoom : AbstractChatRoom() {
         }
     }
 
-    override fun updateUserStatus(userUid: String, userStatus: UserStatus) {
+    override fun updateUserStatus(userUid: String, userState: UserState) {
         val findUser = _roomEvent.value.users.find { it.userInfo.userUid == userUid }!!
-        val updateUser = findUser.copy(userStatus = userStatus)
+        val updateUser = findUser.copy(userState = userState)
         val users = _roomEvent.value.users.toMutableList()
         val getUserIndex = users.indexOf(findUser)
         users[getUserIndex] = updateUser
         _roomEvent.update {
             it.copy(
-                users = users
+                users = users,
+                startChatRoom = users.all{ it.isAccept() }
             )
         }
     }
 
     override fun removeUser(userInfo: UserInfo) {
         val users = _roomEvent.value.users
+        val findUsers = users.find { it.userInfo == userInfo }
         _roomEvent.update {
             it.copy(
-                users = users - Users(userInfo, UserStatus.IDLE)
+                users = users - findUsers!!
             )
         }
         uidUsers.remove(userInfo.userUid)
         if (users.size <= maxUsers) {
             _roomEvent.update {
                 it.copy(
-                    roomStatus = RoomStatus.COMPLETE_USERS
+                    roomStatus = RoomStatus.WAITING_USERS
                 )
             }
         } else if (users.size < maxUsers) {
@@ -69,6 +70,6 @@ class FakeRandomChatRoom : AbstractChatRoom() {
     }
 
     override fun isBothUsersAccepts(): Boolean {
-        return _roomEvent.value.users.all { it.userStatus == UserStatus.ACCEPT }
+        return _roomEvent.value.users.all { it.userState == UserState.ACCEPT }
     }
 }

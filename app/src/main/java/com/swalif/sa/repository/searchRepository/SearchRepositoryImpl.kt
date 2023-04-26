@@ -3,13 +3,12 @@ package com.swalif.sa.repository.searchRepository
 import com.swalif.sa.core.searchManager.RoomEvent
 import com.swalif.sa.core.searchManager.SearchEvent
 import com.swalif.sa.core.searchManager.SearchManager
-import com.swalif.sa.core.searchManager.UserStatus
+import com.swalif.sa.core.searchManager.UserState
 import com.swalif.sa.model.UserInfo
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import logcat.logcat
 import java.io.Closeable
 import javax.inject.Inject
 
@@ -25,7 +24,6 @@ class SearchRepositoryImpl @Inject constructor(
     override fun searchUser(userInfo: UserInfo): Flow<RoomEvent> {
         return callbackFlow {
             searchManager.addSearchEventListener(SearchEvent {
-                logcat("SearchRepository") { it.toString() }
                 trySend(it)
             })
             searchManager.registerSearchEvent(userInfo)
@@ -37,11 +35,11 @@ class SearchRepositoryImpl @Inject constructor(
 
 
     override suspend fun ignoreUser() {
-        searchManager.updateUserStatus(UserStatus.IGNORE)
+        searchManager.updateUserStatus(UserState.IGNORE)
     }
 
     override suspend fun acceptUser() {
-        searchManager.updateUserStatus(UserStatus.ACCEPT)
+        searchManager.updateUserStatus(UserState.ACCEPT)
 
     }
 }

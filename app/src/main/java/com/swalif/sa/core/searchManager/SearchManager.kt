@@ -12,6 +12,6 @@ interface SearchManager :Closeable {
     fun deleteRoom(roomId:String)
     fun registerSearchEvent(userInfo: UserInfo)
     fun unregisterSearchEvent()
-    fun updateUserStatus(userStatus: UserStatus)
+    fun updateUserStatus(userState: UserState)
     fun reload()
 }

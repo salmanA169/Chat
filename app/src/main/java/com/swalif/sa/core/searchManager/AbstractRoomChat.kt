@@ -12,23 +12,25 @@ abstract class AbstractChatRoom {
     abstract fun addUser(userInfo: UserInfo)
     abstract fun removeUser(userInfo: UserInfo)
     abstract fun isBothUsersAccepts():Boolean
-    abstract fun updateUserStatus(userUid:String,userStatus: UserStatus)
+    abstract fun updateUserStatus(userUid:String, userState: UserState)
     abstract fun getUIDUsersInRoom():List<String>
 }
 data class RoomEvent(
     val users :List<Users> = emptyList(),
-    val roomStatus: RoomStatus = RoomStatus.WAITING_USERS
+    val roomStatus: RoomStatus = RoomStatus.WAITING_USERS,
+    val startChatRoom :Boolean = false,
+    val usersLeave :List<String> = emptyList()
 )
 enum class RoomStatus{
     WAITING_USERS,COMPLETE_USERS
 }
 data class Users(
     val userInfo: UserInfo,
-    val userStatus: UserStatus
+    val userState: UserState
 ){
-    fun isLeft() = userStatus == UserStatus.IGNORE
-    fun isAccept() = userStatus == UserStatus.ACCEPT
+    fun isLeft() = userState == UserState.IGNORE
+    fun isAccept() = userState == UserState.ACCEPT
 }
-enum class UserStatus{
-    IDLE,ACCEPT,IGNORE
+enum class UserState{
+    IDLE,ACCEPT,IGNORE,LEFT
 }

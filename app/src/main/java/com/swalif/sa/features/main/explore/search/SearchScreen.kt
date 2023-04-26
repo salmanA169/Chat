@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -39,8 +40,10 @@ import com.swalif.sa.R
 import com.swalif.sa.Screens
 import com.swalif.sa.core.searchManager.RoomEvent
 import com.swalif.sa.core.searchManager.RoomStatus
+import com.swalif.sa.core.searchManager.UserState
 import com.swalif.sa.model.UserInfo
 import com.swalif.sa.ui.theme.ChatAppTheme
+import logcat.logcat
 import java.lang.Float.max
 import kotlin.math.PI
 import kotlin.math.abs
@@ -67,6 +70,11 @@ fun SearchScreen(
 ) {
     val searchState by searchViewModel.searchState.collectAsStateWithLifecycle()
 
+    LaunchedEffect(key1 = searchState.roomEvent.startChatRoom) {
+        logcat("SearchScreen start chat room") {
+            "${searchState.roomEvent.startChatRoom}"
+        }
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         ElevatedCard(
             modifier = Modifier
@@ -76,7 +84,8 @@ fun SearchScreen(
             UserStatusSection(
                 Modifier.align(CenterHorizontally),
                 searchState.roomEvent,
-                searchState.myCurrentUser
+                searchState.myCurrentUser,
+                searchViewModel::updateUserStatus
             )
         }
     }
@@ -86,7 +95,8 @@ fun SearchScreen(
 fun UserStatusSection(
     modifier: Modifier = Modifier,
     roomEvent: RoomEvent,
-    myCurrentUserInfo: UserInfo? = null
+    myCurrentUserInfo: UserInfo? = null,
+    onUserStateChange: (UserState) -> Unit
 ) {
     when (roomEvent.roomStatus) {
         RoomStatus.WAITING_USERS -> {
@@ -114,7 +124,9 @@ fun UserStatusSection(
                     )
             )
             Text(
-                text = if (getUser.isLeft()) stringResource(id = R.string.user_left) else if(getUser.isAccept()) getUser.userInfo.username.plus(" - accepted") else getUser.userInfo.username,
+                text = if (getUser.isLeft()) stringResource(id = R.string.user_left) else if (getUser.isAccept()) getUser.userInfo.username.plus(
+                    " - accepted"
+                ) else getUser.userInfo.username,
                 modifier = modifier.padding(vertical = 6.dp)
             )
             Row(
@@ -128,8 +140,7 @@ fun UserStatusSection(
                         .fillMaxWidth()
                         .weight(1f)
                         .padding(horizontal = 6.dp),
-                    enabled = !getUser.isLeft(),
-                    onClick = { /*TODO*/ },
+                    onClick = { onUserStateChange(UserState.IGNORE) },
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer)
                 ) {
                     Text(
@@ -138,10 +149,13 @@ fun UserStatusSection(
                     )
                 }
 
-                Button(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 6.dp), onClick = { /*TODO*/ }) {
+                Button(
+                    enabled = !getUser.isLeft(), modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .padding(horizontal = 6.dp), onClick = {
+                        onUserStateChange(UserState.ACCEPT)
+                    }) {
                     Text(text = stringResource(id = R.string.accept))
                 }
             }
