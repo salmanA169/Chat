@@ -18,8 +18,7 @@ abstract class AbstractChatRoom {
 data class RoomEvent(
     val users :List<Users> = emptyList(),
     val roomStatus: RoomStatus = RoomStatus.WAITING_USERS,
-    val startChatRoom :Boolean = false,
-    val usersLeave :List<String> = emptyList()
+    val startChatRoom :Boolean = false
 )
 enum class RoomStatus{
     WAITING_USERS,COMPLETE_USERS
