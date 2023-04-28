@@ -7,6 +7,7 @@ plugins {
     id ("com.github.ben-manes.versions")
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 android {
     namespace = "com.swalif.sa"
@@ -92,4 +93,7 @@ dependencies {
     testImplementation(Deps.coroutine_test)
     testImplementation(Deps.turbine_test)
     androidTestImplementation(Deps.turbine_test)
+    implementation(platform("com.google.firebase:firebase-bom:31.5.0"))
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4")
 }

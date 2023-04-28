@@ -13,7 +13,6 @@ import java.io.Closeable
 import javax.inject.Inject
 
 class SearchRepositoryImpl @Inject constructor(
-    private val chatRepository: ChatRepository,
     private val searchManager: SearchManager,
 ) : SearchRepository {
 

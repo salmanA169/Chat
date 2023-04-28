@@ -47,6 +47,7 @@ import logcat.logcat
 import java.lang.Float.max
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.random.Random
 
 fun NavGraphBuilder.searchScreen(navController: NavController) {
     composable(Screens.SearchScreen.route) {
@@ -71,8 +72,14 @@ fun SearchScreen(
     val searchState by searchViewModel.searchState.collectAsStateWithLifecycle()
 
     LaunchedEffect(key1 = searchState.roomEvent.startChatRoom) {
-        logcat("SearchScreen start chat room") {
-            "${searchState.roomEvent.startChatRoom}"
+        if (searchState.roomEvent.startChatRoom){
+            val myCurrentUser = searchState.myCurrentUser!!
+            val getUser = searchState.roomEvent.users.find { it.userInfo != myCurrentUser }!!.userInfo
+            val chatId =Random.nextInt()
+            searchViewModel.addTestChat(chatId ,getUser.username,getUser.imageUri,getUser.userUid)
+            navController.navigate(Screens.MessageScreen.navigateToMessageScreen("test",chatId.toString())){
+                popUpTo(Screens.MainScreens.HomeScreen.route)
+            }
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {

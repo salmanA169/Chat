@@ -10,7 +10,8 @@ data class ChatInfo(
     val userName: String = "",
     val userStatus: UserStatus? = null,
     val uidUser: String = "",
-    val imageUri: String = ""
+    val imageUri: String = "",
+    val userIsLeft:Boolean = false
 ) {
     @Composable
     fun localizeStatusUser(): String {

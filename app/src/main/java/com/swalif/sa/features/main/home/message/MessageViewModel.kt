@@ -55,10 +55,11 @@ class MessageViewModel @Inject constructor(
         }
         // TODO: for test
         viewModelScope.launch(dispatcherProvider.io) {
+            val getCurrentChat = chatRepository.getChatById(channelID)
             chatInfo.update {
                 ChatInfo(
-                    "salman",
-                    imageUri = "https://i.pinimg.com/originals/b4/c1/fb/b4c1fbf0e913bf9365c8fa0dcc48c0c0.jpg",
+                    getCurrentChat.senderName,
+                    imageUri = getCurrentChat.imageUri,
                     userStatus = UserStatus.Offline(LocalDateTime.now().minusDays(1))
                 )
             }

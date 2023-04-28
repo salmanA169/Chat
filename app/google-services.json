@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "123801215248",
+    "project_id": "swalif-d0735",
+    "storage_bucket": "swalif-d0735.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123801215248:android:431edf2236dc9191e5c595",
+        "android_client_info": {
+          "package_name": "com.swalif.sa"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "123801215248-tu1fabtdo7sr8g8lurrapnoepm19hr60.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.swalif.sa",
+            "certificate_hash": "4cb633220aef07c75834fa871a21c5b84321871b"
+          }
+        },
+        {
+          "client_id": "123801215248-v8av8g9fg4mmj9b77gavmf57vfh2imjs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkthH4vZY1tkOAeupFOc-ArzYU0l4WAHM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "123801215248-v8av8g9fg4mmj9b77gavmf57vfh2imjs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

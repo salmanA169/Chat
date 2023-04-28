@@ -10,4 +10,6 @@ interface ChatRepository {
     suspend fun deleteChatById(chat:Chat)
     suspend fun readMessages(chatId:Int)
     suspend fun updateChat(chatID: Int, text: String, messageType: MessageType)
+
+    suspend fun getChatById(chatId: Int):Chat
 }

@@ -81,7 +81,6 @@ sealed class Screens(val route: String) {
                 },
                 navArgument(MY_UID_ARG) {
                     type = NavType.StringType
-
                 }
             )
 
