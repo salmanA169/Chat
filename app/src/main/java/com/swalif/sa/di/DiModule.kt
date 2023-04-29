@@ -2,6 +2,8 @@ package com.swalif.sa.di
 
 import android.content.Context
 import androidx.room.Room
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 import com.swalif.Constants
 import com.swalif.sa.core.data_store.dataStore
 import com.swalif.sa.datasource.local.SwalifDatabase
@@ -35,4 +37,8 @@ object DiModule {
     @Provides
     @Singleton
     fun provideMessageDao(database: SwalifDatabase) = database.messageDao
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth() = Firebase.auth
 }

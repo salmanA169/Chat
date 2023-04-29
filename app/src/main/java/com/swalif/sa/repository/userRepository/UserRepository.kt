@@ -10,4 +10,5 @@ interface UserRepository {
     suspend fun getUserByUid(uid:String):UserInfo?
     suspend fun getCurrentUser(): UserInfo?
     fun isUserAvailable():Flow<Boolean>
+    suspend fun signIn()
 }

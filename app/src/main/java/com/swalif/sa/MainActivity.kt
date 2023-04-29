@@ -26,6 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.auth.FirebaseAuth
 import com.swalif.sa.component.*
 import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.features.main.explore.exploreDestination
