@@ -33,8 +33,8 @@ class UserRepositoryImpl @Inject constructor(
     private val oneTapClint = Identity.getSignInClient(context)
     private val signInRequest = BeginSignInRequest.Builder().setGoogleIdTokenRequestOptions(
         BeginSignInRequest.GoogleIdTokenRequestOptions.builder().setSupported(true)
-            .setServerClientId("123801215248-cneml35srs74pd3uhha8rui9cekma31h.apps.googleusercontent.com")
-            .setFilterByAuthorizedAccounts(true).build()
+            .setServerClientId("123801215248-c2463dk439ifv2d3uq25ppgmpj7k4a4v.apps.googleusercontent.com")
+            .setFilterByAuthorizedAccounts(false).build()
     ).setAutoSelectEnabled(true).build()
 
     override fun onAuthStateChanged(p0: FirebaseAuth) {
@@ -59,7 +59,7 @@ class UserRepositoryImpl @Inject constructor(
             }
         }catch (e:Exception){
             logcat {
-                e.localizedMessage
+                e.toString()
             }
         }
     }

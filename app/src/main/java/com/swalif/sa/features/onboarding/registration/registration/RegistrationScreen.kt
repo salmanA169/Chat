@@ -51,7 +51,7 @@ fun RegistrationScreen(
     val registerIntentSender =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()) {
             logcat("RegistrationScreen") {
-                it.data.toString()
+                it.data!!.extras.toString()
             }
         }
     LaunchedEffect(key1 = registrationState.showGoogleSignInt) {

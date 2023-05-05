@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swalif.sa.coroutine.DispatcherProvider
 import com.swalif.sa.repository.userRepository.UserRepository
+import com.swalif.sa.repository.userRepository.UserRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,6 +29,11 @@ class RegistrationViewModel @Inject constructor(
             SharingStarted.WhileSubscribed(5000), RegistrationState()
         )
 
+    init {
+        if (userRepository is UserRepositoryImpl){
+            addCloseable(userRepository)
+        }
+    }
     fun signInGoogleOneTap() {
         viewModelScope.launch(dispatcherProvider.default) {
             userRepository.signIn()
