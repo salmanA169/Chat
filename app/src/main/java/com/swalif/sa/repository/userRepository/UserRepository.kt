@@ -1,5 +1,6 @@
 package com.swalif.sa.repository.userRepository
 
+import android.content.IntentSender
 import com.swalif.sa.datasource.local.entity.UserEntity
 import com.swalif.sa.model.UserInfo
 import kotlinx.coroutines.flow.Flow
@@ -10,5 +11,6 @@ interface UserRepository {
     suspend fun getUserByUid(uid:String):UserInfo?
     suspend fun getCurrentUser(): UserInfo?
     fun isUserAvailable():Flow<Boolean>
+    fun authState():Flow<IntentSender?>
     suspend fun signIn()
 }

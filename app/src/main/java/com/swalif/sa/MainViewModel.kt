@@ -21,9 +21,10 @@ class MainViewModel @Inject constructor(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000), null
         )
-    fun signOut(){
+
+    fun signOut() {
         viewModelScope.launch {
-            userRepo.deleteUser(UserEntity("","","",Gender.MALE,50,""))
+            userRepo.deleteUser(UserEntity("", "","", Gender.MALE, "", 50, ""))
         }
     }
 }

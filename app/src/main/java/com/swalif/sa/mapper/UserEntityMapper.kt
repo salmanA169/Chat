@@ -6,5 +6,5 @@ import com.swalif.sa.model.UserInfo
 
 
 fun UserEntity.toUserInfo() = UserInfo(
-    userName,uidUser,photoUri,gender,createdAt
+    userName,uidUser,uniqueId,photoUri,gender,createdAt
 )
