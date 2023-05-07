@@ -1,17 +1,22 @@
 package com.swalif.sa.repository.userRepository
 
 import android.content.Context
+import android.content.Intent
 import android.content.IntentSender
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthCredential
+import com.google.firebase.auth.GoogleAuthProvider
 import com.swalif.sa.core.data_store.getUserUidFlow
 import com.swalif.sa.core.data_store.updateIsFirstTime
 import com.swalif.sa.datasource.local.dao.UserDao
 import com.swalif.sa.datasource.local.entity.UserEntity
 import com.swalif.sa.mapper.toUserInfo
+import com.swalif.sa.model.SignInResult
+import com.swalif.sa.model.UserData
 import com.swalif.sa.model.UserInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
@@ -39,14 +44,38 @@ class UserRepositoryImpl @Inject constructor(
 
     override fun onAuthStateChanged(p0: FirebaseAuth) {
         val currentUser = p0.currentUser
-        if (currentUser != null) {
-            _currentUserState.update {
-                currentUser.uid
-            }
-        } else {
-            _currentUserState.update {
-                ""
-            }
+        logcat {
+            "called with user : $currentUser"
+        }
+//        if (currentUser != null) {
+//            _currentUserState.update {
+//                currentUser.uid
+//            }
+//        } else {
+//            _currentUserState.update {
+//                ""
+//            }
+//        }
+    }
+
+    override suspend fun getSignInResult(intent: Intent): SignInResult {
+        val credential = oneTapClint.getSignInCredentialFromIntent(intent)
+        val googleIdToken = credential.googleIdToken
+        val googleCredential = GoogleAuthProvider.getCredential(googleIdToken,null)
+        return try{
+            val user = firebaseAuth.signInWithCredential(googleCredential).await().user
+            SignInResult(
+                userData = user?.run {
+                    UserData(
+                        displayName,uid,photoUrl.toString(),email
+                    )
+                }
+                ,null
+            )
+        }catch (e:Exception){
+            SignInResult(
+                null,e.message
+            )
         }
     }
 
@@ -59,7 +88,7 @@ class UserRepositoryImpl @Inject constructor(
             }
         }catch (e:Exception){
             logcat {
-                e.toString()
+                "error ${e.message}"
             }
         }
     }

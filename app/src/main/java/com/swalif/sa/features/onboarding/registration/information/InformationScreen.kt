@@ -22,7 +22,7 @@ import com.swalif.sa.component.rememberGenderState
 import logcat.logcat
 
 fun NavGraphBuilder.informationDest(navController: NavController) {
-    composable(Screens.OnBoardingScreen.InformationScreen.route) {
+    composable(Screens.OnBoardingScreen.InformationScreen.formattedInfoRout) {
         RegistrationInformation(navController)
     }
 }
@@ -51,7 +51,10 @@ fun RegistrationInformation(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(modifier = Modifier.fillMaxSize().statusBarsPadding(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        if (!infoState.isLoading){
+            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+        }
         AsyncImage(
             modifier = Modifier
                 .size(120.dp)
@@ -70,6 +73,8 @@ fun RegistrationInformation(
                 if (infoState.showNameError){
                     Text("user name must not be empty")
                 }
+            },label = {
+                Text(text = "Username")
             },
             modifier = Modifier.fillMaxWidth(),
             value = infoState.name,

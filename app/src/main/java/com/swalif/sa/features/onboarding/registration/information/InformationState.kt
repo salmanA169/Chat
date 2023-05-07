@@ -12,7 +12,8 @@ data class InformationState(
     val imageUri:String = "",
     val showEmailError:Boolean = false,
     val showNameError:Boolean = false,
-    val showGenderError:Boolean = false
+    val showGenderError:Boolean = false,
+    val isLoading :Boolean = false
 ){
     fun checkIfHasError ():Boolean = name.isEmpty() || !email.isEmailValid || gender == null
 }

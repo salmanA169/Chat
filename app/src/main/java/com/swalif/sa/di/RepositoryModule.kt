@@ -15,33 +15,36 @@ import com.swalif.sa.repository.userRepository.UserRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
+import dagger.hilt.android.components.ActivityRetainedComponent
+import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import dagger.hilt.android.scopes.ViewModelScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
 @Module
-@InstallIn(SingletonComponent::class)
+@InstallIn(ActivityRetainedComponent::class)
 abstract class RepositoryModule {
 
-    @Singleton
+    @ActivityRetainedScoped
     @Binds
     abstract fun provideUserRepo(
         userRepository: UserRepositoryImpl
     ): UserRepository
 
-    @Singleton
+    @ActivityRetainedScoped
     @Binds
     abstract fun provideMessageRepo(
         messageRepository: MessageRepositoryImpl
     ): MessageRepository
 
-    @Singleton
+    @ActivityRetainedScoped
     @Binds
     abstract fun provideChatRepo(
         chatRepository: ChatRepositoryImpl
     ): ChatRepository
 
-    @Singleton
+    @ActivityRetainedScoped
     @Binds
     abstract fun providerDispatcherProvider(
         dispatcherProvider: DispatcherProviderImpl

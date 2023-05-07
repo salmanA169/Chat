@@ -1,5 +1,6 @@
 package com.swalif.sa.features.onboarding.registration.registration
 
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -24,12 +25,19 @@ import com.swalif.sa.ui.theme.ChatAppTheme
 import logcat.logcat
 
 fun NavGraphBuilder.registrationDest(navController: NavController) {
-    composable(Screens.OnBoardingScreen.RegistrationScreen.route) {
+    composable(Screens.OnBoardingScreen.RegistrationScreen.route, arguments = Screens.OnBoardingScreen.RegistrationScreen.args) {
         val registrationViewModel: RegistrationViewModel = hiltViewModel()
         val registrationState by registrationViewModel.currentRegistrationState.collectAsStateWithLifecycle()
-        RegistrationScreen(registrationState, onSignIn =registrationViewModel::signInGoogleOneTap, onNavigate = {
-            
-        })
+        RegistrationScreen(
+            registrationState,
+            onSignIn = registrationViewModel::signInGoogleOneTap,
+            onNavigate = {
+            navController.navigate(it){
+                popUpTo(Screens.OnBoardingScreen.RegistrationScreen.route){
+                    inclusive = true
+                }
+            }
+            }, onSignInResult = registrationViewModel::signInResult)
     }
 }
 
@@ -45,15 +53,28 @@ fun Preview() {
 fun RegistrationScreen(
     registrationState: RegistrationState,
     onSignIn: () -> Unit,
+    onSignInResult: (Intent)->Unit,
     onNavigate: (route: String) -> Unit
 ) {
 
     val registerIntentSender =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()) {
-            logcat("RegistrationScreen") {
-                it.data!!.extras.toString()
-            }
+            onSignInResult(it.data!!)
         }
+
+    LaunchedEffect(key1 = registrationState.userData) {
+        if (registrationState.userData != null) {
+            val user = registrationState.userData
+            onNavigate(
+                Screens.OnBoardingScreen.InformationScreen.navigateToInformation(
+                    user.email!!,
+                    user.photo!!,
+                    user.userId!!,
+                    user.username!!
+                )
+            )
+        }
+    }
     LaunchedEffect(key1 = registrationState.showGoogleSignInt) {
         if (registrationState.showGoogleSignInt != null) {
             registerIntentSender.launch(
@@ -67,7 +88,6 @@ fun RegistrationScreen(
     }
     Box(modifier = Modifier.fillMaxSize()) {
         Button(modifier = Modifier.align(Alignment.Center), onClick = {
-//            onNavigate(Screens.OnBoardingScreen.InformationScreen.route)
             onSignIn()
         }) {
             Text(text = "Continue with google")

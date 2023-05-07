@@ -16,15 +16,47 @@ const val ON_BOARDING_SCREEN = "onboard_route"
 const val MY_UID_ARG = "my_UID"
 const val CHANNEL_ID_ARG = "channel_id"
 const val PREVIEW_IMAGE_ARG = "preview_image_arg"
-
+const val EMAIL_ARG  = "email_arg"
+const val PHOTO_ARG = "photo_arg"
+const val USERNAME_ARG = "username_arg"
 sealed class Screens(val route: String) {
 
     abstract val args: List<NamedNavArgument>
 
-    sealed class OnBoardingScreen(val route: String) {
-        object RegistrationScreen : OnBoardingScreen("registration_rout")
-        object InformationScreen : OnBoardingScreen("gender_rout")
-        object SignInScreen : OnBoardingScreen("login_route")
+    sealed class OnBoardingScreen( route: String):Screens(route) {
+
+        object RegistrationScreen : OnBoardingScreen("registration_rout"){
+            override val args: List<NamedNavArgument>
+                get() = emptyList()
+        }
+        object InformationScreen : OnBoardingScreen("information_rout"){
+            val formattedInfoRout = "$route/{$EMAIL_ARG}/{$PHOTO_ARG}/{$MY_UID_ARG}/{$USERNAME_ARG}"
+            override val args: List<NamedNavArgument>
+                get() = listOf(navArgument(EMAIL_ARG) {
+                    type = NavType.StringType
+                }, navArgument(PHOTO_ARG){
+                    type = NavType.StringType
+                }, navArgument(MY_UID_ARG){
+                    type = NavType.StringType
+                }, navArgument(USERNAME_ARG){
+                    type = NavType.StringType
+                })
+
+            fun navigateToInformation(email:String,photoArg:String,uidArg:String,userName:String): String {
+                val encodedUri = URLEncoder.encode(photoArg, StandardCharsets.UTF_8.toString())
+                return buildString {
+                    append(route)
+                    val args = listOf(email, encodedUri,uidArg,userName)
+                    args.forEach {
+                        append("/$it")
+                    }
+                }
+            }
+        }
+        object SignInScreen : OnBoardingScreen("login_route"){
+            override val args: List<NamedNavArgument>
+                get() = emptyList()
+        }
     }
 
     sealed class MainScreens(route: String, @StringRes val name: Int, val icon: ImageVector) :
