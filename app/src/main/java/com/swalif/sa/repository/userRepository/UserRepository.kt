@@ -13,7 +13,6 @@ interface UserRepository {
     suspend fun getUserByUid(uid:String):UserInfo?
     suspend fun getCurrentUser(): UserInfo?
     fun isUserAvailable():Flow<Boolean>
-    fun authState():Flow<IntentSender?>
-    suspend fun signIn()
+    suspend fun signIn():IntentSender?
     suspend fun getSignInResult(intent: Intent):SignInResult
 }

@@ -8,5 +8,6 @@ data class UserData(
     val username:String?,
     val userId:String?,
     val photo:String?,
-    val email:String?
+    val email:String?,
+    val isNewUser:Boolean = false
 )

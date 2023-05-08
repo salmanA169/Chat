@@ -33,8 +33,6 @@ class UserRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : UserRepository, FirebaseAuth.AuthStateListener, Closeable {
 
-    private val _currentUserState = MutableStateFlow("")
-    private val _currentAuthState = MutableStateFlow<IntentSender?>(null)
     private val oneTapClint = Identity.getSignInClient(context)
     private val signInRequest = BeginSignInRequest.Builder().setGoogleIdTokenRequestOptions(
         BeginSignInRequest.GoogleIdTokenRequestOptions.builder().setSupported(true)
@@ -63,11 +61,12 @@ class UserRepositoryImpl @Inject constructor(
         val googleIdToken = credential.googleIdToken
         val googleCredential = GoogleAuthProvider.getCredential(googleIdToken,null)
         return try{
-            val user = firebaseAuth.signInWithCredential(googleCredential).await().user
+            val authResult =firebaseAuth.signInWithCredential(googleCredential).await()
+            val user = authResult.user
             SignInResult(
                 userData = user?.run {
                     UserData(
-                        displayName,uid,photoUrl.toString(),email
+                        displayName,uid,photoUrl.toString(),email,authResult.additionalUserInfo?.isNewUser?:false
                     )
                 }
                 ,null
@@ -79,17 +78,15 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun signIn() {
-        try {
+    override suspend fun signIn():IntentSender? {
+        return try {
             val result =  oneTapClint.beginSignIn(signInRequest).await()
-
-            _currentAuthState.update {
                 result.pendingIntent.intentSender
-            }
         }catch (e:Exception){
             logcat {
                 "error ${e.message}"
             }
+            null
         }
     }
 
@@ -101,9 +98,6 @@ class UserRepositoryImpl @Inject constructor(
         firebaseAuth.removeAuthStateListener(this)
     }
 
-    override fun authState(): Flow<IntentSender?> {
-        return _currentAuthState
-    }
 
     override suspend fun insertUser(user: UserEntity) {
         userDao.insertUser(user)
@@ -130,7 +124,7 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override fun isUserAvailable() =
-        combine(_currentUserState, userDao.getUsersFlow()) { userUid, listUsers ->
+        combine(dataStore.getUserUidFlow(), userDao.getUsersFlow()) { userUid, listUsers ->
             val hasUid = userUid.isEmpty()
             if (hasUid) {
                 false

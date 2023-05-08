@@ -9,6 +9,7 @@ import com.swalif.sa.repository.userRepository.UserRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -22,15 +23,7 @@ class RegistrationViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider
 ) : ViewModel() {
     private val _currentRegistrationState = MutableStateFlow(RegistrationState())
-    val currentRegistrationState =
-        _currentRegistrationState.combine(userRepository.authState()) { registrationState, cureentAuthstate ->
-            registrationState.copy(
-                cureentAuthstate
-            )
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000), RegistrationState()
-        )
+    val currentRegistrationState = _currentRegistrationState.asStateFlow()
 
     init {
         if (userRepository is UserRepositoryImpl) {
@@ -62,9 +55,15 @@ class RegistrationViewModel @Inject constructor(
 
         }
     }
-        fun signInGoogleOneTap() {
-            viewModelScope.launch(dispatcherProvider.default) {
-                userRepository.signIn()
+
+    fun signInGoogleOneTap() {
+        viewModelScope.launch(dispatcherProvider.default) {
+            val intent = userRepository.signIn()
+            _currentRegistrationState.update {
+                it.copy(
+                    intent
+                )
             }
         }
     }
+}

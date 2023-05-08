@@ -65,6 +65,7 @@ fun RegistrationScreen(
     LaunchedEffect(key1 = registrationState.userData) {
         if (registrationState.userData != null) {
             val user = registrationState.userData
+
             onNavigate(
                 Screens.OnBoardingScreen.InformationScreen.navigateToInformation(
                     user.email!!,
