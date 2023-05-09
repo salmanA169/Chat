@@ -23,7 +23,7 @@ class FakeRandomChatRoom : AbstractChatRoom() {
                 users = it.users + Users(userInfo, UserState.IDLE)
             )
         }
-        uidUsers.add(userInfo.userUid)
+        uidUsers.add(userInfo.uidUser)
         if (_roomEvent.value.users.size == maxUsers) {
             _roomEvent.update {
                 it.copy(
@@ -36,7 +36,7 @@ class FakeRandomChatRoom : AbstractChatRoom() {
     }
 
     override fun updateUserStatus(userUid: String, userState: UserState) {
-        val findUser = _roomEvent.value.users.find { it.userInfo.userUid == userUid }!!
+        val findUser = _roomEvent.value.users.find { it.userInfo.uidUser == userUid }!!
         val updateUser = findUser.copy(userState = userState)
         val users = _roomEvent.value.users.toMutableList()
         val getUserIndex = users.indexOf(findUser)
@@ -57,7 +57,7 @@ class FakeRandomChatRoom : AbstractChatRoom() {
                 users = users - findUsers!!
             )
         }
-        uidUsers.remove(userInfo.userUid)
+        uidUsers.remove(userInfo.uidUser)
         if (users.size <= maxUsers) {
             _roomEvent.update {
                 it.copy(

@@ -76,7 +76,7 @@ fun SearchScreen(
             val myCurrentUser = searchState.myCurrentUser!!
             val getUser = searchState.roomEvent.users.find { it.userInfo != myCurrentUser }!!.userInfo
             val chatId =Random.nextInt()
-            searchViewModel.addTestChat(chatId ,getUser.username,getUser.imageUri,getUser.userUid)
+            searchViewModel.addTestChat(chatId ,getUser.userName,getUser.photoUri,getUser.uidUser)
             navController.navigate(Screens.MessageScreen.navigateToMessageScreen("test",chatId.toString())){
                 popUpTo(Screens.MainScreens.HomeScreen.route)
             }
@@ -119,7 +119,7 @@ fun UserStatusSection(
         RoomStatus.COMPLETE_USERS -> {
             val getUser = roomEvent.users.find { it.userInfo != myCurrentUserInfo }!!
             val painter = ImageRequest.Builder(LocalContext.current)
-                .transformations(listOf(CircleCropTransformation())).data(getUser.userInfo.imageUri)
+                .transformations(listOf(CircleCropTransformation())).data(getUser.userInfo.photoUri)
                 .build()
             AsyncImage(
                 model = painter, contentDescription = "", modifier = modifier
@@ -131,9 +131,9 @@ fun UserStatusSection(
                     )
             )
             Text(
-                text = if (getUser.isLeft()) stringResource(id = R.string.user_left) else if (getUser.isAccept()) getUser.userInfo.username.plus(
+                text = if (getUser.isLeft()) stringResource(id = R.string.user_left) else if (getUser.isAccept()) getUser.userInfo.userName.plus(
                     " - accepted"
-                ) else getUser.userInfo.username,
+                ) else getUser.userInfo.userName,
                 modifier = modifier.padding(vertical = 6.dp)
             )
             Row(

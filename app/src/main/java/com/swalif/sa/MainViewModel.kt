@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swalif.sa.component.Gender
 import com.swalif.sa.datasource.local.entity.UserEntity
+import com.swalif.sa.model.UserInfo
 import com.swalif.sa.repository.userRepository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -24,7 +25,7 @@ class MainViewModel @Inject constructor(
 
     fun signOut() {
         viewModelScope.launch {
-            userRepo.deleteUser(UserEntity("", "","", Gender.MALE, "", 50, ""))
+            userRepo.deleteUser(UserInfo("", "","", Gender.MALE, "", 50, ""))
         }
     }
 }

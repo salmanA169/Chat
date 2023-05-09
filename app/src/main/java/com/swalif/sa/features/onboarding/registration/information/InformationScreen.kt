@@ -52,7 +52,7 @@ fun RegistrationInformation(
     }
 
     Column(modifier = Modifier.fillMaxSize().statusBarsPadding(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        if (!infoState.isLoading){
+        if (infoState.isLoading){
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
         AsyncImage(

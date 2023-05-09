@@ -1,6 +1,7 @@
 package com.swalif.sa.features.onboarding.registration.registration
 
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -13,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -62,18 +64,23 @@ fun RegistrationScreen(
             onSignInResult(it.data!!)
         }
 
+    val context = LocalContext.current
     LaunchedEffect(key1 = registrationState.userData) {
         if (registrationState.userData != null) {
             val user = registrationState.userData
-
-            onNavigate(
-                Screens.OnBoardingScreen.InformationScreen.navigateToInformation(
-                    user.email!!,
-                    user.photo!!,
-                    user.userId!!,
-                    user.username!!
+            if (user.isNewUser){
+                onNavigate(
+                    Screens.OnBoardingScreen.InformationScreen.navigateToInformation(
+                        user.email!!,
+                        user.photo!!,
+                        user.userId!!,
+                        user.username!!
+                    )
                 )
-            )
+            }else{
+                // TODO: navigateBack to home screen and fetch data from firestorte
+                Toast.makeText(context, "Home screen", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     LaunchedEffect(key1 = registrationState.showGoogleSignInt) {

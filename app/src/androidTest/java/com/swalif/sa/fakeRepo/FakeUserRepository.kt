@@ -2,7 +2,7 @@ package com.swalif.sa.fakeRepo
 
 import com.swalif.sa.datasource.local.dao.UserDao
 import com.swalif.sa.datasource.local.entity.UserEntity
-import com.swalif.sa.mapper.toUserInfo
+import com.swalif.sa.mapper.toUserEntity
 import com.swalif.sa.repository.userRepository.UserRepository
 import kotlinx.coroutines.flow.Flow
 import logcat.logcat
@@ -24,7 +24,7 @@ class FakeUserRepository @Inject constructor(
 
     override suspend fun getUserByUid(uid: String): LoginInfo? {
         println("called get user")
-        return userDao.getUserByUid(uid)?.toUserInfo()
+        return userDao.getUserByUid(uid)?.toUserEntity()
     }
 
     override fun isUserAvailable(): Flow<Boolean> {

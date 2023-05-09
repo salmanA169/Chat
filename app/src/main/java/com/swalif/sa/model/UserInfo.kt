@@ -3,10 +3,11 @@ package com.swalif.sa.model
 import com.swalif.sa.component.Gender
 
 data class UserInfo(
-    val username:String,
-    val userUid:String,
+    val uidUser:String,
+    val userName:String,
+    val email:String,
+    val gender:Gender,
     val uniqueId:String,
-    val imageUri:String,
-    val gender : Gender,
-    val createAt:Long
+    val createdAt:Long,
+    val photoUri:String
 )

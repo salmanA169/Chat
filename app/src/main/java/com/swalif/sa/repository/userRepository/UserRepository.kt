@@ -8,8 +8,9 @@ import com.swalif.sa.model.UserInfo
 import kotlinx.coroutines.flow.Flow
 
 interface UserRepository {
-    suspend fun insertUser(user:UserEntity)
-    suspend fun deleteUser(user:UserEntity)
+    suspend fun insertUser(user:UserInfo)
+    suspend fun saveUser(user:UserInfo)
+    suspend fun deleteUser(user:UserInfo)
     suspend fun getUserByUid(uid:String):UserInfo?
     suspend fun getCurrentUser(): UserInfo?
     fun isUserAvailable():Flow<Boolean>

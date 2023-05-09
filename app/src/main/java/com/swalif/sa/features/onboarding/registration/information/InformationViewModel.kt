@@ -3,13 +3,16 @@ package com.swalif.sa.features.onboarding.registration.information
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Timestamp
 import com.swalif.sa.EMAIL_ARG
 import com.swalif.sa.MY_UID_ARG
 import com.swalif.sa.PHOTO_ARG
 import com.swalif.sa.USERNAME_ARG
 import com.swalif.sa.component.Gender
 import com.swalif.sa.datasource.local.entity.UserEntity
+import com.swalif.sa.model.UserInfo
 import com.swalif.sa.repository.userRepository.UserRepository
+import com.swalif.sa.utils.generateUniqueId
 import com.swalif.sa.utils.isEmailValid
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -19,12 +22,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import logcat.logcat
 import javax.inject.Inject
+import kotlin.random.Random
 
 // TODO: save data to room and firestore and data store and manage them later
 @HiltViewModel
 class InformationViewModel @Inject constructor(
     private val userRepository: UserRepository,
-     savedStateHandle: SavedStateHandle
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val emailArg = savedStateHandle.get<String>(EMAIL_ARG)
@@ -43,28 +47,37 @@ class InformationViewModel @Inject constructor(
             )
         }
     }
+
     private val _infoEvent = MutableStateFlow<InfoEvent?>(null)
     val infoEvent = _infoEvent.asStateFlow()
 
-    fun checkAndSave(gender: Gender){
+    fun checkAndSave(gender: Gender) {
         updateGender(gender)
         val info = _infoState.value
-        if (info.checkIfHasError()){
+        if (info.checkIfHasError()) {
             checkError()
-        }else{
+        } else {
             insertUser(
-                UserEntity(
-                    "test",info.name,info.email,gender,"",500,""
+                UserInfo(
+                    myUidArg!!,
+                    userNameArg!!,
+                    emailArg!!,
+                    gender,
+                    generateUniqueId(),
+                    Timestamp.now().toDate().time,
+                    photoArg!!
                 )
             )
 
         }
     }
-    private fun onEvent(infoEvent: InfoEvent){
+
+    private fun onEvent(infoEvent: InfoEvent) {
         _infoEvent.update {
             infoEvent
         }
     }
+
     private fun checkError() {
         _infoState.update {
             it.copy(
@@ -74,14 +87,15 @@ class InformationViewModel @Inject constructor(
             )
         }
     }
-    private fun insertUser(userEntity: UserEntity) {
+
+    private fun insertUser(userEntity: UserInfo) {
         viewModelScope.launch(Dispatchers.IO) {
             _infoState.update {
                 it.copy(
                     isLoading = true
                 )
             }
-            userRepository.insertUser(userEntity)
+            userRepository.saveUser(userEntity)
             _infoState.update {
                 it.copy(
                     isLoading = false
@@ -99,13 +113,15 @@ class InformationViewModel @Inject constructor(
             )
         }
     }
-    private fun updateGender(gender:Gender){
+
+    private fun updateGender(gender: Gender) {
         _infoState.update {
             it.copy(
                 gender = gender
             )
         }
     }
+
     fun updateEmail(email: String) {
         _infoState.update {
             it.copy(
@@ -115,7 +131,7 @@ class InformationViewModel @Inject constructor(
     }
 }
 
-sealed class InfoEvent{
+sealed class InfoEvent {
 
-    object Saved:InfoEvent()
+    object Saved : InfoEvent()
 }
