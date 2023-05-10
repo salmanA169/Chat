@@ -51,6 +51,13 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun signOut(uid: String) {
+        oneTapClint.signOut().await()
+        firebaseAuth.signOut()
+        val getUserByUid = getUserByUid(uid)?:return
+        deleteUser(getUserByUid)
+    }
+
     override suspend fun getSignInResult(intent: Intent): SignInResult {
         val credential = oneTapClint.getSignInCredentialFromIntent(intent)
         val googleIdToken = credential.googleIdToken
@@ -108,6 +115,7 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun insertUser(user: UserInfo) {
         userDao.insertUser(user.toUserEntity())
+        updateUserStore(user.uidUser)
     }
 
     override suspend fun deleteUser(user: UserInfo) {
@@ -116,7 +124,7 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getUserByUid(uid: String): UserInfo? {
-        return userDao.getUserByUid(uid)?.toUserInfo()
+        return userDao.getUserByUid(uid)?.toUserInfo() ?: fireStore.getUserByUid(uid)?.toUserInfo()
     }
 
     private suspend fun updateUserStore(uid: String) {

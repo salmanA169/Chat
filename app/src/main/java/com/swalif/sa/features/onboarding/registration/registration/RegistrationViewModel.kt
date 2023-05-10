@@ -4,14 +4,12 @@ import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swalif.sa.coroutine.DispatcherProvider
+import com.swalif.sa.model.UserInfo
 import com.swalif.sa.repository.userRepository.UserRepository
 import com.swalif.sa.repository.userRepository.UserRepositoryImpl
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import logcat.logcat
@@ -31,6 +29,13 @@ class RegistrationViewModel @Inject constructor(
         }
     }
 
+    suspend fun insertUser(uidUser:String){
+        val getUser = userRepository.getUserByUid(uidUser)
+        if (getUser != null){
+            userRepository.insertUser(getUser)
+        }
+    }
+
     fun signInResult(intent: Intent) {
         viewModelScope.launch(dispatcherProvider.default) {
             val getResult = userRepository.getSignInResult(intent)
@@ -38,6 +43,9 @@ class RegistrationViewModel @Inject constructor(
                 getResult.toString()
             }
             if (getResult.userData != null) {
+                if (!getResult.userData.isNewUser){
+                    insertUser(getResult.userData.userId!!)
+                }
                 _currentRegistrationState.update {
                     it.copy(
                         userData = getResult.userData

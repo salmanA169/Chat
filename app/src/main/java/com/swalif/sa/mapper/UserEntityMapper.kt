@@ -1,6 +1,7 @@
 package com.swalif.sa.mapper
 
 import com.google.firebase.Timestamp
+import com.swalif.sa.component.Gender
 import com.swalif.sa.datasource.local.entity.UserEntity
 import com.swalif.sa.datasource.remote.firestore_dto.UserDto
 import com.swalif.sa.model.UserInfo
@@ -19,3 +20,8 @@ fun UserInfo.toUserDto() = UserDto(
 fun UserEntity.toUserInfo() = UserInfo(
     uidUser, userName, email, gender, uniqueId, createdAt, photoUri
 )
+
+fun UserDto.toUserInfo() = UserInfo(
+    uidUser, userName, email, gender?:Gender.MALE, uniqueId, createdAt.toDate().time, photoUri
+)
+

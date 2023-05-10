@@ -61,7 +61,7 @@ fun RegistrationScreen(
 
     val registerIntentSender =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()) {
-            onSignInResult(it.data!!)
+            onSignInResult(it.data?:return@rememberLauncherForActivityResult)
         }
 
     val context = LocalContext.current
@@ -78,8 +78,10 @@ fun RegistrationScreen(
                     )
                 )
             }else{
-                // TODO: navigateBack to home screen and fetch data from firestorte
-                Toast.makeText(context, "Home screen", Toast.LENGTH_SHORT).show()
+                onNavigate(
+                    Screens.MainScreens.HomeScreen.route
+                )
+                Toast.makeText(context, "Welcome back ${user.username}", Toast.LENGTH_SHORT).show()
             }
         }
     }

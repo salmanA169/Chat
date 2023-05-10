@@ -16,4 +16,6 @@ interface UserRepository {
     fun isUserAvailable():Flow<Boolean>
     suspend fun signIn():IntentSender?
     suspend fun getSignInResult(intent: Intent):SignInResult
+    suspend fun signOut(uid:String)
+
 }
