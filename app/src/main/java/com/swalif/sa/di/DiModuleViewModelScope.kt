@@ -2,6 +2,7 @@ package com.swalif.sa.di
 
 import com.swalif.sa.core.searchManager.SearchManager
 import com.swalif.sa.core.searchManager.SearchManagerFakeData
+import com.swalif.sa.core.searchManager.SearchManagerFireStore
 import com.swalif.sa.repository.searchRepository.SearchRepository
 import com.swalif.sa.repository.searchRepository.SearchRepositoryImpl
 import dagger.Binds
@@ -18,7 +19,7 @@ abstract class DiModuleViewModelScope {
     @ViewModelScoped
     @Binds
     abstract fun provideSearchManager(
-        searchManager: SearchManagerFakeData
+        searchManager: SearchManagerFireStore
     ): SearchManager
 
     @ViewModelScoped

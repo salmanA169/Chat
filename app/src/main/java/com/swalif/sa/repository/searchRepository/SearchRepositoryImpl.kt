@@ -39,6 +39,5 @@ class SearchRepositoryImpl @Inject constructor(
 
     override suspend fun acceptUser() {
         searchManager.updateUserStatus(UserState.ACCEPT)
-
     }
 }

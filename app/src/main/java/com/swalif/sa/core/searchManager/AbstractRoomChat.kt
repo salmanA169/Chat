@@ -7,7 +7,7 @@ import java.util.*
 abstract class AbstractChatRoom {
     abstract val roomEvent:StateFlow<RoomEvent>
     abstract val maxUsers :Int
-    val roomId = UUID.randomUUID().toString()
+    var roomId = UUID.randomUUID().toString()
 
     abstract fun addUser(userInfo: UserInfo)
     abstract fun removeUser(userInfo: UserInfo)
