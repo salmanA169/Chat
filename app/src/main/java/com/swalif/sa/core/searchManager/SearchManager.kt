@@ -9,7 +9,7 @@ interface SearchManager :Closeable {
     fun addSearchEventListener(searchEventListener: SearchEvent) {
         onSearchEventListener = searchEventListener
     }
-    fun deleteRoom(roomId:String)
+    suspend fun deleteRoom(roomId:String)
     fun registerSearchEvent(userInfo: UserInfo)
     fun unregisterSearchEvent()
     fun updateUserStatus(userState: UserState)

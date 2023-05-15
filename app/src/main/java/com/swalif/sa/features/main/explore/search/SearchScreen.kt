@@ -1,6 +1,7 @@
 package com.swalif.sa.features.main.explore.search
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.widget.Toast
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -71,15 +72,17 @@ fun SearchScreen(
 ) {
     val searchState by searchViewModel.searchState.collectAsStateWithLifecycle()
 
+    val context = LocalContext.current
     LaunchedEffect(key1 = searchState.roomEvent.startChatRoom) {
         if (searchState.roomEvent.startChatRoom){
-            val myCurrentUser = searchState.myCurrentUser!!
-            val getUser = searchState.roomEvent.users.find { it.userInfo != myCurrentUser }!!.userInfo
-            val chatId =Random.nextInt()
-            searchViewModel.addTestChat(chatId ,getUser.userName,getUser.photoUri,getUser.uidUser)
-            navController.navigate(Screens.MessageScreen.navigateToMessageScreen("test",chatId.toString())){
-                popUpTo(Screens.MainScreens.HomeScreen.route)
-            }
+//            val myCurrentUser = searchState.myCurrentUser!!
+//            val getUser = searchState.roomEvent.users.find { it.userInfo != myCurrentUser }!!.userInfo
+//            val chatId =Random.nextInt()
+//            searchViewModel.addTestChat(chatId ,getUser.userName,getUser.photoUri,getUser.uidUser)
+//            navController.navigate(Screens.MessageScreen.navigateToMessageScreen("test",chatId.toString())){
+//                popUpTo(Screens.MainScreens.HomeScreen.route)
+//            }
+            Toast.makeText(context, "show chat screen ", Toast.LENGTH_SHORT).show()
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -117,7 +120,7 @@ fun UserStatusSection(
             )
         }
         RoomStatus.COMPLETE_USERS -> {
-            val getUser = roomEvent.users.find { it.userInfo != myCurrentUserInfo }!!
+            val getUser = roomEvent.users.find { it.userInfo.uidUser != myCurrentUserInfo!!.uidUser }!!
             val painter = ImageRequest.Builder(LocalContext.current)
                 .transformations(listOf(CircleCropTransformation())).data(getUser.userInfo.photoUri)
                 .build()

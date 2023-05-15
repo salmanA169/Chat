@@ -2,6 +2,7 @@ package com.swalif.sa.core.searchManager
 
 import com.swalif.sa.component.Gender
 import com.swalif.sa.coroutine.DispatcherProvider
+import com.swalif.sa.mapper.toUserDto
 import com.swalif.sa.model.UserInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -61,13 +62,13 @@ class SearchManagerFakeData @Inject constructor(
         job = scope.launch {
             val randomRoom = fakeChatRooms.random()
             currentRoom = randomRoom
-            randomRoom.addUser(userInfo)
+            randomRoom.addUser(userInfo.toUserDto())
             currentUserInfo = userInfo
             launch {
                 delay(5000)
                 val randomUser = fakeData.random()
                 currentRoom!!.addUser(
-                    randomUser
+                    randomUser.toUserDto()
                 )
                 delay(3000)
                 currentRoom!!.updateUserStatus(
@@ -75,10 +76,10 @@ class SearchManagerFakeData @Inject constructor(
                     if (Random.nextBoolean()) UserState.IGNORE else UserState.ACCEPT
                 )
             }
-            randomRoom.roomEvent.collect {
-                logcat("SearchManager") { it.toString() }
-                onSearchEventListener?.onEvent(it)
-            }
+//            randomRoom.roomEvent.collect {
+//                logcat("SearchManager") { it.toString() }
+//                onSearchEventListener?.onEvent(it)
+//            }
 
         }
 
@@ -91,8 +92,8 @@ class SearchManagerFakeData @Inject constructor(
             val findUserUidFromRoom =
                 currentRoom!!.getUIDUsersInRoom().find { it != currentUserInfo!!.uidUser }
             val getUser = fakeData.find { it.uidUser == findUserUidFromRoom }
-            currentRoom!!.removeUser(getUser!!)
-            currentRoom!!.removeUser(currentUserInfo!!)
+            currentRoom!!.removeUser(getUser!!.toUserDto())
+            currentRoom!!.removeUser(currentUserInfo!!.toUserDto())
             reload()
         }
     }
@@ -104,7 +105,7 @@ class SearchManagerFakeData @Inject constructor(
         registerSearchEvent(currentUserInfo!!)
     }
 
-    override fun deleteRoom(roomId: String) {
+    override suspend fun deleteRoom(roomId: String) {
         TODO("Not yet implemented")
     }
 

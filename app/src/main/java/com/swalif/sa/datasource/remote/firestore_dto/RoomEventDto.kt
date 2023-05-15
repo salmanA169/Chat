@@ -9,7 +9,8 @@ data class RoomResultDto(
     val users : List<UsersDto> = emptyList(),
     val maxUsers:Int = 0,
     val roomStatus: RoomStatus = RoomStatus.WAITING_USERS,
-    val roomId:String =""
+    val roomId:String ="",
+    val shouldStartChat:Boolean = false
 )
 
 data class UsersDto(

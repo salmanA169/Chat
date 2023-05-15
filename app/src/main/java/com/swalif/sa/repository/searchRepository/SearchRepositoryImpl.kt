@@ -22,9 +22,9 @@ class SearchRepositoryImpl @Inject constructor(
 
     override fun searchUser(userInfo: UserInfo): Flow<RoomEvent> {
         return callbackFlow {
-            searchManager.addSearchEventListener(SearchEvent {
+            searchManager.addSearchEventListener {
                 trySend(it)
-            })
+            }
             searchManager.registerSearchEvent(userInfo)
             awaitClose {
                 searchManager.unregisterSearchEvent()

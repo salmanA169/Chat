@@ -1,98 +1,113 @@
 package com.swalif.sa.core.searchManager
 
 import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.FirebaseFirestore
 import com.swalif.sa.core.searchManager.exceptions.RoomMaxUsersExceptions
-import com.swalif.sa.coroutine.DispatcherProvider
-import com.swalif.sa.datasource.remote.FireStoreDatabase
-import com.swalif.sa.model.UserInfo
+import com.swalif.sa.coroutine.DispatcherProviderImpl
+import com.swalif.sa.datasource.remote.firestore_dto.UserDto
+import com.swalif.sa.datasource.remote.firestore_dto.UsersDto
+import com.swalif.sa.datasource.remote.firestore_dto.toUsers
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-import logcat.logcat
-import javax.inject.Inject
 
-class ChatRoomFireStore() : AbstractChatRoom() {
+interface FireStoreRoomEvent {
+    fun onAllUserJoinChat(roomId: String)
+}
 
-    constructor(roomId:String,users:List<Users>,roomStatus: RoomStatus):this(){
-        this.roomId = roomId
-        _roomEvent.update {
-            it.copy(users,roomStatus)
-        }
+class ChatRoomFireStore(
+    val currentRoomDocumentReference: DocumentReference,
+    private val firestoreRoomEvent: FireStoreRoomEvent
+) : AbstractChatRoom() {
+
+
+    override var users: List<UsersDto> = mutableListOf()
+    override var roomStatus: RoomStatus = RoomStatus.WAITING_USERS
+
+    private val dispatcherProvider = DispatcherProviderImpl()
+    private var currentJob: Job? = null
+    private val coroutineScope = CoroutineScope(SupervisorJob() + dispatcherProvider.io)
+    override fun getRoomEvent(): RoomEvent {
+        return RoomEvent(
+            users.toUsers(), roomStatus, isBothUsersAccepts()
+        )
     }
-    private val _roomEvent = MutableStateFlow(RoomEvent())
-    override val roomEvent: StateFlow<RoomEvent>
-        get() = _roomEvent.asStateFlow()
+
+    constructor(
+        roomId: String,
+        users: List<UsersDto>,
+        roomStatus: RoomStatus,
+        roomDocumentReference: DocumentReference,
+        firestoreRoomEvent: FireStoreRoomEvent
+    ) : this(roomDocumentReference, firestoreRoomEvent) {
+        this.roomId = roomId
+        this.users = users
+        this.roomStatus = roomStatus
+    }
+
     override val maxUsers: Int
         get() = 2
 
-    override fun addUser(userInfo: UserInfo) {
 
-        val currentUsers = _roomEvent.value.users.distinctBy { it.userInfo.uidUser }
-        val checkUser = currentUsers.find { it.userInfo.uidUser == userInfo.uidUser }
+    override fun addUser(UserInfoDto: UserDto) {
+        currentJob?.cancel()
+        val currentUsers = users.distinctBy { it.user.uidUser }
+        val checkUser = currentUsers.find { it.user.uidUser == UserInfoDto.uidUser }
         if (checkUser != null) {
             return
         }
 
         if (currentUsers.size < maxUsers) {
-            val newUsers = currentUsers + Users(userInfo, UserState.IDLE)
+            val newUsers = currentUsers + UsersDto(UserInfoDto, UserState.IDLE)
+            users = newUsers
 
-            val currentStatus = if (newUsers.size == maxUsers) {
-                RoomStatus.COMPLETE_USERS
+            if (users.size == maxUsers) {
+                roomStatus = RoomStatus.COMPLETE_USERS
             } else {
-                RoomStatus.WAITING_USERS
+                roomStatus = RoomStatus.WAITING_USERS
             }
-            _roomEvent.update {
-                it.copy(
-                    newUsers, currentStatus
+            currentJob = coroutineScope.launch {
+                val data = mapOf(
+                    "users" to users,
+                    "roomStatus" to roomStatus,
                 )
+                currentRoomDocumentReference.update(data).await()
             }
         } else {
-            throw RoomMaxUsersExceptions("users more then max users, currentUsers: ${_roomEvent.value.users.size} , maxUsers: $maxUsers")
+            throw RoomMaxUsersExceptions("users more then max users, currentUsers: ${users.size} , maxUsers: $maxUsers")
         }
 
     }
 
-    override fun removeUser(userInfo: UserInfo) {
-        val users = _roomEvent.value.users
-        val findUsers = users.find { it.userInfo.uidUser == userInfo.uidUser }!!
+    override fun removeUser(UserInfoDto: UserDto) {
+        val findUsers = users.find { it.user.uidUser == UserInfoDto.uidUser }!!
         val updateList = users - findUsers
 
-        _roomEvent.update {
-            it.copy(
-                updateList
-            )
-        }
+        users = updateList
 
 
     }
 
     override fun isBothUsersAccepts(): Boolean {
-        TODO("Not yet implemented")
+        return users.all { it.userState == UserState.ACCEPT }
     }
 
     override fun updateUserStatus(userUid: String, userState: UserState) {
-        val users = _roomEvent.value.users
-        val getCurrentUser = users.find { it.userInfo.uidUser == userUid }!!
+        val getCurrentUser = users.find { it.user.uidUser == userUid }!!
         val getIndex = users.indexOf(getCurrentUser)
         val newData = users.toMutableList()
         val updatedUser = getCurrentUser.copy(userState = userState)
         newData[getIndex] = updatedUser
-
-        _roomEvent.update {
-            it.copy(
-                newData
-            )
+        users = newData
+        val data = mapOf("users" to newData,"shouldStartChat" to isBothUsersAccepts())
+        currentJob?.cancel()
+        currentJob = coroutineScope.launch {
+            if (isBothUsersAccepts()) {
+                firestoreRoomEvent.onAllUserJoinChat(roomId)
+            }
+            currentRoomDocumentReference.update(data).await()
         }
-
 
     }
 

@@ -30,5 +30,5 @@ enum class MessageType{
     fun isMedia() = this == IMAGE || this == AUDIO
 }
 enum class MessageStatus{
-    SENT,DELIVERED,SEEN;
+    LOADING,SENT,DELIVERED,SEEN;
 }
