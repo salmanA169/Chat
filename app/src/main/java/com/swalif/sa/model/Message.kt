@@ -5,10 +5,10 @@ import java.time.LocalDateTime
 
 data class Message(
     val messageId:Int,
-    val chatId:Int,
+    val chatId:String,
     val senderUid:String,
     val message:String,
-    val dateTime:LocalDateTime,
+    val dateTime:Long,
     val mediaUri:String? = null,
     val statusMessage:MessageStatus,
     val messageType : MessageType

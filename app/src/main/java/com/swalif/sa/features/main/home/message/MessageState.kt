@@ -9,5 +9,6 @@ import com.swalif.sa.model.Message
 data class MessageState(
     val messages : List<Message> = emptyList(),
     val text:String = "",
-    val chatInfo:ChatInfo = ChatInfo()
+    val chatInfo:ChatInfo = ChatInfo(),
+    val myUid:String = " "
 )

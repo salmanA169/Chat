@@ -3,7 +3,8 @@ package com.swalif.sa.datasource.remote.firestore_dto
 data class ChatDto(
     val users:List<UsersChatDto> = listOf(),
     val maxUsers :Int = 0,
-    val isAcceptRequestFriends :Boolean = false
+    val isAcceptRequestFriends :Boolean = false,
+    val chatId:String = "",
 )
 
 data class UsersChatDto(

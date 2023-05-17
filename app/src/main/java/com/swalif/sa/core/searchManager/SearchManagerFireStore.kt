@@ -34,8 +34,10 @@ class SearchManagerFireStore @Inject constructor(
                 UsersChatDto(it.user.uidUser,false,false,it.user.photoUri,it.user.userName)
             }
             val maxUsers = currentRoom!!.maxUsers
-            val chatsWithUsers = ChatDto(users,maxUsers,false)
+            val usersUids = currentRoom!!.getUIDUsersInRoom()
+            val chatsWithUsers = ChatDto(users,maxUsers,false,roomId)
             firestore.collection(Constants.CHATS_COLLECTIONS).add(chatsWithUsers).await()
+
             deleteRoom(roomId)
         }
     }
@@ -97,7 +99,7 @@ class SearchManagerFireStore @Inject constructor(
                 RoomEvent(
                     roomEvent.users.toUsers(),
                     roomEvent.roomStatus,
-                    roomEvent.shouldStartChat
+                    roomEvent.shouldStartChat,roomEvent.roomId
                 )
             )
         }
@@ -122,6 +124,7 @@ class SearchManagerFireStore @Inject constructor(
     }
 
     override fun close() {
+        logcat { "close called" }
         unregisterSearchEvent()
     }
 }

@@ -109,7 +109,7 @@ sealed class Screens(val route: String) {
         override val args: List<NamedNavArgument>
             get() = listOf(
                 navArgument(CHANNEL_ID_ARG) {
-                    type = NavType.IntType
+                    type = NavType.StringType
                 },
                 navArgument(MY_UID_ARG) {
                     type = NavType.StringType

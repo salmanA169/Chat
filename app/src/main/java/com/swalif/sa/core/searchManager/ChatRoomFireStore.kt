@@ -112,6 +112,6 @@ class ChatRoomFireStore(
     }
 
     override fun getUIDUsersInRoom(): List<String> {
-        TODO("Not yet implemented")
+        return users.map { it.user.uidUser }
     }
 }

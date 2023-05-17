@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 
 data class MessageDto(
     val messageId:Int =0,
-    val chatId:Int = 0,
+    val chatId:String = "",
     val senderUid:String ="",
     val message:String ="",
     val dateTime: Timestamp = Timestamp.now(),

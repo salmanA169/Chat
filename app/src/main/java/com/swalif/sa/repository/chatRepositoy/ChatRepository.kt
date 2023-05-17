@@ -8,8 +8,8 @@ interface ChatRepository {
     fun getChats(): Flow<List<Chat>>
     suspend fun insertChat(chat: Chat)
     suspend fun deleteChatById(chat:Chat)
-    suspend fun readMessages(chatId:Int)
-    suspend fun updateChat(chatID: Int, text: String, messageType: MessageType)
+    suspend fun readMessages(chatId:String)
+    suspend fun updateChat(chatID: String, text: String, messageType: MessageType)
 
-    suspend fun getChatById(chatId: Int):Chat
+    suspend fun getChatById(chatId: String):Chat
 }

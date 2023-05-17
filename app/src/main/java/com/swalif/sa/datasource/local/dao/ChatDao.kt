@@ -10,7 +10,7 @@ interface ChatDao {
     fun getChats():Flow<List<ChatEntity>>
 
     @Query("SELECT * FROM chatentity WHERE chatId = :chatId")
-    suspend fun getChatById(chatId:Int):ChatEntity?
+    suspend fun getChatById(chatId:String):ChatEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertChat(chatEntity: ChatEntity)

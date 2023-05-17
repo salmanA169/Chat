@@ -16,7 +16,6 @@ import com.swalif.sa.datasource.local.entity.UserEntity
     entities = [UserEntity::class, ChatEntity::class, MessageEntity::class],
 
     )
-@TypeConverters(value = [Convertor::class])
 abstract class SwalifDatabase : RoomDatabase() {
     abstract val userDao: UserDao
     abstract val chatDao: ChatDao

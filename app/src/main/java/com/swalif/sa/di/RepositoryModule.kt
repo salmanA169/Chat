@@ -6,6 +6,8 @@ import com.swalif.sa.coroutine.DispatcherProvider
 import com.swalif.sa.coroutine.DispatcherProviderImpl
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import com.swalif.sa.repository.chatRepositoy.ChatRepositoryImpl
+import com.swalif.sa.repository.firestoreChatMessagesRepo.FirestoreChatMessageRepository
+import com.swalif.sa.repository.firestoreChatMessagesRepo.FirestoreChatWithMessageRepositoryImpl
 import com.swalif.sa.repository.messageRepository.MessageRepository
 import com.swalif.sa.repository.messageRepository.MessageRepositoryImpl
 import com.swalif.sa.repository.searchRepository.SearchRepository
@@ -31,6 +33,12 @@ abstract class RepositoryModule {
     abstract fun provideUserRepo(
         userRepository: UserRepositoryImpl
     ): UserRepository
+
+    @ActivityRetainedScoped
+    @Binds
+    abstract fun provideFirestoreRepo(
+        firestoreChatWithMessageRepositoryImpl: FirestoreChatWithMessageRepositoryImpl
+    ):FirestoreChatMessageRepository
 
     @ActivityRetainedScoped
     @Binds

@@ -40,6 +40,7 @@ import com.swalif.sa.Screens
 import com.swalif.sa.model.Chat
 import com.swalif.sa.ui.theme.ChatAppTheme
 import com.swalif.sa.utils.formatShortTime
+import com.swalif.sa.utils.toTimeStamp
 import logcat.logcat
 import me.saket.swipe.SwipeAction
 import me.saket.swipe.SwipeableActionsBox
@@ -68,7 +69,7 @@ fun HomeScreen(
     val homeState by viewModel.homeState.collectAsState()
 
     val rememberOnDelete = remember{
-        {chatId:Int->
+        {chatId:String->
             viewModel.deleteChatById(chatId)
         }
     }
@@ -83,13 +84,13 @@ fun HomeScreen(
             Button(onClick = {
                 viewModel.addTestChat(
                     Chat(
-                        0,
+                        "",
                         "salman",
                         "saleh",
                         "salman alamoudi",
                         "كيف حالك",
                         "https://i.pinimg.com/originals/b4/c1/fb/b4c1fbf0e913bf9365c8fa0dcc48c0c0.jpg",
-                        LocalDateTime.now(),
+                        0,
                         2,
                         ""
                     )
@@ -113,13 +114,13 @@ fun Preview1() {
     ChatAppTheme {
         ChatItem(
             chat = Chat(
-                1,
+                "",
                 "",
                 "",
                 "salman alamoudi",
                 "Hi",
                 "https://i.pinimg.com/originals/b4/c1/fb/b4c1fbf0e913bf9365c8fa0dcc48c0c0.jpg",
-                LocalDateTime.now(),
+                0,
                 10,
                 ""
             ), rememberNavController()
@@ -132,7 +133,7 @@ fun Preview1() {
 fun ChatItem(
     chat: Chat,
     navController: NavController,
-    onDelete: (ChatId: Int) -> Unit = {}
+    onDelete: (ChatId: String) -> Unit = {}
 ) {
     val deleteAction = SwipeAction(
         onSwipe = {
@@ -191,7 +192,7 @@ fun ChatItem(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     Text(
-                        text = chat.lastMessageDate.formatShortTime(),
+                        text = chat.lastMessageDate.toTimeStamp(),
                         style = MaterialTheme.typography.labelSmall,
                     )
                     if (chat.messagesUnread > 0) {

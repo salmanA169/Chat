@@ -66,12 +66,17 @@ class MessageRepositoryImpl @Inject constructor(
         return messageDao.getMessages().toMessageList()
     }
 
-    override fun getMessages(chatId: Int): Flow<ChatWithMessages> {
+    override fun getMessages(chatId: String): Flow<ChatWithMessages> {
         return messageDao.getMessage(chatId)
     }
 
     override suspend fun updateMessage(message: Message) {
         messageDao.updateMessage(message.toMessageEntity())
+    }
+
+    override suspend fun deleteMessage(message: Message) {
+        // TODO: delete file storage
+        messageDao.deleteMessage(message.toMessageEntity())
     }
 
     override suspend fun deleteMessages(message: List<Message>) {

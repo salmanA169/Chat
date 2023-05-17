@@ -1,5 +1,6 @@
 package com.swalif.sa.repository.chatRepositoy
 
+import com.google.firebase.Timestamp
 import com.swalif.sa.datasource.local.dao.ChatDao
 import com.swalif.sa.mapper.toChat
 import com.swalif.sa.mapper.toChatEntity
@@ -20,7 +21,7 @@ class ChatRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getChatById(chatId: Int): Chat {
+    override suspend fun getChatById(chatId: String): Chat {
         return chatDao.getChatById(chatId)!!.toChat()
     }
 
@@ -34,12 +35,12 @@ class ChatRepositoryImpl @Inject constructor(
         chatDao.deleteChatById(chat.toChatEntity())
     }
 
-    override suspend fun readMessages(chatId: Int) {
+    override suspend fun readMessages(chatId: String) {
         val getChat = chatDao.getChatById(chatId)
         chatDao.updateChat(getChat!!.copy(messagesUnread = 0))
     }
 
-    override suspend fun updateChat(chatID: Int, text: String, messageType: MessageType) {
+    override suspend fun updateChat(chatID: String, text: String, messageType: MessageType) {
         val getChat = chatDao.getChatById(chatID)
         val message: String
         when (messageType) {
@@ -55,7 +56,7 @@ class ChatRepositoryImpl @Inject constructor(
             getChat!!.copy(
                 lastMessage = message,
                 messagesUnread = getChat.messagesUnread.plus(1),
-                lastMessageDate = LocalDateTime.now()
+                lastMessageDate = Timestamp.now().toDate().time
             )
         )
     }

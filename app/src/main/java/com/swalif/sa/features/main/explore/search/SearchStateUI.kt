@@ -7,5 +7,6 @@ import com.swalif.sa.model.UserInfo
 @Immutable
 data class SearchStateUI(
     val roomEvent :RoomEvent = RoomEvent(),
-    val myCurrentUser:UserInfo? = null
+    val myCurrentUser:UserInfo? = null,
+
 )

@@ -5,13 +5,16 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.provider.MediaStore
 import androidx.lifecycle.*
+import com.google.firebase.Timestamp
 import com.swalif.sa.CHANNEL_ID_ARG
 import com.swalif.sa.MY_UID_ARG
 import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.coroutine.DispatcherProvider
+import com.swalif.sa.datasource.remote.firestore_dto.MessageDto
 import com.swalif.sa.mapper.toMessageList
 import com.swalif.sa.model.*
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
+import com.swalif.sa.repository.firestoreChatMessagesRepo.FirestoreChatMessageRepository
 import com.swalif.sa.repository.messageRepository.MessageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,82 +24,63 @@ import kotlinx.coroutines.launch
 import logcat.logcat
 import java.time.LocalDateTime
 import javax.inject.Inject
+import kotlin.random.Random
 
 @HiltViewModel
 class MessageViewModel @Inject constructor(
-    private val messageRepository: MessageRepository,
-    private val chatRepository: ChatRepository,
+    private val firestoreChatMessageRepository: FirestoreChatMessageRepository,
     private val dispatcherProvider: DispatcherProvider,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _state = MutableStateFlow(MessageState())
-    private val channelID = savedStateHandle.get<Int>(CHANNEL_ID_ARG)!!
+    private val channelID = savedStateHandle.get<String>(CHANNEL_ID_ARG)!!
     private val myUid = savedStateHandle.get<String>(MY_UID_ARG)!!
     private val chatInfo = MutableStateFlow(ChatInfo())
 
-    val state = combine(
-        _state,
-        messageRepository.getMessages(channelID),
-        chatInfo
-    ) { state, message, chatInfo ->
-
-        state.copy(
-            message.messages.toMessageList().sortedByDescending {
-                it.dateTime
-            },
-            chatInfo = chatInfo,
-        )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), MessageState())
-
+    val state = _state.asStateFlow()
 
     init {
+        firestoreChatMessageRepository.addChatId(channelID)
         viewModelScope.launch(dispatcherProvider.io) {
-            chatRepository.readMessages(channelID)
-        }
-        // TODO: for test
-        viewModelScope.launch(dispatcherProvider.io) {
-            val getCurrentChat = chatRepository.getChatById(channelID)
-            chatInfo.update {
-                ChatInfo(
-                    getCurrentChat.senderName,
-                    imageUri = getCurrentChat.imageUri,
-                    userStatus = UserStatus.Offline(LocalDateTime.now().minusDays(1))
-                )
+            firestoreChatMessageRepository.getMessage().collect{messages->
+                _state.update {
+                    it.copy(
+                        messages,
+                        myUid = myUid
+                    )
+                }
             }
         }
-
+        viewModelScope.launch(dispatcherProvider.io) {
+            firestoreChatMessageRepository.syncMessages()
+        }
     }
-    private var isMe = true
     fun sendTextMessage(message: String) {
 
-        val i = if (isMe) {
-            "test"
-        } else {
-            "salman"
-        }
-        isMe = !isMe
-        val message1 = Message(
-            0, channelID, i, message, LocalDateTime.now(), null,MessageStatus.SEEN,MessageType.TEXT
+
+        val message1 = MessageDto(
+            // TODO: fix it to generate
+            Random.nextInt(), channelID, myUid, message, Timestamp.now(), null,MessageStatus.SEEN,MessageType.TEXT
         )
         sendMessage(message1)
         removeTexts()
     }
     fun sendImage(imageUri:String){
-        val i = if (isMe) {
-            "test"
-        } else {
-            "salman"
-        }
-        isMe = !isMe
-        val message1 = Message(
-            0, channelID, i, "", LocalDateTime.now(), imageUri,MessageStatus.SEEN,MessageType.IMAGE
-        )
-        sendMessage(message1)
+//        val i = if (isMe) {
+//            "test"
+//        } else {
+//            "salman"
+//        }
+//        isMe = !isMe
+//        val message1 = Message(
+//            0, channelID, i, "", LocalDateTime.now(), imageUri,MessageStatus.SEEN,MessageType.IMAGE
+//        )
+//        sendMessage(message1)
     }
-    private fun sendMessage(message:Message){
+    private fun sendMessage(message:MessageDto){
         viewModelScope.launch(dispatcherProvider.io) {
-            messageRepository.addMessage(message)
-            chatRepository.updateChat(message.chatId, message.message, message.messageType)
+            firestoreChatMessageRepository.sendMessage(message)
+//            chatRepository.updateChat(message.chatId, message.message, message.messageType)
         }
     }
     private fun removeTexts() {

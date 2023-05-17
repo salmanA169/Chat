@@ -1,5 +1,7 @@
 package com.swalif.sa.features.main.explore.search
 
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swalif.sa.core.searchManager.UserState
@@ -21,18 +23,16 @@ class SearchViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val searchRepository: SearchRepository,
     private val dispatcherProvider: DispatcherProvider,
-    // for test
-private val chatDao :ChatDao
 ) : ViewModel() {
 
     private val _searchState = MutableStateFlow<SearchStateUI>(SearchStateUI())
     val searchState = _searchState.asStateFlow()
 
-    fun addTestChat(chatId:Int,username:String,image:String,userUid:String,){
-        viewModelScope.launch(dispatcherProvider.io) {
-            chatDao.insertChat(ChatEntity(chatId,userUid,username,"test","",image, LocalDateTime.now(),0,""))
-        }
-    }
+    private val _navigation = MutableLiveData<String?>(null)
+    val navigation:LiveData<String?> = _navigation
+
+
+
     init {
         addCloseable(searchRepository.getClosable())
         viewModelScope.launch {

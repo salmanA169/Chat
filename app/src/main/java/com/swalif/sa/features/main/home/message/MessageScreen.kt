@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -47,6 +48,7 @@ import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
 import com.swalif.sa.ui.theme.ChatAppTheme
 import com.swalif.sa.utils.formatShortTime
+import com.swalif.sa.utils.toTimeStamp
 
 fun NavGraphBuilder.messageDest(navController: NavController) {
     composable(
@@ -82,7 +84,7 @@ fun MessageScreen(
     val pickMedia =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) {
             if (it != null) {
-                viewModel.sendImage(it.toString())
+//                viewModel.sendImage(it.toString())
             }
         }
     Column(
@@ -112,7 +114,8 @@ fun MessageScreen(
             }) {
                 MessageItem(
                     message = it,
-                    navController
+                    navController,
+                    state.myUid
                 )
                 Spacer(modifier = Modifier.height(4.dp))
             }
@@ -195,10 +198,11 @@ fun getShapeMessageItemSender() = MaterialTheme.shapes.medium.copy(topStart = Co
 @Composable
 fun MessageItem(
     message: Message,
-    navController: NavController
+    navController: NavController,
+    myUid:String
 ) {
     val isMessageFromMe = remember(message.senderUid) {
-        message.isMessageFromMe("test")
+        message.isMessageFromMe(myUid)
     }
     Row(
         modifier = Modifier
@@ -288,7 +292,7 @@ fun ContentMessage(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = message.dateTime.formatShortTime(),
+                text = message.dateTime.toTimeStamp(),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(3.dp)
             )

@@ -10,7 +10,7 @@ interface MessageDao {
 
     @Transaction
     @Query("SELECT * FROM ChatEntity WHERE chatId =:chatId")
-    fun getMessage(chatId:Int):Flow<ChatWithMessages>
+    fun getMessage(chatId:String):Flow<ChatWithMessages>
 
     @Query("SELECT * FROM MessageEntity ")
     fun getMessage():Flow<MessageEntity>

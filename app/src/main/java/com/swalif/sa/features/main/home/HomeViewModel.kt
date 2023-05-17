@@ -53,7 +53,7 @@ class HomeViewModel @Inject constructor(
         }.map {
             it.chatId
         }
-        val ids = mutableSetOf<Int>()
+        val ids = mutableSetOf<String>()
         for (i in messagesChatsIds){
             if (!chatsIDs.contains(i)){
                 ids.add(i)
@@ -66,7 +66,7 @@ class HomeViewModel @Inject constructor(
             messageRepository.deleteMessages(getMessage)
         }
     }
-    fun deleteChatById(chatId: Int) {
+    fun deleteChatById(chatId: String) {
         viewModelScope.launch(dispatchers.io) {
             val getChat = messageRepository.getMessages(chatId).filter {
                 it.chat.chatId == chatId

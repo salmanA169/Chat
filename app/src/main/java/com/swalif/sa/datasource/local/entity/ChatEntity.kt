@@ -6,14 +6,14 @@ import java.time.LocalDateTime
 
 @Entity
 data class ChatEntity(
-    @PrimaryKey(autoGenerate = true)
-    val chatId:Int = 0,
+    @PrimaryKey(autoGenerate = false)
+    val chatId:String = "",
     val uidSenderUser:String,
     val senderName:String,
     val toUserUid:String,
     val lastMessage:String,
     val imageUri:String,
-    val lastMessageDate:LocalDateTime,
+    val lastMessageDate:Long,
     val messagesUnread:Int,
     val lastSenderUid:String
 )
