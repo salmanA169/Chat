@@ -68,8 +68,19 @@ fun HomeScreen(
 ) {
     val homeState by viewModel.homeState.collectAsState()
 
-    val rememberOnDelete = remember{
-        {chatId:String->
+    LaunchedEffect(key1 = homeState, block = {
+        homeState.myUid?.let {
+            navController.navigate(
+                Screens.MessageScreen.navigateToMessageScreen(
+                    it,
+                    "df7682c3-8d79-4427-867f-2c112da7fc79"
+                )
+            )
+        }
+    })
+
+    val rememberOnDelete = remember {
+        { chatId: String ->
             viewModel.deleteChatById(chatId)
         }
     }
@@ -102,7 +113,7 @@ fun HomeScreen(
         items(homeState.chats, key = {
             it.chatId
         }) {
-            ChatItem(chat = it, navController,rememberOnDelete)
+            ChatItem(chat = it, navController, rememberOnDelete)
             Divider()
         }
     }

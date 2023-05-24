@@ -24,7 +24,6 @@ import logcat.logcat
 import javax.inject.Inject
 import kotlin.random.Random
 
-// TODO: save data to room and firestore and data store and manage them later
 @HiltViewModel
 class InformationViewModel @Inject constructor(
     private val userRepository: UserRepository,

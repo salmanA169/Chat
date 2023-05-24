@@ -6,6 +6,7 @@ import android.graphics.Bitmap.CompressFormat
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.graphics.decodeBitmap
 import androidx.core.net.toUri
 import androidx.core.os.BuildCompat
@@ -17,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import logcat.logcat
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -27,6 +29,22 @@ class FilesManager @Inject constructor(
 ) {
     private val contentResolver = context.contentResolver
 
+    private val formatImage: CompressFormat = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        CompressFormat.WEBP_LOSSY
+    } else {
+        CompressFormat.JPEG
+    }
+
+    suspend fun compressImage(uri: Uri):ByteArray{
+        return withContext(Dispatchers.Default){
+            val outputStream = ByteArrayOutputStream()
+            val btm = ImageDecoder.createSource(contentResolver,uri).decodeBitmap{info,source->
+
+            }
+            btm.compress(formatImage,80,outputStream)
+            outputStream.toByteArray()
+        }
+    }
     // bf9c06d3-10b9-47b3-89bd-fb318d186687.jpeg
     suspend fun saveImage(uri: Uri, nameFile: String): Boolean {
         return try {
@@ -36,15 +54,7 @@ class FilesManager @Inject constructor(
                     }
                 context.openFileOutput(nameFile, Context.MODE_PRIVATE)
                     .use {
-                        val formatImage: CompressFormat
                         val quality: Int = 80
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            formatImage = CompressFormat.WEBP_LOSSY
-//                            quality = 0
-                        } else {
-                            formatImage = CompressFormat.JPEG
-//                            quality = 80
-                        }
                         logcat("FilesManager") {
                             formatImage.toString()
                         }

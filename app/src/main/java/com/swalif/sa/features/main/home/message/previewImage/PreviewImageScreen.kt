@@ -26,6 +26,6 @@ fun PreviewScreen(
 ) {
     val state by viewModel.previewState.collectAsState()
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
-        AsyncImage(model = state, contentDescription = "")
+        AsyncImage(model = state, contentDescription = "",modifier = Modifier.fillMaxSize())
     }
 }

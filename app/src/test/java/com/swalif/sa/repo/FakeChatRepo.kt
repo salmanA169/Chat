@@ -11,9 +11,6 @@ class FakeChatRepo:ChatRepository {
         return chats.asStateFlow()
     }
 
-    override suspend fun updateChat(chatID: Int, text: String, messageType: MessageType) {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun insertChat(chat: Chat) {
         chats.emit(chats.value + chat)
@@ -23,7 +20,15 @@ class FakeChatRepo:ChatRepository {
         chats.value -= chat
     }
 
-    override suspend fun readMessages(chatId: Int) {
+    override suspend fun readMessages(chatId: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateChat(chatID: String, text: String, messageType: MessageType) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getChatById(chatId: String): Chat {
         TODO("Not yet implemented")
     }
 }

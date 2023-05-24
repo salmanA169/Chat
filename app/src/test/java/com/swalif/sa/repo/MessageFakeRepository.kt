@@ -12,7 +12,11 @@ class MessageFakeRepository:MessageRepository {
         TODO("Not yet implemented")
     }
 
-    override fun getMessages(chatId: Int): Flow<ChatWithMessages> {
+    override fun getMessages(chatId: String): Flow<ChatWithMessages> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteMessage(message: Message) {
         TODO("Not yet implemented")
     }
 

@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.swalif.Constants
 import com.swalif.sa.core.data_store.dataStore
 import com.swalif.sa.datasource.local.SwalifDatabase
@@ -47,4 +48,9 @@ object DiModule {
     @Provides
     @Singleton
     fun provideFireStore() = Firebase.firestore
+
+
+    @Provides
+    @Singleton
+    fun provideFireStorage() = Firebase.storage
 }

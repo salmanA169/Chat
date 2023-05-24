@@ -28,8 +28,11 @@ android {
 
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+
+            isMinifyEnabled = true
             proguardFiles (getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("debug")
+            versionNameSuffix = "release"
         }
     }
     compileOptions {
@@ -100,5 +103,5 @@ dependencies {
     implementation("com.google.firebase:firebase-auth-ktx")
     implementation("com.google.android.gms:play-services-auth:20.5.0")
     implementation ("com.google.firebase:firebase-firestore-ktx")
-
+    implementation ("com.google.firebase:firebase-storage-ktx")
 }

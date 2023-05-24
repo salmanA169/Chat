@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.map
 
 private const val DATA_STORE_NAME = "settings"
 private const val CURRENT_USER_UID_PREFERENCES_NAME = "current_user_uid"
+
 private val isFirstTimePreferenceKey = stringPreferencesKey(CURRENT_USER_UID_PREFERENCES_NAME)
 
 val Context.dataStore by preferencesDataStore(name = DATA_STORE_NAME)

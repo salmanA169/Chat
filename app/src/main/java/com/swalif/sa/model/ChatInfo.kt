@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.swalif.sa.R
 import com.swalif.sa.utils.formatDateTime
+import com.swalif.sa.utils.toTimeStamp
 import java.time.LocalDateTime
 
 data class ChatInfo(
@@ -11,14 +12,15 @@ data class ChatInfo(
     val userStatus: UserStatus? = null,
     val uidUser: String = "",
     val imageUri: String = "",
-    val userIsLeft:Boolean = false
+    val userIsLeft:Boolean = false,
+    val requestFriendStatus:RequestFriendStatus = RequestFriendStatus.IDLE
 ) {
     @Composable
     fun localizeStatusUser(): String {
         return when (userStatus) {
             is UserStatus.Offline -> stringResource(
                 id = R.string.last_seen,
-                userStatus.lastSeen.formatDateTime()
+                userStatus.lastSeen.toTimeStamp()
             )
             UserStatus.Online -> {
                 stringResource(id = R.string.online)
@@ -29,10 +31,12 @@ data class ChatInfo(
 
     }
 }
-
+enum class RequestFriendStatus{
+    IDLE,SENT,ACCEPTED
+}
 sealed class UserStatus {
     object Online : UserStatus()
-    class Offline(val lastSeen: LocalDateTime) : UserStatus()
+    class Offline(val lastSeen: Long) : UserStatus()
     object TYPING : UserStatus()
 
 }

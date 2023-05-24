@@ -5,5 +5,6 @@ import com.swalif.sa.model.Chat
 
 @Immutable
 data class HomeChatState(
-    val chats:List<Chat> = emptyList()
+    val chats:List<Chat> = emptyList(),
+    val myUid:String? = null
 )

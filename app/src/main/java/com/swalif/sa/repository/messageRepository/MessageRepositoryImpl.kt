@@ -1,14 +1,8 @@
 package com.swalif.sa.repository.messageRepository
 
-import android.app.NotificationManager
 import android.content.Context
-import android.media.AudioAttributes
-import android.media.AudioManager
-import android.media.MediaPlayer
 import androidx.core.net.toUri
-import com.swalif.sa.R
 import com.swalif.sa.core.storage.FilesManager
-import com.swalif.sa.datasource.local.dao.ChatDao
 import com.swalif.sa.datasource.local.dao.MessageDao
 import com.swalif.sa.datasource.local.relation.ChatWithMessages
 import com.swalif.sa.mapper.toMessageEntity
@@ -17,12 +11,7 @@ import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.first
 import java.io.File
-import java.time.LocalDateTime
-import java.time.ZonedDateTime
-import java.util.*
 import javax.inject.Inject
 
 class MessageRepositoryImpl @Inject constructor(
@@ -45,17 +34,18 @@ class MessageRepositoryImpl @Inject constructor(
             MessageType.TEXT -> {
                 messageDao.addMessage(message.toMessageEntity())
             }
+
             MessageType.IMAGE -> {
                 val id = messageDao.addMessage(message.copy(mediaUri = "").toMessageEntity())
-                val uriImage = message.mediaUri!!
-                val nameFile = UUID.randomUUID().toString().plus(".jpeg")
-                val rootDir = File(context.filesDir, nameFile).toUri().toString()
-                if (filesManager.saveImage(uriImage.toUri(), nameFile)) {
+                val uriImage = message.mediaUri!!.toUri()
+                val rootDir = File(context.filesDir, uriImage.lastPathSegment!!).toUri().toString()
+                if (filesManager.saveImage(uriImage, uriImage.lastPathSegment!!)) {
                     messageDao.updateMessage(
                         message.copy(messageId = id.toInt(), mediaUri = rootDir).toMessageEntity()
                     )
                 }
             }
+
             MessageType.AUDIO -> TODO()
         }
 //        mediaPlayer.start()

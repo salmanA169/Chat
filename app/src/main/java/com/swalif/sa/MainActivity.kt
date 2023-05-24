@@ -27,7 +27,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.swalif.sa.component.*
 import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.features.main.explore.exploreDestination
@@ -37,11 +41,19 @@ import com.swalif.sa.features.main.home.message.previewImage.previewNavDest
 import com.swalif.sa.features.main.explore.search.searchScreen
 import com.swalif.sa.features.onboarding.onBoardingNavigation
 import com.swalif.sa.ui.theme.ChatAppTheme
+import com.swalif.sa.utils.toTimeStamp
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import logcat.logcat
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.time.OffsetDateTime
+import java.time.ZonedDateTime
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

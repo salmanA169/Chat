@@ -19,3 +19,15 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+-keep class com.swalif.sa.datasource.remote.firestore_dto.MessageDto
+-keep class com.swalif.sa.model.Message
+-keep class com.swalif.sa.datasource.remote.firestore_dto.ChatDto
+-keep class com.swalif.sa.model.ChatInfo
+-keep class com.swalif.sa.model.UserInfo
+-keep class com.swalif.sa.datasource.remote.firestore_dto.UserDto
+-keep class com.swalif.sa.datasource.local.entity.UserEntity
+-keep class com.swalif.sa.datasource.remote.firestore_dto.RoomResultDto
+-keep class com.swalif.sa.datasource.remote.firestore_dto.UsersDto
+-keep class androidx.datastore.*.** {*;}
+

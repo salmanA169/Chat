@@ -1,5 +1,6 @@
 package com.swalif.sa.features.main.home.message
 
+import android.content.res.Configuration
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,17 +23,23 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.Center
+import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.FirstBaseline
+import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -40,12 +47,14 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import com.google.firebase.Timestamp
 import com.swalif.sa.R
 import com.swalif.sa.Screens
 import com.swalif.sa.model.ChatInfo
 import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
+import com.swalif.sa.model.RequestFriendStatus
 import com.swalif.sa.ui.theme.ChatAppTheme
 import com.swalif.sa.utils.formatShortTime
 import com.swalif.sa.utils.toTimeStamp
@@ -58,13 +67,27 @@ fun NavGraphBuilder.messageDest(navController: NavController) {
     }
 }
 
-@Preview(showBackground = true, locale = "ar")
+@Preview(
+    showBackground = true, locale = "ar",
+    device = "spec:width=1080px,height=2340px,dpi=440",
+    wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_UNDEFINED
+)
 @Composable
 fun Preview1() {
     ChatAppTheme() {
-
-//        MessageScreen(navController = rememberNavController())
-
+        MessageItem(
+            message = Message(
+                0,
+                "",
+                "",
+                "salman",
+                Timestamp.now().toDate().time,
+                null,
+                MessageStatus.DELIVERED,
+                MessageType.TEXT
+            ), rememberNavController(), ""
+        )
     }
 }
 
@@ -75,18 +98,12 @@ fun MessageScreen(
     viewModel: MessageViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val animateSendColor by animateColorAsState(targetValue = if (state.text.isEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary)
     val lazyColumnState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
     LaunchedEffect(key1 = state.messages.size) {
         lazyColumnState.animateScrollToItem(0)
     }
-    val pickMedia =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) {
-            if (it != null) {
-//                viewModel.sendImage(it.toString())
-            }
-        }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -95,11 +112,15 @@ fun MessageScreen(
                     focusManager.clearFocus()
                 }
             }
+            .navigationBarsPadding()
     ) {
         ChatInfoSection(
             navController = navController,
             chatInfo = state.chatInfo,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            onRequestFriendClick = {
+                viewModel.updateFriendRequest()
+            }
         )
         LazyColumn(
             state = lazyColumnState,
@@ -120,72 +141,123 @@ fun MessageScreen(
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
-        TextField(
-            textStyle = LocalTextStyle.current.copy(textDirection = TextDirection.Content),
-            leadingIcon = {
-                IconButton(onClick = {
-                    pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                }) {
-                    Icon(imageVector = Icons.Default.Email, "")
-                }
-            },
-            trailingIcon = {
-                IconButton(onClick = {
-                    viewModel.sendTextMessage(
-                        state.text
-                    )
-                }, enabled = state.text.isNotEmpty()) {
-                    Icon(
-                        imageVector = Icons.Default.Send,
-                        contentDescription = "",
-                        tint = animateSendColor
-                    )
-                }
-            },
-            modifier = Modifier.fillMaxWidth(),
-            value = state.text,
-            onValueChange = {
-                viewModel.updateMessage(it)
-            })
+        EditTextField(
+            onSendMessage = viewModel::sendTextMessage,
+            onSendImage = viewModel::sendImage,
+            viewModel::updateTypingUser
+        )
     }
+}
 
+// TODO: move list here
+@Composable
+fun MessagesList() {
+
+}
+
+@Composable
+fun EditTextField(
+    onSendMessage: (String) -> Unit,
+    onSendImage: (String) -> Unit,
+    onValueChange: () -> Unit
+) {
+    var message by remember {
+        mutableStateOf("")
+    }
+    val animateSendColor by animateColorAsState(targetValue = if (message.isEmpty()) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.primary)
+    val pickMedia =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.PickVisualMedia()) {
+            if (it != null) {
+                onSendImage(it.toString())
+            }
+        }
+    TextField(
+        textStyle = LocalTextStyle.current.copy(textDirection = TextDirection.Content),
+        leadingIcon = {
+            IconButton(onClick = {
+                pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }) {
+                Icon(imageVector = Icons.Default.Email, "")
+            }
+        },
+        trailingIcon = {
+            IconButton(onClick = {
+                onSendMessage(message)
+                message = ""
+            }, enabled = message.isNotEmpty()) {
+                Icon(
+                    imageVector = Icons.Default.Send,
+                    contentDescription = "",
+                    tint = animateSendColor
+                )
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .imePadding(),
+        value = message,
+        onValueChange = {
+            message = it
+            onValueChange()
+        })
 }
 
 @Composable
 fun ChatInfoSection(
     modifier: Modifier = Modifier,
     navController: NavController,
-    chatInfo: ChatInfo
+    chatInfo: ChatInfo,
+    onRequestFriendClick :()->Unit
 ) {
-    Row(
+    Box(
         modifier = modifier
-            .height(64.dp)
-            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Start
+            .wrapContentHeight()
+            .background(MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp))
+            .statusBarsPadding()
+            .padding(bottom = 6.dp),
+         contentAlignment = CenterStart
     ) {
-        IconButton(onClick = { navController.popBackStack() }) {
-            Icon(rememberVectorPainter(image = Icons.Default.ArrowBack), "")
+        Row(modifier = Modifier.wrapContentSize()){
+            IconButton(onClick = { navController.popBackStack() }) {
+                Icon(rememberVectorPainter(image = Icons.Default.ArrowBack), "")
+            }
+
+            AsyncImage(
+                model = chatInfo.imageUri,
+                contentDescription = "",
+                modifier = Modifier
+                    .size(45.dp)
+                    .clip(CircleShape)
+                    .clickable {
+                        navController.navigate(Screens.PreviewScreen.navigateToPreview(chatInfo.imageUri))
+                    },
+                contentScale = ContentScale.Crop
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.wrapContentSize(), verticalArrangement = Arrangement.Center) {
+                Text(text = chatInfo.userName, style = MaterialTheme.typography.titleMedium)
+                Text(text = chatInfo.localizeStatusUser(), style = MaterialTheme.typography.labelSmall)
+            }
+        }
+        if (chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED){
+            IconButton(modifier = Modifier.align(CenterEnd),onClick = {
+                if (chatInfo.requestFriendStatus == RequestFriendStatus.IDLE){
+                    onRequestFriendClick()
+                }
+            }) {
+                Icon(modifier = Modifier,
+                    painter = painterResource(
+                        when (chatInfo.requestFriendStatus){
+                            RequestFriendStatus.IDLE -> R.drawable.request_friend_icon
+                            RequestFriendStatus.SENT -> R.drawable.request_friend_pending_icon
+                            RequestFriendStatus.ACCEPTED -> R.drawable.check_icon
+                        }
+                    ),contentDescription = "Request Friend"
+                )
+            }
         }
 
-        AsyncImage(
-            model = chatInfo.imageUri,
-            contentDescription = "",
-            modifier = Modifier
-                .size(45.dp)
-                .clip(CircleShape)
-                .clickable {
-                    navController.navigate(Screens.PreviewScreen.navigateToPreview(chatInfo.imageUri))
-                },
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column(modifier = Modifier.fillMaxSize(), verticalArrangement = Arrangement.Center) {
-            Text(text = chatInfo.userName, style = MaterialTheme.typography.titleMedium)
-            Text(text = chatInfo.localizeStatusUser(), style = MaterialTheme.typography.labelSmall)
-        }
     }
-
 }
 
 @Composable
@@ -199,11 +271,12 @@ fun getShapeMessageItemSender() = MaterialTheme.shapes.medium.copy(topStart = Co
 fun MessageItem(
     message: Message,
     navController: NavController,
-    myUid:String
+    myUid: String
 ) {
     val isMessageFromMe = remember(message.senderUid) {
         message.isMessageFromMe(myUid)
     }
+
     Row(
         modifier = Modifier
             .fillMaxWidth(),
@@ -248,7 +321,7 @@ fun ContentMessage(
                 modifier
                     .widthIn(max = 290.dp)
                     .fillMaxWidth()
-                    .padding(vertical = 2.dp, horizontal = 6.dp),
+                    .padding(start = 6.dp, end = 6.dp, top = 3.dp),
                 style = LocalTextStyle.current.copy(textDirection = TextDirection.Content)
             )
 
@@ -267,7 +340,6 @@ fun ContentMessage(
                             contentDescription = "",
                             modifier = Modifier
                                 .size(150.dp)
-                                .padding(2.dp)
                                 .clickable {
                                     navController.navigate(
                                         Screens.PreviewScreen.navigateToPreview(
@@ -275,7 +347,7 @@ fun ContentMessage(
                                         )
                                     )
                                 },
-                            contentScale = ContentScale.Crop
+                            contentScale = ContentScale.FillBounds
                         )
                     }
                 }
@@ -294,7 +366,7 @@ fun ContentMessage(
             Text(
                 text = message.dateTime.toTimeStamp(),
                 style = MaterialTheme.typography.labelSmall,
-                modifier = Modifier.padding(3.dp)
+                modifier = Modifier.padding(horizontal = 3.dp)
             )
             if (isMessageFromMe) {
                 Crossfade(targetState = message.statusMessage) {
@@ -304,7 +376,7 @@ fun ContentMessage(
                                 painter = painterResource(id = R.drawable.check_icon),
                                 contentDescription = "",
                                 modifier = Modifier
-                                    .size(24.dp)
+                                    .size(20.dp)
                             )
                         }
 
@@ -314,10 +386,19 @@ fun ContentMessage(
                                 contentDescription = "",
                                 tint = animate.value,
                                 modifier = Modifier
-                                    .size(24.dp)
+                                    .size(20.dp)
                             )
                         }
 
+                        MessageStatus.LOADING -> {
+                            Icon(
+                                painter = painterResource(id = R.drawable.loading_message_icon),
+                                contentDescription = "",
+                                tint = animate.value,
+                                modifier = Modifier
+                                    .size(20.dp)
+                            )
+                        }
                         else -> {}
                     }
                 }
