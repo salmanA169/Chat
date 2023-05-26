@@ -12,6 +12,8 @@ import com.swalif.sa.datasource.remote.firestore_dto.MessageDto
 import com.swalif.sa.datasource.remote.firestore_dto.UserStatusDto
 import com.swalif.sa.model.*
 import com.swalif.sa.repository.firestoreChatMessagesRepo.FirestoreChatMessageRepository
+import com.swalif.sa.repository.firestoreChatMessagesRepo.FirestoreChatWithMessageRepositoryImpl
+import com.swalif.sa.repository.firestoreChatMessagesRepo.MessageEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -29,16 +31,40 @@ class MessageViewModel @Inject constructor(
     private val firestoreChatMessageRepository: FirestoreChatMessageRepository,
     private val dispatcherProvider: DispatcherProvider,
     savedStateHandle: SavedStateHandle
-) : ViewModel() {
+) : ViewModel(),MessageEvent {
     private val _state = MutableStateFlow(MessageState())
     private val channelID = savedStateHandle.get<String>(CHANNEL_ID_ARG)!!
     private val myUid = savedStateHandle.get<String>(MY_UID_ARG)!!
+    private val isSavedLocally = savedStateHandle.get<String>(MY_UID_ARG)!!
     val state = _state.asStateFlow()
 
     private var currentJob: Job? = null
     private var isTyping: Boolean = false
 
+    private val _messageEventDataChange = MutableLiveData<Unit?>()
+    val messageEventDataChange :LiveData<Unit?> = _messageEventDataChange
+
+    private val _friendEvent = MutableStateFlow<Unit?>(null)
+    val friendEvent = _friendEvent.asStateFlow()
+    private var messageSize = 0
+    override fun onDataChanged() {
+        if (messageSize != _state.value.messages.size){
+            _messageEventDataChange.postValue(Unit)
+            messageSize = _state.value.messages.size
+        }
+    }
+
+    override fun onFriendAccepted() {
+        _friendEvent.value = Unit
+    }
+
+    fun restMessageEvent(){
+        _messageEventDataChange.value = null
+    }
     init {
+        if (firestoreChatMessageRepository is FirestoreChatWithMessageRepositoryImpl){
+            firestoreChatMessageRepository.onMessageEventListener = this
+        }
        addCloseable(firestoreChatMessageRepository)
         firestoreChatMessageRepository.addChatId(channelID)
         viewModelScope.launch(dispatcherProvider.io) {

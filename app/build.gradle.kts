@@ -104,4 +104,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:20.5.0")
     implementation ("com.google.firebase:firebase-firestore-ktx")
     implementation ("com.google.firebase:firebase-storage-ktx")
+    implementation("androidx.compose.runtime:runtime-livedata:1.4.3")
 }

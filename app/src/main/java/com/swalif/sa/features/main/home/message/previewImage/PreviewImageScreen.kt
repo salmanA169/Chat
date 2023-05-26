@@ -1,5 +1,6 @@
 package com.swalif.sa.features.main.home.message.previewImage
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -16,13 +17,14 @@ import com.swalif.sa.Screens
 
 fun NavGraphBuilder.previewNavDest(navController: NavController){
     composable(Screens.PreviewScreen.formattedPreviewRoute,Screens.PreviewScreen.args){
-        PreviewScreen()
+        PreviewScreen(navController = navController)
     }
 }
 
 @Composable
 fun PreviewScreen(
-    viewModel: PreviewViewModel = hiltViewModel()
+    viewModel: PreviewViewModel = hiltViewModel(),
+    navController: NavController
 ) {
     val state by viewModel.previewState.collectAsState()
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){

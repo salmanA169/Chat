@@ -1,7 +1,6 @@
 package com.swalif.sa.repository.firestoreChatMessagesRepo
 
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
 import com.google.firebase.firestore.CollectionReference
 import com.google.firebase.firestore.DocumentChange
@@ -10,7 +9,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.dataObjects
 import com.google.firebase.firestore.ktx.snapshots
 import com.google.firebase.firestore.ktx.toObject
-import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.storage.FirebaseStorage
 import com.swalif.Constants
 import com.swalif.sa.core.storage.FilesManager
@@ -22,16 +20,18 @@ import com.swalif.sa.datasource.remote.firestore_dto.UserStatusDto
 import com.swalif.sa.datasource.remote.firestore_dto.formatRequestFriend
 import com.swalif.sa.datasource.remote.firestore_dto.localizeToUserStatus
 import com.swalif.sa.mapper.toMessageModel
+import com.swalif.sa.model.Chat
 import com.swalif.sa.model.ChatInfo
 import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
+import com.swalif.sa.model.SenderInfo
+import com.swalif.sa.model.UserInfo
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import com.swalif.sa.repository.messageRepository.MessageRepository
 import com.swalif.sa.repository.userRepository.UserRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -70,6 +70,10 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     val mm = MutableStateFlow<List<Message>>(emptyList())
     private var currentChatDto: ChatDto? = null
     private var myUid: String? = null
+    var onMessageEventListener: MessageEvent? = null
+        set(value) {
+            field = value
+        }
 
 
     override suspend fun updateUserStatus(userStatus: UserStatusDto) {
@@ -96,7 +100,9 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 .firstOrNull()!!.reference.apply { currentChatDocument = this }
                 .collection(Constants.MESSAGES_COLLECTIONS)
         currentMessagesCollection = firestore
+        // TODO: fix it when app in background still observe
         firestore.snapshots().collect {
+
 //            val messages = it.toObjects<MessageDto>()
 //            if (isFirstTime) {
 //                val messagesDao = getMessage().first().toMutableList()
@@ -112,7 +118,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 val message = it.toObject(MessageDto::class.java)
                 message?.statusMessage == MessageStatus.SENT && message.senderUid != myUid
             }.map {
-                val message  = it.toObject(MessageDto::class.java)
+                val message = it.toObject(MessageDto::class.java)
                 logcat {
                     "map message $message "
                 }
@@ -139,9 +145,6 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                         mm.update {
                             list
                         }
-                        logcat("FirestoreChatWithMessageRepository") {
-                            " added message called with $message"
-                        }
                     }
 
                     DocumentChange.Type.MODIFIED -> {
@@ -164,14 +167,16 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                     }
                 }
             }
+
+            onMessageEventListener?.let {
+                it.onDataChanged()
+            }
         }
 
     }
 
     private suspend fun readMessages(documentReference: DocumentReference) {
-        logcat {
-            "called read message document ${documentReference.id}"
-        }
+
         documentReference.update("statusMessage", MessageStatus.SEEN).await()
     }
 
@@ -186,8 +191,6 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 mm.update {
                     it + message.toMessageModel()
                 }
-                // TODO: test for now
-                delay(5000)
                 currentMessagesCollection!!.add(message.copy(statusMessage = MessageStatus.SENT))
                 if (isSavedLocally) {
                     messageRepository.addMessage(message.toMessageModel())
@@ -199,7 +202,8 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                     it + message.toMessageModel().copy(mediaUri = "")
                 }
                 val image = saveToFireStorage(myUid!!, message.mediaUri!!.toUri())
-                val messageUpdated = message.copy(mediaUri = image, statusMessage = MessageStatus.SENT)
+                val messageUpdated =
+                    message.copy(mediaUri = image, statusMessage = MessageStatus.SENT)
                 currentMessagesCollection!!.add(messageUpdated)
                 if (isSavedLocally && image != null) {
                     messageRepository.addMessage(message.toMessageModel())
@@ -228,7 +232,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
 
     }
 
-    override suspend fun addChatLocally() {
+    override suspend fun addChatLocally(chat: Chat) {
         TODO("Not yet implemented")
     }
 
@@ -244,15 +248,18 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 .snapshots().map {
 
                     val chat = it.first()
-                    val usersChat = chat.toObject(ChatDto::class.java).apply {
-                        currentChatDto = this
-                    }
-                    usersChat.users.forEach {
-                        logcat("FireStoreMessage:Map") {
-                            "${it.username} == ${it.requestFriend}"
+                    val usersChat = chat.toObject(ChatDto::class.java)
+                    currentChatDto = usersChat
+                    val findReceiver = usersChat.users.find { it.userUid != getMyUser.uidUser }!!
+                    if (!isSavedLocally) {
+                        if (usersChat.acceptRequestFriends) {
+                            onMessageEventListener?.onFriendAccepted()
+                            isSavedLocally = true
+                            saveUserLocally(usersChat.chatId,
+                                SenderInfo(findReceiver.userUid,findReceiver.image,findReceiver.username),getMyUser
+                            )
                         }
                     }
-                    val findReceiver = usersChat.users.find { it.userUid != getMyUser.uidUser }!!
                     findReceiver
                 }
         val receiverUid = getReceiver.first().userUid
@@ -275,14 +282,24 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
         }
     }
 
+    private suspend fun saveUserLocally(chatId: String, senderInfo: SenderInfo,myCurrentUser:UserInfo) {
+
+    }
+
+    suspend fun syncMessageLocally(){
+
+    }
     override suspend fun updateUserFriendRequest() {
         val getCurrentUser = currentChatDto!!.users.find { it.userUid == myUid }!!
         val updatedCurrentUser = getCurrentUser.copy(requestFriend = true)
         val newList = currentChatDto!!.users.toMutableList()
         val index = newList.indexOfFirst { it.userUid == myUid }
         newList[index] = updatedCurrentUser
-        val newData = currentChatDto!!.copy(users = newList)
+        val isAcceptedAsFriend = newList.all { it.requestFriend }
+        val newData =
+            currentChatDto!!.copy(users = newList, acceptRequestFriends = isAcceptedAsFriend)
         currentChatDocument!!.set(newData).await()
+
 
     }
 

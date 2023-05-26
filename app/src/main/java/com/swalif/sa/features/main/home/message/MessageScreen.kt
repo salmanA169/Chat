@@ -1,6 +1,7 @@
 package com.swalif.sa.features.main.home.message
 
 import android.content.res.Configuration
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -22,6 +23,9 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterEnd
@@ -35,8 +39,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.FirstBaseline
 import androidx.compose.ui.layout.LastBaseline
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
@@ -58,6 +64,7 @@ import com.swalif.sa.model.RequestFriendStatus
 import com.swalif.sa.ui.theme.ChatAppTheme
 import com.swalif.sa.utils.formatShortTime
 import com.swalif.sa.utils.toTimeStamp
+import logcat.logcat
 
 fun NavGraphBuilder.messageDest(navController: NavController) {
     composable(
@@ -100,8 +107,21 @@ fun MessageScreen(
     val state by viewModel.state.collectAsState()
     val lazyColumnState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
-    LaunchedEffect(key1 = state.messages.size) {
-        lazyColumnState.animateScrollToItem(0)
+    val messageEvent by viewModel.messageEventDataChange.observeAsState()
+    val friendEvent by viewModel.friendEvent.collectAsState()
+    val context = LocalContext.current
+    val receiverUser = state.chatInfo.userName
+    val messageToast = stringResource(id = R.string.acceptedFriend, receiverUser)
+    LaunchedEffect(key1 = friendEvent) {
+        friendEvent?.let {
+            Toast.makeText(context, messageToast, Toast.LENGTH_SHORT).show()
+        }
+    }
+    LaunchedEffect(key1 = messageEvent) {
+        messageEvent?.let {
+            lazyColumnState.animateScrollToItem(0)
+            viewModel.restMessageEvent()
+        }
     }
 
     Column(
@@ -141,6 +161,7 @@ fun MessageScreen(
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
+
         EditTextField(
             onSendMessage = viewModel::sendTextMessage,
             onSendImage = viewModel::sendImage,
@@ -207,7 +228,7 @@ fun ChatInfoSection(
     modifier: Modifier = Modifier,
     navController: NavController,
     chatInfo: ChatInfo,
-    onRequestFriendClick :()->Unit
+    onRequestFriendClick: () -> Unit
 ) {
     Box(
         modifier = modifier
@@ -215,9 +236,9 @@ fun ChatInfoSection(
             .background(MaterialTheme.colorScheme.surfaceColorAtElevation(2.dp))
             .statusBarsPadding()
             .padding(bottom = 6.dp),
-         contentAlignment = CenterStart
+        contentAlignment = CenterStart
     ) {
-        Row(modifier = Modifier.wrapContentSize()){
+        Row(modifier = Modifier.wrapContentSize()) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(rememberVectorPainter(image = Icons.Default.ArrowBack), "")
             }
@@ -234,25 +255,32 @@ fun ChatInfoSection(
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Column(modifier = Modifier.wrapContentSize(), verticalArrangement = Arrangement.Center) {
+            Column(
+                modifier = Modifier.wrapContentSize(),
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(text = chatInfo.userName, style = MaterialTheme.typography.titleMedium)
-                Text(text = chatInfo.localizeStatusUser(), style = MaterialTheme.typography.labelSmall)
+                Text(
+                    text = chatInfo.localizeStatusUser(),
+                    style = MaterialTheme.typography.labelSmall
+                )
             }
         }
-        if (chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED){
-            IconButton(modifier = Modifier.align(CenterEnd),onClick = {
-                if (chatInfo.requestFriendStatus == RequestFriendStatus.IDLE){
+        if (chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
+            IconButton(modifier = Modifier.align(CenterEnd), onClick = {
+                if (chatInfo.requestFriendStatus == RequestFriendStatus.IDLE) {
                     onRequestFriendClick()
                 }
             }) {
-                Icon(modifier = Modifier,
+                Icon(
+                    modifier = Modifier,
                     painter = painterResource(
-                        when (chatInfo.requestFriendStatus){
+                        when (chatInfo.requestFriendStatus) {
                             RequestFriendStatus.IDLE -> R.drawable.request_friend_icon
                             RequestFriendStatus.SENT -> R.drawable.request_friend_pending_icon
                             RequestFriendStatus.ACCEPTED -> R.drawable.check_icon
                         }
-                    ),contentDescription = "Request Friend"
+                    ), contentDescription = "Request Friend"
                 )
             }
         }
@@ -346,6 +374,7 @@ fun ContentMessage(
                                             message.mediaUri ?: ""
                                         )
                                     )
+
                                 },
                             contentScale = ContentScale.FillBounds
                         )
@@ -399,6 +428,7 @@ fun ContentMessage(
                                     .size(20.dp)
                             )
                         }
+
                         else -> {}
                     }
                 }

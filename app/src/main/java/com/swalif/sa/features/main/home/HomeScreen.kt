@@ -167,7 +167,8 @@ fun ChatItem(
             navController.navigate(
                 Screens.MessageScreen.navigateToMessageScreen(
                     "test",
-                    "${chat.chatId}"
+                    chat.chatId,
+                    true
                 )
             )
         }, shape = RoundedCornerShape(0.dp)) {

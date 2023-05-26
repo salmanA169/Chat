@@ -1,13 +1,11 @@
 package com.swalif.sa.datasource.remote.firestore_dto
 
-import com.swalif.sa.model.ChatInfo
 import com.swalif.sa.model.RequestFriendStatus
-import com.swalif.sa.model.UserStatus
 
 data class ChatDto(
     val users:List<UsersChatDto> = listOf(),
     val maxUsers :Int = 0,
-    val isAcceptRequestFriends :Boolean = false,
+    val acceptRequestFriends :Boolean = false,
     val chatId:String = "",
 )
 

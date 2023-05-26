@@ -19,6 +19,7 @@ const val PREVIEW_IMAGE_ARG = "preview_image_arg"
 const val EMAIL_ARG  = "email_arg"
 const val PHOTO_ARG = "photo_arg"
 const val USERNAME_ARG = "username_arg"
+const val IS_SAVED_LOCALLY = "saved_locally"
 sealed class Screens(val route: String) {
 
     abstract val args: List<NamedNavArgument>
@@ -105,7 +106,7 @@ sealed class Screens(val route: String) {
 
     object MessageScreen : Screens("message_rout") {
 
-        val formattedMessageRoute = "$route/{$CHANNEL_ID_ARG}/{$MY_UID_ARG}"
+        val formattedMessageRoute = "$route/{$CHANNEL_ID_ARG}/{$MY_UID_ARG}/{$IS_SAVED_LOCALLY}"
         override val args: List<NamedNavArgument>
             get() = listOf(
                 navArgument(CHANNEL_ID_ARG) {
@@ -113,13 +114,17 @@ sealed class Screens(val route: String) {
                 },
                 navArgument(MY_UID_ARG) {
                     type = NavType.StringType
+                },
+                navArgument(IS_SAVED_LOCALLY){
+                    type = NavType.BoolType
+                    defaultValue = false
                 }
             )
 
-        fun navigateToMessageScreen(myUid: String, channelId: String): String {
+        fun navigateToMessageScreen(myUid: String, channelId: String, isSavedLocally :Boolean = false): String {
             return buildString {
                 append(route)
-                val args = listOf(channelId, myUid)
+                val args = listOf(channelId, myUid,isSavedLocally)
                 args.forEach {
                     append("/$it")
                 }

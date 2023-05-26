@@ -1,6 +1,7 @@
 package com.swalif.sa.mapper
 
 import com.swalif.sa.datasource.local.entity.ChatEntity
+import com.swalif.sa.datasource.remote.firestore_dto.ChatDto
 import com.swalif.sa.model.Chat
 
 
@@ -27,6 +28,7 @@ fun Chat.toChatEntity() = ChatEntity(
     messagesUnread,
     lastSenderUid
 )
+
 
 fun List<ChatEntity>.toChat() = map {
     it.toChat()

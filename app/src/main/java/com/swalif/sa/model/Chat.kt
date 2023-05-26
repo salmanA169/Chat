@@ -13,5 +13,4 @@ data class Chat(
     val lastMessageDate: Long,
     val messagesUnread: Int,
     val lastSenderUid:String,
-
 )
