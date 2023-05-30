@@ -78,6 +78,19 @@ fun NavGraphBuilder.messageDest(navController: NavController) {
 @Preview(
     showBackground = true, locale = "ar",
     device = "spec:width=1080px,height=2340px,dpi=440",
+    wallpaper = Wallpapers.NONE,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_UNDEFINED
+)
+@Composable
+fun AnnouncementPreview() {
+    ChatAppTheme() {
+        AnnouncementContent(content = "salman sent friend request")
+    }
+}
+
+@Preview(
+    showBackground = true, locale = "ar",
+    device = "spec:width=1080px,height=2340px,dpi=440",
     wallpaper = Wallpapers.GREEN_DOMINATED_EXAMPLE,
     uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_UNDEFINED
 )
@@ -154,12 +167,19 @@ fun MessageScreen(
             items(state.messages, key = {
                 it.messageId
             }) {
-                MessageItem(
-                    message = it,
-                    navController,
-                    state.myUid
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                if (it.messageType == MessageType.ANNOUNCEMENT) {
+                    if (it.senderUid != state.myUid) {
+                        AnnouncementContent(content = it.message)
+                    }
+                } else {
+
+                    MessageItem(
+                        message = it,
+                        navController,
+                        state.myUid
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
             }
         }
 
@@ -193,7 +213,8 @@ fun EditTextField(
                 onSendImage(it.toString())
             }
         }
-    TextField(
+    OutlinedTextField(
+        shape = CircleShape,
         textStyle = LocalTextStyle.current.copy(textDirection = TextDirection.Content),
         leadingIcon = {
             IconButton(onClick = {
@@ -216,6 +237,7 @@ fun EditTextField(
         },
         modifier = Modifier
             .fillMaxWidth()
+            .padding(8.dp)
             .imePadding(),
         value = message,
         onValueChange = {
@@ -326,7 +348,7 @@ fun MessageItem(
                 Modifier,
                 message,
                 isMessageFromMe,
-                navController,myUid
+                navController, myUid
             )
         }
     }
@@ -385,10 +407,8 @@ fun ContentMessage(
             }
 
             MessageType.AUDIO -> TODO()
-            MessageType.ANNOUNCEMENT ->{
-                if (message.senderUid != myUid){
-                    AnnouncementContent(content = message.message)
-                }
+            MessageType.ANNOUNCEMENT -> {
+
             }
         }
 
@@ -445,8 +465,26 @@ fun ContentMessage(
 }
 
 @Composable
-fun AnnouncementContent(content:String) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth(0.5f)) {
-        Text(text = content,modifier = Modifier.padding(6.dp))
+fun AnnouncementContent(content: String) {
+    Box(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(2.dp)
+                .align(Center)
+        ) {
+            Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    painter = painterResource(id = R.drawable.request_friend_icon),
+                    contentDescription = "request friend",
+                    modifier = Modifier.size(26.dp).padding(horizontal = 4.dp)
+                )
+                Text(
+                    text = content,
+                    modifier = Modifier.padding(6.dp),
+                    style = MaterialTheme.typography.labelSmall
+                )
+            }
+        }
     }
 }

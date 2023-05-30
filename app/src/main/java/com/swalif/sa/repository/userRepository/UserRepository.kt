@@ -17,5 +17,6 @@ interface UserRepository {
     suspend fun signIn():IntentSender?
     suspend fun getSignInResult(intent: Intent):SignInResult
     suspend fun signOut(uid:String)
-
+    suspend fun setOffline()
+    suspend fun setOnline()
 }

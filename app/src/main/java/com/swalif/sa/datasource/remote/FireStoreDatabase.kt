@@ -1,8 +1,12 @@
 package com.swalif.sa.datasource.remote
 
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.swalif.Constants
 import com.swalif.sa.datasource.remote.firestore_dto.UserDto
+import com.swalif.sa.datasource.remote.firestore_dto.UserStatusDto
+import com.swalif.sa.model.UserStatus
 import kotlinx.coroutines.tasks.await
 import logcat.logcat
 import java.io.Closeable
@@ -21,6 +25,27 @@ class FireStoreDatabase @Inject constructor(
         }
     }
 
+   suspend  fun setOffline(user:UserDto){
+        fireStoreDatabase.collection(Constants.USERS_COLLECTIONS).whereEqualTo("uidUser" , user.uidUser).get().await().apply {
+            val document = firstOrNull()
+            val data = mapOf("lastSeen" to FieldValue.serverTimestamp(),"userStatus" to  UserStatusDto.OFFLINE)
+            document?.let{
+                it.reference.update(data).await()
+            }
+        }
+
+    }
+
+    suspend  fun setOnline(user:UserDto){
+        fireStoreDatabase.collection(Constants.USERS_COLLECTIONS).whereEqualTo("uidUser" , user.uidUser).get().await().apply {
+            val document = firstOrNull()
+            val data = mapOf("lastSeen" to FieldValue.serverTimestamp(),"userStatus" to  UserStatusDto.ONLINE)
+            document?.let{
+                it.reference.update(data).await()
+            }
+        }
+
+    }
     suspend fun getUserByUid(uidUser: String): UserDto? {
         val users = fireStoreDatabase.collection(Constants.USERS_COLLECTIONS)
             .whereEqualTo("uidUser", uidUser).get().await().toObjects(UserDto::class.java).run {

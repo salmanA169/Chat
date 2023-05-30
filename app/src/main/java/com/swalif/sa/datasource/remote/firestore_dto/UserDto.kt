@@ -13,7 +13,7 @@ data class UserDto(
     val createdAt: Timestamp = Timestamp.now(),
     val photoUri: String = "",
     val userStatus: UserStatusDto = UserStatusDto.OFFLINE,
-    val lastSeen: Long = 0
+    val lastSeen: Timestamp? = null
 )
 
 enum class UserStatusDto {
@@ -24,7 +24,7 @@ fun UserDto.localizeToUserStatus(): UserStatus {
     return when (this.userStatus) {
         UserStatusDto.ONLINE -> UserStatus.Online
         UserStatusDto.OFFLINE -> UserStatus.Offline(
-            lastSeen
+            lastSeen?.toDate()?.time?:0
         )
 
         UserStatusDto.TYPING -> UserStatus.TYPING

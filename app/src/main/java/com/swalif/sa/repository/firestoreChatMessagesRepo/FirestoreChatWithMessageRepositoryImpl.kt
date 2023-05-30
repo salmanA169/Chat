@@ -346,7 +346,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 messageRepository.addMessage(it)
             }
         }
-        messages.lastOrNull()?.let {
+        messages.lastOrNull { it.messageType != MessageType.ANNOUNCEMENT }?.let {
             checkAnyNewUpdateChatLocally(chatId, it.message, it.messageType)
         }
     }

@@ -8,6 +8,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -59,6 +60,16 @@ import java.util.TimeZone
 class MainActivity : ComponentActivity() {
     private lateinit var launcherPermission: ActivityResultLauncher<Array<String>>
 
+    private val viewModel by viewModels<MainViewModel>()
+    override fun onPause() {
+        super.onPause()
+        viewModel.setOffline()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.setOnline()
+    }
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

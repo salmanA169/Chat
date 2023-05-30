@@ -10,6 +10,7 @@ import com.swalif.sa.model.MessageType
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import logcat.logcat
 import java.time.LocalDateTime
 import javax.inject.Inject
 
@@ -34,6 +35,9 @@ class ChatRepositoryImpl @Inject constructor(
 
     override suspend fun readAllChatMessages(chatId: String) {
        val getChat = chatDao.getChatById(chatId)
+        logcat{
+            "chat : $getChat"
+        }
         getChat?.let {
             chatDao.updateChat(it.copy(messagesUnread = 0))
         }

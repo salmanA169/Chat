@@ -51,6 +51,16 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun setOffline() {
+        val getCurrentUser = getCurrentUser()?: return
+        fireStore.setOffline(getCurrentUser.toUserDto())
+    }
+
+    override suspend fun setOnline() {
+        val getCurrentUser = getCurrentUser()?: return
+        fireStore.setOnline(getCurrentUser.toUserDto())
+    }
+
     override suspend fun signOut(uid: String) {
         oneTapClint.signOut().await()
         firebaseAuth.signOut()

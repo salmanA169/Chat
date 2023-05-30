@@ -83,9 +83,9 @@ class MessageRepositoryImpl @Inject constructor(
                     messageDao.updateMessage(tempMessage.toMessageEntity())
                 }
             }else{
-                val getMessageById = getAllMessages().find { it.messageId == tempMessage.messageId }
-                getMessageById?.let {
-                    messageDao.updateMessage(it.toMessageEntity())
+                val getMessageById = getAllMessages().find { it.messageId == tempMessage.messageId }!!
+                getMessageById.let {
+                    messageDao.updateMessage(it.toMessageEntity().copy(statusMessage =message.statusMessage))
                 }
             }
         }else{
