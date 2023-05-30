@@ -35,6 +35,12 @@ data class MessageDto(
                 chatId,senderUid, mediaUri = image, messageType = MessageType.IMAGE
             )
         }
+        fun createAnnouncementMessage(content:String,chatId:String,senderUid: String):MessageDto{
+            return MessageDto(
+                Random.nextInt(),
+                chatId,senderUid,message = content, messageType = MessageType.ANNOUNCEMENT
+            )
+        }
     }
 }
 

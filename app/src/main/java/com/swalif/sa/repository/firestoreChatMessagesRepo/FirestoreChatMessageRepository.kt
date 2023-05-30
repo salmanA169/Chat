@@ -1,5 +1,6 @@
 package com.swalif.sa.repository.firestoreChatMessagesRepo
 
+import com.swalif.sa.datasource.local.entity.ChatEntity
 import com.swalif.sa.datasource.remote.firestore_dto.MessageDto
 import com.swalif.sa.datasource.remote.firestore_dto.UserStatusDto
 import com.swalif.sa.model.Chat
@@ -13,8 +14,7 @@ interface FirestoreChatMessageRepository :Closeable{
     var isSavedLocally :Boolean
     fun getMessage():Flow<List<Message>>
     suspend fun sendMessage(message: MessageDto)
-    suspend fun addChatLocally(chat:Chat)
-    suspend fun updateChat()
+    suspend fun addChatLocally(chat: ChatEntity)
     suspend fun getChatInfo():Flow<ChatInfo>
     suspend fun syncMessages()
     suspend fun observeMessage()

@@ -3,12 +3,15 @@ package com.swalif.sa.di
 import com.swalif.sa.core.searchManager.SearchManager
 import com.swalif.sa.core.searchManager.SearchManagerFakeData
 import com.swalif.sa.core.searchManager.SearchManagerFireStore
+import com.swalif.sa.repository.firestoreChatMessagesRepo.FirestoreChatMessageRepository
+import com.swalif.sa.repository.firestoreChatMessagesRepo.FirestoreChatWithMessageRepositoryImpl
 import com.swalif.sa.repository.searchRepository.SearchRepository
 import com.swalif.sa.repository.searchRepository.SearchRepositoryImpl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
+import dagger.hilt.android.scopes.ActivityRetainedScoped
 import dagger.hilt.android.scopes.ViewModelScoped
 import javax.inject.Singleton
 
@@ -28,4 +31,9 @@ abstract class DiModuleViewModelScope {
         searchRepository: SearchRepositoryImpl
     ): SearchRepository
 
+    @ViewModelScoped
+    @Binds
+    abstract fun provideFirestoreRepo(
+        firestoreChatWithMessageRepositoryImpl: FirestoreChatWithMessageRepositoryImpl
+    ): FirestoreChatMessageRepository
 }

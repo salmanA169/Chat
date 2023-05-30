@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -325,7 +326,7 @@ fun MessageItem(
                 Modifier,
                 message,
                 isMessageFromMe,
-                navController
+                navController,myUid
             )
         }
     }
@@ -336,7 +337,8 @@ fun ContentMessage(
     modifier: Modifier = Modifier,
     message: Message,
     isMessageFromMe: Boolean,
-    navController: NavController
+    navController: NavController,
+    myUid: String
 ) {
     val animate =
         animateColorAsState(
@@ -383,6 +385,11 @@ fun ContentMessage(
             }
 
             MessageType.AUDIO -> TODO()
+            MessageType.ANNOUNCEMENT ->{
+                if (message.senderUid != myUid){
+                    AnnouncementContent(content = message.message)
+                }
+            }
         }
 
         Row(
@@ -434,5 +441,12 @@ fun ContentMessage(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun AnnouncementContent(content:String) {
+    ElevatedCard(modifier = Modifier.fillMaxWidth(0.5f)) {
+        Text(text = content,modifier = Modifier.padding(6.dp))
     }
 }

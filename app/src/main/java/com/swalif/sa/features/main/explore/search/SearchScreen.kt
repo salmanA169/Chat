@@ -75,13 +75,11 @@ fun SearchScreen(
     LaunchedEffect(key1 = searchState.roomEvent.startChatRoom) {
         if (searchState.roomEvent.startChatRoom) {
             val myCurrentUser = searchState.myCurrentUser!!
-            val getUser =
-                searchState.roomEvent.users.find { it.userInfo != myCurrentUser }!!.userInfo
 
             if (searchState.roomEvent.roomId.isNotEmpty()) {
                 navController.navigate(
                     Screens.MessageScreen.navigateToMessageScreen(
-                        getUser.uidUser,
+                        myCurrentUser.uidUser,
                         searchState.roomEvent.roomId
                     )
                 ) {

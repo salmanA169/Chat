@@ -34,11 +34,7 @@ abstract class RepositoryModule {
         userRepository: UserRepositoryImpl
     ): UserRepository
 
-    @ActivityRetainedScoped
-    @Binds
-    abstract fun provideFirestoreRepo(
-        firestoreChatWithMessageRepositoryImpl: FirestoreChatWithMessageRepositoryImpl
-    ):FirestoreChatMessageRepository
+
 
     @ActivityRetainedScoped
     @Binds

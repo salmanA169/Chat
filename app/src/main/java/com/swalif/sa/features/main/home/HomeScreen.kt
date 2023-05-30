@@ -24,17 +24,20 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.swalif.sa.R
 import com.swalif.sa.Screens
 import com.swalif.sa.model.Chat
@@ -68,20 +71,20 @@ fun HomeScreen(
 ) {
     val homeState by viewModel.homeState.collectAsState()
 
-    LaunchedEffect(key1 = homeState, block = {
-        homeState.myUid?.let {
-            navController.navigate(
-                Screens.MessageScreen.navigateToMessageScreen(
-                    it,
-                    "df7682c3-8d79-4427-867f-2c112da7fc79"
-                )
-            )
-        }
-    })
-
     val rememberOnDelete = remember {
         { chatId: String ->
             viewModel.deleteChatById(chatId)
+        }
+    }
+    val rememberOnNavigate = remember {
+        { chatId: String ->
+            navController.navigate(
+                Screens.MessageScreen.navigateToMessageScreen(
+                    homeState.myUid!!,
+                    chatId,
+                    true
+                )
+            )
         }
     }
     LazyColumn(
@@ -90,34 +93,16 @@ fun HomeScreen(
             .padding(paddingValues)
             .nestedScroll(nestedScrollConnection),
     ) {
-        item {
 
-            Button(onClick = {
-                viewModel.addTestChat(
-                    Chat(
-                        "",
-                        "salman",
-                        "saleh",
-                        "salman alamoudi",
-                        "كيف حالك",
-                        "https://i.pinimg.com/originals/b4/c1/fb/b4c1fbf0e913bf9365c8fa0dcc48c0c0.jpg",
-                        0,
-                        2,
-                        ""
-                    )
-                )
-            }) {
-
-            }
-        }
         items(homeState.chats, key = {
             it.chatId
         }) {
-            ChatItem(chat = it, navController, rememberOnDelete)
+            ChatItem(chat = it, rememberOnDelete, rememberOnNavigate)
             Divider()
         }
     }
 }
+
 
 @Preview
 @Composable
@@ -128,13 +113,12 @@ fun Preview1() {
                 "",
                 "",
                 "",
-                "salman alamoudi",
                 "Hi",
                 "https://i.pinimg.com/originals/b4/c1/fb/b4c1fbf0e913bf9365c8fa0dcc48c0c0.jpg",
                 0,
                 10,
-                ""
-            ), rememberNavController()
+                "", 5
+            )
         )
     }
 }
@@ -143,8 +127,8 @@ fun Preview1() {
 @Composable
 fun ChatItem(
     chat: Chat,
-    navController: NavController,
-    onDelete: (ChatId: String) -> Unit = {}
+    onDelete: (ChatId: String) -> Unit = {},
+    onNavigate: (String) -> Unit = {}
 ) {
     val deleteAction = SwipeAction(
         onSwipe = {
@@ -164,13 +148,8 @@ fun ChatItem(
         endActions = listOf(deleteAction)
     ) {
         ElevatedCard(onClick = {
-            navController.navigate(
-                Screens.MessageScreen.navigateToMessageScreen(
-                    "test",
-                    chat.chatId,
-                    true
-                )
-            )
+            onNavigate(chat.chatId)
+
         }, shape = RoundedCornerShape(0.dp)) {
             Box(
                 modifier = Modifier

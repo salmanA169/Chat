@@ -8,25 +8,25 @@ import com.swalif.sa.model.Chat
 fun ChatEntity.toChat() = Chat(
     chatId,
     uidSenderUser,
-    toUserUid,
     senderName,
     lastMessage,
     imageUri,
     lastMessageDate,
     messagesUnread,
-    lastSenderUid
+    lastSenderUid,
+    maxUsers
 )
 
 fun Chat.toChatEntity() = ChatEntity(
     chatId,
     uidSenderUser,
     senderName,
-    toUserUid,
     lastMessage,
     imageUri,
     lastMessageDate,
     messagesUnread,
-    lastSenderUid
+    lastSenderUid,
+    maxUsers
 )
 
 

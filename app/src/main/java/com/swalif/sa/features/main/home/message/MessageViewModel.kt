@@ -5,7 +5,9 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ServerTimestamp
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+import com.swalif.Constants
 import com.swalif.sa.CHANNEL_ID_ARG
+import com.swalif.sa.IS_SAVED_LOCALLY
 import com.swalif.sa.MY_UID_ARG
 import com.swalif.sa.coroutine.DispatcherProvider
 import com.swalif.sa.datasource.remote.firestore_dto.MessageDto
@@ -35,7 +37,8 @@ class MessageViewModel @Inject constructor(
     private val _state = MutableStateFlow(MessageState())
     private val channelID = savedStateHandle.get<String>(CHANNEL_ID_ARG)!!
     private val myUid = savedStateHandle.get<String>(MY_UID_ARG)!!
-    private val isSavedLocally = savedStateHandle.get<String>(MY_UID_ARG)!!
+    private val isSavedLocally = savedStateHandle.get<Boolean>(IS_SAVED_LOCALLY)!!
+
     val state = _state.asStateFlow()
 
     private var currentJob: Job? = null
@@ -65,6 +68,7 @@ class MessageViewModel @Inject constructor(
         if (firestoreChatMessageRepository is FirestoreChatWithMessageRepositoryImpl){
             firestoreChatMessageRepository.onMessageEventListener = this
         }
+        firestoreChatMessageRepository.isSavedLocally = isSavedLocally
        addCloseable(firestoreChatMessageRepository)
         firestoreChatMessageRepository.addChatId(channelID)
         viewModelScope.launch(dispatcherProvider.io) {

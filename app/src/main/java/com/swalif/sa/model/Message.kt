@@ -25,7 +25,7 @@ data class Message(
     }
 }
 enum class MessageType{
-    TEXT,IMAGE,AUDIO;
+    TEXT,IMAGE,AUDIO,ANNOUNCEMENT;
 
     fun isMedia() = this == IMAGE || this == AUDIO
 }

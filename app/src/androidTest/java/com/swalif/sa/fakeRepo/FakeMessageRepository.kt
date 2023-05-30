@@ -24,7 +24,7 @@ class FakeMessageRepository @Inject constructor(
     }
 
     override fun getMessages(chatId: Int): Flow<ChatWithMessages> {
-        return messageDao.getMessage(chatId)
+        return messageDao.getMessageWithChat(chatId)
     }
 
     override suspend fun updateMessage(message: Message) {

@@ -4,8 +4,6 @@ import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth
 import com.swalif.sa.coroutine.DispatcherProvider
-import com.swalif.sa.datasource.local.dao.ChatDao
-import com.swalif.sa.datasource.local.dao.MessageDao
 import com.swalif.sa.features.main.home.HomeViewModel
 import com.swalif.sa.model.Chat
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
@@ -87,13 +85,13 @@ class TestViewModel {
                 chatRepository.insertChat(it)
             }
             val getChat = chatRepository.getChats().testIn(backgroundScope)
-            val getMessage = messageRepository.getMessages()
+            val getMessage = messageRepository.observeMessageByChatId()
             Truth.assertThat(getChat.awaitItem().size).isEqualTo(2)
             Truth.assertThat(getMessage.find{it.chatId ==3 }).isNotNull()
 
             // remove message with deleted chat
             homeViewModel.checkChatIsDeletedMessages()
-            val getMessage1 = messageRepository.getMessages()
+            val getMessage1 = messageRepository.observeMessageByChatId()
             Truth.assertThat(getMessage1.find { it.chatId ==3 }).isNull()
         }
     }

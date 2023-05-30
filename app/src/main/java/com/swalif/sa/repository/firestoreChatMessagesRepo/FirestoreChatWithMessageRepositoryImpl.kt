@@ -9,24 +9,26 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.dataObjects
 import com.google.firebase.firestore.ktx.snapshots
 import com.google.firebase.firestore.ktx.toObject
+import com.google.firebase.firestore.ktx.toObjects
 import com.google.firebase.storage.FirebaseStorage
 import com.swalif.Constants
 import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.coroutine.DispatcherProvider
+import com.swalif.sa.datasource.local.entity.ChatEntity
 import com.swalif.sa.datasource.remote.firestore_dto.ChatDto
 import com.swalif.sa.datasource.remote.firestore_dto.MessageDto
 import com.swalif.sa.datasource.remote.firestore_dto.UserDto
 import com.swalif.sa.datasource.remote.firestore_dto.UserStatusDto
 import com.swalif.sa.datasource.remote.firestore_dto.formatRequestFriend
 import com.swalif.sa.datasource.remote.firestore_dto.localizeToUserStatus
+import com.swalif.sa.mapper.toListMessageModel
+import com.swalif.sa.mapper.toMessageList
 import com.swalif.sa.mapper.toMessageModel
-import com.swalif.sa.model.Chat
 import com.swalif.sa.model.ChatInfo
 import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
 import com.swalif.sa.model.SenderInfo
-import com.swalif.sa.model.UserInfo
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import com.swalif.sa.repository.messageRepository.MessageRepository
 import com.swalif.sa.repository.userRepository.UserRepository
@@ -43,6 +45,7 @@ import kotlinx.coroutines.tasks.await
 import logcat.logcat
 import javax.inject.Inject
 
+// TODO: fix announcement issue
 class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     private val messageRepository: MessageRepository,
     private val chatRepository: ChatRepository,
@@ -82,6 +85,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
             .await().first().apply {
                 reference.update("userStatus", userStatus).await()
             }
+
     }
 
     override fun getMessage(): Flow<List<Message>> {
@@ -94,75 +98,87 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     }
 
     override suspend fun syncMessages() {
+        readAllMessageLocally(chatId)
+        if (isSavedLocally) {
+            observeMessage()
+        }
         val firestore =
             firestore.collection(Constants.CHATS_COLLECTIONS).whereEqualTo("chatId", chatId)
                 .get().await()
                 .firstOrNull()!!.reference.apply { currentChatDocument = this }
                 .collection(Constants.MESSAGES_COLLECTIONS)
         currentMessagesCollection = firestore
-        // TODO: fix it when app in background still observe
+        // TODO: fix it when app in background still observe.. use LocalViewModelStoreOwner in message screen to clear
         firestore.snapshots().collect {
-
-//            val messages = it.toObjects<MessageDto>()
-//            if (isFirstTime) {
-//                val messagesDao = getMessage().first().toMutableList()
-//                messagesDao.removeAll { message ->
-//                    messages.find { it.chatId == message.chatId } != null
-//                }
-//                messagesDao.forEach {
-//                    messageRepository.addMessage(it)
-//                }
-//                isFirstTime = false
-//            }
+            logcat("FirestoreChatMessageRepository sync message") {
+                "is save locally : $isSavedLocally"
+            }
+            if (isFirstTime && isSavedLocally) {
+                val messages = it.toObjects<MessageDto>()
+                coroutineScope.launch {
+                    syncMessageLocally(messages.toListMessageModel())
+                }
+            }
             it.documents.filter {
                 val message = it.toObject(MessageDto::class.java)
                 message?.statusMessage == MessageStatus.SENT && message.senderUid != myUid
             }.map {
-                val message = it.toObject(MessageDto::class.java)
-                logcat {
-                    "map message $message "
-                }
                 it.reference
             }.forEach {
                 coroutineScope.launch {
                     readMessages(it)
                 }
             }
-
-            it.documentChanges.forEach {
-                val message = it.document.toObject<MessageDto>()
-                when (it.type) {
-                    DocumentChange.Type.ADDED -> {
+            if (!isFirstTime || !isSavedLocally) {
+                it.documentChanges.forEach {
+                    logcat("FirestoreChatWithMessages"){
+                        "${it.type}"
+                    }
+                    val message = it.document.toObject<MessageDto>()
+                    when (it.type) {
+                        DocumentChange.Type.ADDED -> {
 //                                messageRepository.addMessage(message.toMessageModel())
 //                        Log.d("FirestoreChatWithMessage",message.toString())
-                        val list = mm.value.toMutableList()
-                        if (list.find { it.messageId == message.messageId } != null) {
-                            val getIndex = list.indexOfFirst { it.messageId == message.messageId }
-                            list[getIndex] = message.toMessageModel()
-                        } else {
-                            list.add(message.toMessageModel())
+                            val list = mm.value.toMutableList()
+                            if (list.find { it.messageId == message.messageId } != null) {
+                                val getIndex =
+                                    list.indexOfFirst { it.messageId == message.messageId }
+                                list[getIndex] = message.toMessageModel()
+                            } else {
+                                list.add(message.toMessageModel())
+                            }
+                            if (isSavedLocally) {
+                                messageRepository.addMessage(message.toMessageModel())
+//                                chatRepository.updateChat(
+//                                    chatId,
+//                                    message.message,
+//                                    message.messageType!!
+//                                )
+                            } else {
+                                mm.update {
+                                    list
+                                }
+                            }
                         }
-                        mm.update {
-                            list
-                        }
-                    }
 
-                    DocumentChange.Type.MODIFIED -> {
-                        val list = mm.value.toMutableList()
-                        val index = list.indexOfFirst { it.messageId == message.messageId }
-                        list[index] = message.toMessageModel()
-                        mm.update {
-                            list
+                        DocumentChange.Type.MODIFIED -> {
+                            val list = mm.value.toMutableList()
+                            val index = list.indexOfFirst { it.messageId == message.messageId }
+                            list[index] = message.toMessageModel()
+                            if (isSavedLocally) {
+                                messageRepository.updateMessage(message.toMessageModel())
+                            } else {
+                                mm.update {
+                                    list
+                                }
+                            }
                         }
-                        logcat("FirestoreChatWithMessageRepository") {
-                            " update message called"
-                        }
-                    }
 
-                    DocumentChange.Type.REMOVED -> {
+                        DocumentChange.Type.REMOVED -> {
 //                                messageRepository.deleteMessage(message.toMessageModel())
-                        logcat("FirestoreChatWithMessageRepository") {
-                            " remove message called"
+                            logcat("FirestoreChatWithMessageRepository") {
+                                " remove message called"
+                            }
                         }
                     }
                 }
@@ -171,17 +187,30 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
             onMessageEventListener?.let {
                 it.onDataChanged()
             }
+            isFirstTime = false
         }
 
     }
 
     private suspend fun readMessages(documentReference: DocumentReference) {
-
         documentReference.update("statusMessage", MessageStatus.SEEN).await()
+        readAllMessageLocally(chatId)
+    }
+
+    private suspend fun readAllMessageLocally(chatId: String){
+        if (isSavedLocally){
+            chatRepository.readAllChatMessages(chatId)
+        }
     }
 
     override suspend fun observeMessage() {
-        TODO("Not yet implemented")
+        coroutineScope.launch {
+            messageRepository.observeMessageByChatId(chatId).collect { messages ->
+                mm.update {
+                    messages.messages.toMessageList()
+                }
+            }
+        }
     }
 
     override suspend fun sendMessage(message: MessageDto) {
@@ -192,9 +221,6 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                     it + message.toMessageModel()
                 }
                 currentMessagesCollection!!.add(message.copy(statusMessage = MessageStatus.SENT))
-                if (isSavedLocally) {
-                    messageRepository.addMessage(message.toMessageModel())
-                }
             }
 
             MessageType.IMAGE -> {
@@ -205,12 +231,12 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 val messageUpdated =
                     message.copy(mediaUri = image, statusMessage = MessageStatus.SENT)
                 currentMessagesCollection!!.add(messageUpdated)
-                if (isSavedLocally && image != null) {
-                    messageRepository.addMessage(message.toMessageModel())
-                }
             }
 
             MessageType.AUDIO -> TODO()
+            MessageType.ANNOUNCEMENT -> {
+
+            }
             null -> TODO()
         }
 
@@ -232,12 +258,16 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
 
     }
 
-    override suspend fun addChatLocally(chat: Chat) {
-        TODO("Not yet implemented")
+    override suspend fun addChatLocally(chat: ChatEntity) {
+        chatRepository.insertChat(chat)
     }
 
-    override suspend fun updateChat() {
-        TODO("Not yet implemented")
+    private suspend fun checkAnyNewUpdateChatLocally(
+        chatId: String,
+        message: String,
+        type: MessageType
+    ) {
+        chatRepository.updateChat(chatId, message, type)
     }
 
     override suspend fun getChatInfo(): Flow<ChatInfo> {
@@ -246,7 +276,6 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
         val getReceiver =
             firestore.collection(Constants.CHATS_COLLECTIONS).whereEqualTo("chatId", chatId)
                 .snapshots().map {
-
                     val chat = it.first()
                     val usersChat = chat.toObject(ChatDto::class.java)
                     currentChatDto = usersChat
@@ -255,8 +284,13 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                         if (usersChat.acceptRequestFriends) {
                             onMessageEventListener?.onFriendAccepted()
                             isSavedLocally = true
-                            saveUserLocally(usersChat.chatId,
-                                SenderInfo(findReceiver.userUid,findReceiver.image,findReceiver.username),getMyUser
+                            saveUserLocally(
+                                usersChat.chatId,
+                                SenderInfo(
+                                    findReceiver.userUid,
+                                    findReceiver.image,
+                                    findReceiver.username
+                                ), usersChat.maxUsers
                             )
                         }
                     }
@@ -282,13 +316,41 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
         }
     }
 
-    private suspend fun saveUserLocally(chatId: String, senderInfo: SenderInfo,myCurrentUser:UserInfo) {
-
+    private suspend fun saveUserLocally(chatId: String, senderInfo: SenderInfo, maxUsers: Int) {
+        val message = mm.value.last()
+        val chatEntity = ChatEntity(
+            chatId,
+            senderInfo.uid,
+            senderInfo.username,
+            message.message, senderInfo.image, message.dateTime, 0, message.senderUid, maxUsers
+        )
+        addChatLocally(chatEntity)
+        syncMessageLocally(mm.value)
+        observeMessage()
     }
 
-    suspend fun syncMessageLocally(){
+    private suspend fun syncMessageLocally(messages: List<Message>) {
+        val getMessageLocal = messageRepository.getMessagesByChatID(chatId)
+        val messages = messages.toMutableList()
 
+        messages.removeAll{list1->
+            getMessageLocal.any{
+                list1.messageId == it.messageId
+            }
+        }
+        messages.forEach {
+            logcat("FirestoreChatWithMessages"){
+                "called ${it.messageId}"
+            }
+            coroutineScope.launch(dispatcherProvider.io) {
+                messageRepository.addMessage(it)
+            }
+        }
+        messages.lastOrNull()?.let {
+            checkAnyNewUpdateChatLocally(chatId, it.message, it.messageType)
+        }
     }
+
     override suspend fun updateUserFriendRequest() {
         val getCurrentUser = currentChatDto!!.users.find { it.userUid == myUid }!!
         val updatedCurrentUser = getCurrentUser.copy(requestFriend = true)
@@ -298,8 +360,18 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
         val isAcceptedAsFriend = newList.all { it.requestFriend }
         val newData =
             currentChatDto!!.copy(users = newList, acceptRequestFriends = isAcceptedAsFriend)
-        currentChatDocument!!.set(newData).await()
-
+        currentChatDocument!!.apply {
+            set(newData).await()
+            val getReceiverUser = newData.users.find { it.userUid != myUid }?: return
+            if (!getReceiverUser.requestFriend){
+                val findMyUser = newData.users.find { it.userUid == myUid }?: return
+                currentMessagesCollection?.add(
+                    MessageDto.createAnnouncementMessage(
+                        "${findMyUser.username} sent request friend",chatId,findMyUser.userUid
+                    )
+                )?.await()
+            }
+        }
 
     }
 
@@ -308,9 +380,6 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     }
 
     override fun close() {
-        logcat {
-            "called close"
-        }
         job.cancel()
         currentMessagesCollection = null
         currentChatDto = null

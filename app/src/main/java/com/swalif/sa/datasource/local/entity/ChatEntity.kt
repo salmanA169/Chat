@@ -10,10 +10,10 @@ data class ChatEntity(
     val chatId:String = "",
     val uidSenderUser:String,
     val senderName:String,
-    val toUserUid:String,
     val lastMessage:String,
     val imageUri:String,
     val lastMessageDate:Long,
     val messagesUnread:Int,
-    val lastSenderUid:String
+    val lastSenderUid:String,
+    val maxUsers:Int
 )

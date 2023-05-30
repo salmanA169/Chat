@@ -1,6 +1,7 @@
 package com.swalif.sa.repository.messageRepository
 
 import android.content.Context
+import android.net.Uri
 import androidx.core.net.toUri
 import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.datasource.local.dao.MessageDao
@@ -10,7 +11,10 @@ import com.swalif.sa.mapper.toMessageList
 import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.withContext
+import logcat.logcat
 import java.io.File
 import javax.inject.Inject
 
@@ -34,34 +38,60 @@ class MessageRepositoryImpl @Inject constructor(
             MessageType.TEXT -> {
                 messageDao.addMessage(message.toMessageEntity())
             }
-
             MessageType.IMAGE -> {
                 val id = messageDao.addMessage(message.copy(mediaUri = "").toMessageEntity())
-                val uriImage = message.mediaUri!!.toUri()
-                val rootDir = File(context.filesDir, uriImage.lastPathSegment!!).toUri().toString()
-                if (filesManager.saveImage(uriImage, uriImage.lastPathSegment!!)) {
+                val uriImage = message.mediaUri!!
+                val nameFile = uriImage.toUri().lastPathSegment!!.substringAfter("/")
+                val file = File(context.filesDir,nameFile)
+
+                val savedFile = filesManager.saveImage(uriImage,nameFile)
+                if (savedFile) {
                     messageDao.updateMessage(
-                        message.copy(messageId = id.toInt(), mediaUri = rootDir).toMessageEntity()
+                        message.copy(messageId = id.toInt(), mediaUri = file.toUri().toString()).toMessageEntity()
                     )
                 }
             }
 
             MessageType.AUDIO -> TODO()
+            else -> {}
         }
 //        mediaPlayer.start()
     }
 
-
-    override suspend fun getMessages(): List<Message> {
-        return messageDao.getMessages().toMessageList()
+    override suspend fun getMessagesByChatID(chatId: String): List<Message> {
+        return messageDao.getMessageByChatId(chatId).toMessageList()
     }
 
-    override fun getMessages(chatId: String): Flow<ChatWithMessages> {
-        return messageDao.getMessage(chatId)
+    override suspend fun getAllMessages(): List<Message> {
+        return messageDao.getAllMessages().toMessageList()
+    }
+
+    override fun observeMessageByChatId(chatId: String): Flow<ChatWithMessages> {
+        return messageDao.getMessageWithChat(chatId)
     }
 
     override suspend fun updateMessage(message: Message) {
-        messageDao.updateMessage(message.toMessageEntity())
+        var tempMessage = message
+        if (message.messageType.isMedia()){
+            val nameFile = tempMessage.mediaUri!!.toUri().lastPathSegment!!.substringAfter("/")
+            if (!filesManager.ifFileAvailable(nameFile)){
+                logcat { "called file not exist" }
+                val savedFile = filesManager.saveImage(tempMessage.mediaUri!!,nameFile)
+                val fileName = File(context.filesDir,nameFile)
+                if (savedFile){
+                    tempMessage = tempMessage.copy(mediaUri = fileName.toUri().toString())
+                    messageDao.updateMessage(tempMessage.toMessageEntity())
+                }
+            }else{
+                val getMessageById = getAllMessages().find { it.messageId == tempMessage.messageId }
+                getMessageById?.let {
+                    messageDao.updateMessage(it.toMessageEntity())
+                }
+            }
+        }else{
+            messageDao.updateMessage(tempMessage.toMessageEntity())
+        }
+
     }
 
     override suspend fun deleteMessage(message: Message) {
@@ -71,6 +101,7 @@ class MessageRepositoryImpl @Inject constructor(
 
     override suspend fun deleteMessages(message: List<Message>) {
         message.forEach {
+            // TODO: also delete medial files
             messageDao.deleteMessage(it.toMessageEntity())
         }
     }

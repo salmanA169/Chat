@@ -63,6 +63,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window,false)
+
         installSplashScreen()
         setContent {
             ChatAppTheme {
@@ -88,7 +89,7 @@ class MainActivity : ComponentActivity() {
                 }
                 Scaffold(
                     topBar = {
-                        AnimatedVisibility(visible = isMainDest) {
+                        AnimatedVisibility(visible = isMainDest, modifier = Modifier.wrapContentSize()) {
                             MediumTopAppBar(scrollBehavior = scrollTopBar, title = {
                                 Text(text = "Main screen")
                             })

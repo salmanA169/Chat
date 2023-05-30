@@ -3,20 +3,15 @@ package com.swalif.sa.features.main.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swalif.sa.coroutine.DispatcherProvider
-import com.swalif.sa.mapper.toChat
 import com.swalif.sa.mapper.toChatEntity
 import com.swalif.sa.mapper.toMessageList
-import com.swalif.sa.mapper.toMessageModel
 import com.swalif.sa.model.Chat
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import com.swalif.sa.repository.messageRepository.MessageRepository
 import com.swalif.sa.repository.userRepository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import logcat.logcat
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 @HiltViewModel
@@ -33,7 +28,7 @@ class HomeViewModel @Inject constructor(
     fun addTestChat(chat: Chat) {
         viewModelScope.launch(dispatchers.io) {
             chatRepository.insertChat(
-                chat
+                chat.toChatEntity()
             )
         }
     }
@@ -55,7 +50,7 @@ class HomeViewModel @Inject constructor(
         }.map {
             it.chatId
         }
-        val messagesChatsIds = messageRepository.getMessages().distinctBy {
+        val messagesChatsIds = messageRepository.getAllMessages().distinctBy {
             it.chatId
         }.map {
             it.chatId
@@ -67,7 +62,7 @@ class HomeViewModel @Inject constructor(
             }
         }
         ids.forEach {id->
-            val getMessage = messageRepository.getMessages().filter {
+            val getMessage = messageRepository.getAllMessages().filter {
                 it.chatId == id
             }
             messageRepository.deleteMessages(getMessage)
@@ -75,10 +70,10 @@ class HomeViewModel @Inject constructor(
     }
     fun deleteChatById(chatId: String) {
         viewModelScope.launch(dispatchers.io) {
-            val getChat = messageRepository.getMessages(chatId).filter {
+            val getChat = messageRepository.observeMessageByChatId(chatId).filter {
                 it.chat.chatId == chatId
             }.first()
-            chatRepository.deleteChatById(getChat.chat.toChat())
+            chatRepository.deleteChatById(getChat.chat)
             messageRepository.deleteMessages(getChat.messages.toMessageList())
         }
     }

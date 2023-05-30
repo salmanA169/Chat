@@ -2,6 +2,7 @@ package com.swalif.sa.repository.chatRepositoy
 
 import com.google.firebase.Timestamp
 import com.swalif.sa.datasource.local.dao.ChatDao
+import com.swalif.sa.datasource.local.entity.ChatEntity
 import com.swalif.sa.mapper.toChat
 import com.swalif.sa.mapper.toChatEntity
 import com.swalif.sa.model.Chat
@@ -25,14 +26,21 @@ class ChatRepositoryImpl @Inject constructor(
         return chatDao.getChatById(chatId)!!.toChat()
     }
 
-    override suspend fun insertChat(chat: Chat) {
+    override suspend fun insertChat(chat: ChatEntity) {
         chatDao.insertChat(
-            chat.toChatEntity()
+            chat
         )
     }
 
-    override suspend fun deleteChatById(chat: Chat) {
-        chatDao.deleteChatById(chat.toChatEntity())
+    override suspend fun readAllChatMessages(chatId: String) {
+       val getChat = chatDao.getChatById(chatId)
+        getChat?.let {
+            chatDao.updateChat(it.copy(messagesUnread = 0))
+        }
+    }
+
+    override suspend fun deleteChatById(chat: ChatEntity) {
+        chatDao.deleteChatById(chat)
     }
 
     override suspend fun readMessages(chatId: String) {
@@ -51,6 +59,9 @@ class ChatRepositoryImpl @Inject constructor(
                 message = "\uD83D\uDDBC️"
             }
             MessageType.AUDIO -> TODO()
+            else -> {
+                message = text
+            }
         }
         chatDao.updateChat(
             getChat!!.copy(
