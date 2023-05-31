@@ -4,6 +4,10 @@ import android.content.Context
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.ktx.storage
 import com.swalif.sa.datasource.local.SwalifDatabase
 import dagger.Module
 import dagger.Provides
@@ -49,6 +53,19 @@ object DiModuleTest {
     @Provides
     @Singleton
     fun provideMessageDao(database: SwalifDatabase) = database.messageDao
+
+    @Provides
+    @Singleton
+    fun provideFireStore() = Firebase.firestore
+
+
+    @Provides
+    @Singleton
+    fun provideFireStorage() = Firebase.storage
+
+    @Provides
+    @Singleton
+    fun provideFirebaseAuth() = Firebase.auth
 
 }
 

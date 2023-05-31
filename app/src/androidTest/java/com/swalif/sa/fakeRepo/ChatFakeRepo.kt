@@ -1,5 +1,6 @@
 package com.swalif.sa.fakeRepo
 
+import com.swalif.sa.datasource.local.entity.ChatEntity
 import com.swalif.sa.model.Chat
 import com.swalif.sa.model.MessageType
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
@@ -14,19 +15,28 @@ class ChatFakeRepo @Inject constructor():ChatRepository {
         return chat.asStateFlow()
     }
 
-    override suspend fun deleteChatById(chat: Chat) {
+    override suspend fun insertChat(chat: ChatEntity) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun readMessages(chatId: Int) {
+    override suspend fun deleteChatById(chat: ChatEntity) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun insertChat(chat: Chat) {
+    override suspend fun readMessages(chatId: String) {
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateChat(chatID: Int, text: String, messageType: MessageType) {
+    override suspend fun updateChat(chatID: String, text: String, messageType: MessageType) {
         TODO("Not yet implemented")
     }
+
+    override suspend fun getChatById(chatId: String): Chat {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun readAllChatMessages(chatId: String) {
+        TODO("Not yet implemented")
+    }
+
 }

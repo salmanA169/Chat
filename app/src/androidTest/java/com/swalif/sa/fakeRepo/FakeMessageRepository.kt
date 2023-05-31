@@ -19,12 +19,20 @@ class FakeMessageRepository @Inject constructor(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getMessages(): List<Message> {
+    override fun observeMessageByChatId(chatId: String): Flow<ChatWithMessages> {
         TODO("Not yet implemented")
     }
 
-    override fun getMessages(chatId: Int): Flow<ChatWithMessages> {
-        return messageDao.getMessageWithChat(chatId)
+    override suspend fun deleteMessage(message: Message) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getMessagesByChatID(chatId: String): List<Message> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getAllMessages(): List<Message> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun updateMessage(message: Message) {

@@ -220,7 +220,7 @@ fun EditTextField(
             IconButton(onClick = {
                 pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }) {
-                Icon(imageVector = Icons.Default.Email, "")
+                Icon(imageVector = Icons.Default.Email, "email")
             }
         },
         trailingIcon = {
