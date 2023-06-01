@@ -106,6 +106,7 @@ class SearchManagerFireStore @Inject constructor(
     }
 
     override fun unregisterSearchEvent() {
+        // TODO: remove room if he last one
         currentJob?.cancel()
         currentJob = null
         currentRoom = null

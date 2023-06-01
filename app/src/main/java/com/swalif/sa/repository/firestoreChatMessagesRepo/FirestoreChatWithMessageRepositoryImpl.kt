@@ -45,7 +45,6 @@ import kotlinx.coroutines.tasks.await
 import logcat.logcat
 import javax.inject.Inject
 
-// TODO: fix announcement issue
 class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     private val messageRepository: MessageRepository,
     private val chatRepository: ChatRepository,
@@ -310,7 +309,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 receiverStatus.localizeToUserStatus(),
                 receiverInfo.userUid,
                 receiverInfo.image,
-                receiverInfo.isLeft,
+                receiverInfo.left,
                 currentChatDto!!.users.formatRequestFriend(myUid!!)
             )
         }
@@ -376,10 +375,24 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     }
 
     override suspend fun leaveChat() {
-        TODO("Not yet implemented")
+        currentChatDocument?.let { document->
+            val users = currentChatDto?.users
+            val myUser = users?.find { it.userUid == myUid }!!
+            val index = users.indexOfFirst { it.userUid == myUid }
+            val newList = users.toMutableList()
+            val updatedData = myUser.copy(left = true)
+            newList[index] = updatedData
+            val data = mapOf("users" to newList)
+            document.update(data).await()
+            onMessageEventListener?.onLeaveChat()
+            if (newList.all { it.left }){
+                document.delete().await()
+            }
+        }
     }
 
     override fun close() {
+        // TODO: check last user to delete chat if not accept as friend
         job.cancel()
         currentMessagesCollection = null
         currentChatDto = null

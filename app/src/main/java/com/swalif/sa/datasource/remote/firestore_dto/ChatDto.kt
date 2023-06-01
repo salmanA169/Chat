@@ -11,8 +11,8 @@ data class ChatDto(
 
 data class UsersChatDto(
     val userUid:String = "",
-    val isLeft:Boolean = false,
-    val isTyping:Boolean = false,
+    val left:Boolean = false,
+    val typing:Boolean = false,
     val image:String = "",
     val username:String = "",
     val requestFriend:Boolean = false

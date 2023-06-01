@@ -2,6 +2,8 @@ package com.swalif.sa.features.main.home.message
 
 import android.content.res.Configuration
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -48,6 +50,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
@@ -126,9 +129,35 @@ fun MessageScreen(
     val context = LocalContext.current
     val receiverUser = state.chatInfo.userName
     val messageToast = stringResource(id = R.string.acceptedFriend, receiverUser)
+    val showDialog by viewModel.showDialogLeaveUser.collectAsStateWithLifecycle()
+
+    if (showDialog) {
+        // TODO: fix it
+        AlertDialog(onDismissRequest = { viewModel.dialogEvent(false) }, confirmButton = {
+            TextButton(onClick = {
+                viewModel.leaveChat()
+                viewModel.dialogEvent(false)
+            }) {
+                Text(text = stringResource(id = R.string.confirm))
+            }
+        }, dismissButton = {
+            TextButton(onClick = {
+                viewModel.dialogEvent(false)
+            }) {
+                Text(text = stringResource(id = R.string.dismiss))
+            }
+        })
+    }
     LaunchedEffect(key1 = friendEvent) {
         friendEvent?.let {
             Toast.makeText(context, messageToast, Toast.LENGTH_SHORT).show()
+        }
+    }
+    BackHandler {
+        if (state.chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
+            viewModel.dialogEvent(true)
+        } else {
+            navController.popBackStack()
         }
     }
     LaunchedEffect(key1 = messageEvent) {
@@ -138,6 +167,11 @@ fun MessageScreen(
         }
     }
 
+    val rememberPreviewScreen = remember {
+        { image: String ->
+            navController.navigate(Screens.PreviewScreen.navigateToPreview(image))
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -149,11 +183,17 @@ fun MessageScreen(
             .navigationBarsPadding()
     ) {
         ChatInfoSection(
-            navController = navController,
+            onClickImage = rememberPreviewScreen,
             chatInfo = state.chatInfo,
             modifier = Modifier.fillMaxWidth(),
             onRequestFriendClick = {
                 viewModel.updateFriendRequest()
+            }, onBack = {
+                if (state.chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
+                    viewModel.dialogEvent(true)
+                } else {
+                    navController.popBackStack()
+                }
             }
         )
         LazyColumn(
@@ -179,6 +219,11 @@ fun MessageScreen(
                         state.myUid
                     )
                     Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
+            item{
+                if (state.chatInfo.userIsLeft){
+                    AnnouncementContent(content = "user has left")
                 }
             }
         }
@@ -249,7 +294,8 @@ fun EditTextField(
 @Composable
 fun ChatInfoSection(
     modifier: Modifier = Modifier,
-    navController: NavController,
+    onBack: () -> Unit,
+    onClickImage: (String) -> Unit,
     chatInfo: ChatInfo,
     onRequestFriendClick: () -> Unit
 ) {
@@ -262,7 +308,7 @@ fun ChatInfoSection(
         contentAlignment = CenterStart
     ) {
         Row(modifier = Modifier.wrapContentSize()) {
-            IconButton(onClick = { navController.popBackStack() }) {
+            IconButton(onClick = onBack) {
                 Icon(rememberVectorPainter(image = Icons.Default.ArrowBack), "")
             }
 
@@ -273,7 +319,7 @@ fun ChatInfoSection(
                     .size(45.dp)
                     .clip(CircleShape)
                     .clickable {
-                        navController.navigate(Screens.PreviewScreen.navigateToPreview(chatInfo.imageUri))
+                        onClickImage(chatInfo.imageUri)
                     },
                 contentScale = ContentScale.Crop
             )
@@ -473,11 +519,16 @@ fun AnnouncementContent(content: String) {
                 .padding(2.dp)
                 .align(Center)
         ) {
-            Row(horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     painter = painterResource(id = R.drawable.request_friend_icon),
                     contentDescription = "request friend",
-                    modifier = Modifier.size(26.dp).padding(horizontal = 4.dp)
+                    modifier = Modifier
+                        .size(26.dp)
+                        .padding(horizontal = 4.dp)
                 )
                 Text(
                     text = content,

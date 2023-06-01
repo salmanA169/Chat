@@ -17,4 +17,6 @@
     <string name="find_users">Find users ...</string>
     <string name="user_left">User left</string>
     <string name="acceptedFriend">%1$s accept your request</string>
+    <string name="confirm">confirm</string>
+    <string name="dismiss">dismiss</string>
 </resources>

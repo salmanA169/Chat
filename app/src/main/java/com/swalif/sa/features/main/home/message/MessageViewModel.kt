@@ -33,11 +33,15 @@ class MessageViewModel @Inject constructor(
     private val firestoreChatMessageRepository: FirestoreChatMessageRepository,
     private val dispatcherProvider: DispatcherProvider,
     savedStateHandle: SavedStateHandle
-) : ViewModel(),MessageEvent {
+) : ViewModel(), MessageEvent {
     private val _state = MutableStateFlow(MessageState())
     private val channelID = savedStateHandle.get<String>(CHANNEL_ID_ARG)!!
     private val myUid = savedStateHandle.get<String>(MY_UID_ARG)!!
     private val isSavedLocally = savedStateHandle.get<Boolean>(IS_SAVED_LOCALLY)!!
+
+    private val _showDialogLeaveUser = MutableStateFlow(false)
+    val showDialogLeaveUser = _showDialogLeaveUser.asStateFlow()
+
 
     val state = _state.asStateFlow()
 
@@ -45,15 +49,22 @@ class MessageViewModel @Inject constructor(
     private var isTyping: Boolean = false
 
     private val _messageEventDataChange = MutableLiveData<Unit?>()
-    val messageEventDataChange :LiveData<Unit?> = _messageEventDataChange
+    val messageEventDataChange: LiveData<Unit?> = _messageEventDataChange
 
     private val _friendEvent = MutableStateFlow<Unit?>(null)
     val friendEvent = _friendEvent.asStateFlow()
+
     private var messageSize = 0
     override fun onDataChanged() {
-        if (messageSize != _state.value.messages.size){
+        if (messageSize != _state.value.messages.size) {
             _messageEventDataChange.postValue(Unit)
             messageSize = _state.value.messages.size
+        }
+    }
+
+    override fun onLeaveChat() {
+        logcat {
+            "called onLeaveChat"
         }
     }
 
@@ -61,15 +72,16 @@ class MessageViewModel @Inject constructor(
         _friendEvent.value = Unit
     }
 
-    fun restMessageEvent(){
+    fun restMessageEvent() {
         _messageEventDataChange.value = null
     }
+
     init {
-        if (firestoreChatMessageRepository is FirestoreChatWithMessageRepositoryImpl){
+        if (firestoreChatMessageRepository is FirestoreChatWithMessageRepositoryImpl) {
             firestoreChatMessageRepository.onMessageEventListener = this
         }
         firestoreChatMessageRepository.isSavedLocally = isSavedLocally
-       addCloseable(firestoreChatMessageRepository)
+        addCloseable(firestoreChatMessageRepository)
         firestoreChatMessageRepository.addChatId(channelID)
         viewModelScope.launch(dispatcherProvider.io) {
             firestoreChatMessageRepository.getMessage().collect { messages ->
@@ -140,6 +152,18 @@ class MessageViewModel @Inject constructor(
             it.copy(
                 text = ""
             )
+        }
+    }
+
+    fun dialogEvent(show: Boolean) {
+        _showDialogLeaveUser.update {
+            show
+        }
+    }
+
+    fun leaveChat() {
+        viewModelScope.launch(dispatcherProvider.io) {
+            firestoreChatMessageRepository.leaveChat()
         }
     }
 

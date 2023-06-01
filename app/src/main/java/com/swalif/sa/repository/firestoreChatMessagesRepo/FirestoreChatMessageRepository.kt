@@ -22,4 +22,5 @@ interface FirestoreChatMessageRepository :Closeable{
     suspend fun updateUserStatus(userStatus: UserStatusDto)
     suspend fun updateUserFriendRequest()
     suspend fun leaveChat()
+
 }
