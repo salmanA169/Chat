@@ -85,7 +85,6 @@ fun ExploreScreen(
     paddingValues: PaddingValues
 ) {
 
-    // TODO: continue here
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,7 +100,12 @@ fun ExploreScreen(
                 Text(text = stringResource(id = R.string.add_user_by_uid))
             }
         }
-        LazyVerticalGrid(columns = GridCells.Fixed(2),modifier = Modifier.fillMaxSize()) {
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
             items(exploreState.users, key = {
                 it.uniqueId
             }) {
@@ -120,11 +124,12 @@ fun UsersCard(
             .fillMaxWidth()
             .wrapContentHeight()
     ) {
+
         AsyncImage(
             model = userInfo.photoUri,
             contentDescription = "",
             modifier = Modifier
-                .size(80.dp)
+                .size(60.dp)
                 .align(Alignment.CenterHorizontally)
                 .clip(CircleShape),
             placeholder = painterResource(id = R.drawable.ic_launcher_foreground)

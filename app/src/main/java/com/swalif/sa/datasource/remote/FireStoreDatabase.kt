@@ -3,9 +3,12 @@ package com.swalif.sa.datasource.remote
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ktx.toObjects
 import com.swalif.Constants
 import com.swalif.sa.datasource.remote.firestore_dto.UserDto
 import com.swalif.sa.datasource.remote.firestore_dto.UserStatusDto
+import com.swalif.sa.mapper.toUserInfo
+import com.swalif.sa.model.UserInfo
 import com.swalif.sa.model.UserStatus
 import kotlinx.coroutines.tasks.await
 import logcat.logcat
@@ -16,6 +19,13 @@ class FireStoreDatabase @Inject constructor(
     private val fireStoreDatabase: FirebaseFirestore
 ) {
 
+    suspend fun getUsers():List<UserInfo>{
+        val collectionUsers = fireStoreDatabase.collection(Constants.USERS_COLLECTIONS).get().await()
+        val users = collectionUsers.toObjects<UserDto>()
+        return users.map {
+            it.toUserInfo()
+        }
+    }
     suspend fun saveUserFirstTime(userInfo: UserDto): Boolean {
         return try {
             fireStoreDatabase.collection(Constants.USERS_COLLECTIONS).add(userInfo).await()
