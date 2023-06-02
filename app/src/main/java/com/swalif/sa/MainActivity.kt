@@ -122,7 +122,7 @@ class MainActivity : ComponentActivity() {
                         messageDest(navController)
                         previewNavDest(navController)
                         searchScreen(navController)
-                        exploreDestination(navController)
+                        exploreDestination(navController,paddingValues)
                         accountScreen(navController,paddingValues)
                     }
                 }

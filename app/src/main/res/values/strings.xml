@@ -26,4 +26,5 @@
     <string name="createAt">createdAt: </string>
     <string name="uniqueId">"uniqueid: "</string>
     <string name="signOut">sign out</string>
+    <string name="find_random_user">find random user</string>
 </resources>

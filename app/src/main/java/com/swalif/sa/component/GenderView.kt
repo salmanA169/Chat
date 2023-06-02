@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.PathParser
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.swalif.sa.R
 import com.swalif.sa.ui.theme.ChatAppTheme
 
 @Preview(showBackground = true)
@@ -351,6 +352,14 @@ enum class Gender(val gender: String) {
         return when (this) {
             FEMALE -> femaleColor
             MALE -> maleColor
+        }
+    }
+
+    @Composable
+    fun getGenderIcon():Int {
+        return when(this){
+            MALE -> R.drawable.male_icon
+            FEMALE -> R.drawable.female_icon
         }
     }
 }

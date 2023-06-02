@@ -8,9 +8,8 @@ data class Chat(
     val senderName: String,
     val lastMessage: String,
     val imageUri: String,
-    // TODO: create helper class
     val lastMessageDate: Long,
     val messagesUnread: Int,
     val lastSenderUid:String,
-    val maxUsers:Int
+    val maxUsers:Int,
 )

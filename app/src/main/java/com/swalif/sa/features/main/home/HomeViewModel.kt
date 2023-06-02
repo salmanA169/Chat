@@ -25,12 +25,9 @@ class HomeViewModel @Inject constructor(
     val homeState = chatRepository.getChats().combine(myUid) {chats,myUid->
         HomeChatState(chats, myUid)
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeChatState())
-    fun addTestChat(chat: Chat) {
-        viewModelScope.launch(dispatchers.io) {
-            chatRepository.insertChat(
-                chat.toChatEntity()
-            )
-        }
+
+    fun syncChats(){
+        // TODO: check chats
     }
 
     init {
