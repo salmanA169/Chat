@@ -1,1 +1,1 @@
-C:\Users\salma\Desktop\Chat\buildSrc\build\classes\kotlin\main\com\build\Deps.class;C:\Users\salma\Desktop\Chat\buildSrc\build\classes\kotlin\main\com\build\Versions.class;C:\Users\salma\Desktop\Chat\buildSrc\build\classes\kotlin\main\com\build\VersionsKt.class
+C:\Users\kd\StudioProjects\Chat\buildSrc\build\classes\kotlin\main\com\build\Deps.class;C:\Users\kd\StudioProjects\Chat\buildSrc\build\classes\kotlin\main\com\build\Versions.class;C:\Users\kd\StudioProjects\Chat\buildSrc\build\classes\kotlin\main\com\build\VersionsKt.class

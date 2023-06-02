@@ -130,10 +130,12 @@ fun MessageScreen(
     val receiverUser = state.chatInfo.userName
     val messageToast = stringResource(id = R.string.acceptedFriend, receiverUser)
     val showDialog by viewModel.showDialogLeaveUser.collectAsStateWithLifecycle()
+    val leaveChat by viewModel.leaveChat.observeAsState()
 
     if (showDialog) {
-        // TODO: fix it
-        AlertDialog(onDismissRequest = { viewModel.dialogEvent(false) }, confirmButton = {
+        AlertDialog(title = {
+            Text(text = stringResource(id = R.string.sure))
+        }, onDismissRequest = { viewModel.dialogEvent(false) }, confirmButton = {
             TextButton(onClick = {
                 viewModel.leaveChat()
                 viewModel.dialogEvent(false)
@@ -147,6 +149,12 @@ fun MessageScreen(
                 Text(text = stringResource(id = R.string.dismiss))
             }
         })
+    }
+
+    LaunchedEffect(key1 = leaveChat ){
+        if (leaveChat == true){
+            navController.popBackStack()
+        }
     }
     LaunchedEffect(key1 = friendEvent) {
         friendEvent?.let {
@@ -221,8 +229,8 @@ fun MessageScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                 }
             }
-            item{
-                if (state.chatInfo.userIsLeft){
+            item {
+                if (state.chatInfo.userIsLeft) {
                     AnnouncementContent(content = "user has left")
                 }
             }

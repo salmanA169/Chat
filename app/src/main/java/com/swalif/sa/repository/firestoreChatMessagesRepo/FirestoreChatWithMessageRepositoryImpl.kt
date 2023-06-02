@@ -56,12 +56,6 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
 ) : FirestoreChatMessageRepository {
 
     override var isSavedLocally: Boolean = false
-        get() = field
-        set(value) {
-            // TODO: here update chat when is saved
-            field = value
-
-        }
 
     private val job = Job()
     private val coroutineScope = CoroutineScope(dispatcherProvider.io + job)
@@ -109,9 +103,6 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
         currentMessagesCollection = firestore
         // TODO: fix it when app in background still observe.. use LocalViewModelStoreOwner in message screen to clear
         firestore.snapshots().collect {
-            logcat("FirestoreChatMessageRepository sync message") {
-                "is save locally : $isSavedLocally"
-            }
             if (isFirstTime && isSavedLocally) {
                 val messages = it.toObjects<MessageDto>()
                 coroutineScope.launch {
@@ -130,9 +121,6 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
             }
             if (!isFirstTime || !isSavedLocally) {
                 it.documentChanges.forEach {
-                    logcat("FirestoreChatWithMessages"){
-                        "${it.type}"
-                    }
                     val message = it.document.toObject<MessageDto>()
                     when (it.type) {
                         DocumentChange.Type.ADDED -> {
@@ -163,6 +151,9 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                         DocumentChange.Type.MODIFIED -> {
                             val list = mm.value.toMutableList()
                             val index = list.indexOfFirst { it.messageId == message.messageId }
+                            if (index == -1){
+                                return@collect
+                            }
                             list[index] = message.toMessageModel()
                             if (isSavedLocally) {
                                 messageRepository.updateMessage(message.toMessageModel())
@@ -275,8 +266,8 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
         val getReceiver =
             firestore.collection(Constants.CHATS_COLLECTIONS).whereEqualTo("chatId", chatId)
                 .snapshots().map {
-                    val chat = it.first()
-                    val usersChat = chat.toObject(ChatDto::class.java)
+                    val chat = it.firstOrNull()
+                    val usersChat = chat?.toObject(ChatDto::class.java)?:ChatDto()
                     currentChatDto = usersChat
                     val findReceiver = usersChat.users.find { it.userUid != getMyUser.uidUser }!!
                     if (!isSavedLocally) {
@@ -298,15 +289,14 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
         val receiverUid = getReceiver.first().userUid
         val receiveStatus =
             firestore.collection(Constants.USERS_COLLECTIONS).whereEqualTo("uidUser", receiverUid)
-                .dataObjects<UserDto>().map { it.first() }
+                .dataObjects<UserDto>().map { it.firstOrNull() }
+
         return combine(getReceiver, receiveStatus) { receiverInfo, receiverStatus ->
-            logcat("FirestoreChatWithMessage:getChat Info") {
-                "called ${receiverStatus.userStatus}"
-            }
+
 
             ChatInfo(
                 receiverInfo.username,
-                receiverStatus.localizeToUserStatus(),
+                receiverStatus?.localizeToUserStatus(),
                 receiverInfo.userUid,
                 receiverInfo.image,
                 receiverInfo.left,
@@ -378,14 +368,21 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
         currentChatDocument?.let { document->
             val users = currentChatDto?.users
             val myUser = users?.find { it.userUid == myUid }!!
+            val receiverUser = users.find { it.userUid != myUid }
             val index = users.indexOfFirst { it.userUid == myUid }
             val newList = users.toMutableList()
             val updatedData = myUser.copy(left = true)
             newList[index] = updatedData
             val data = mapOf("users" to newList)
             document.update(data).await()
+            currentMessagesCollection?.add(
+                MessageDto.createAnnouncementMessage(
+                    "${receiverUser!!.username.toString()} has left",chatId,myUid!!
+                )
+            )
             onMessageEventListener?.onLeaveChat()
             if (newList.all { it.left }){
+                // TODO: try to remove messages also
                 document.delete().await()
             }
         }

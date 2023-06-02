@@ -39,6 +39,8 @@ class MessageViewModel @Inject constructor(
     private val myUid = savedStateHandle.get<String>(MY_UID_ARG)!!
     private val isSavedLocally = savedStateHandle.get<Boolean>(IS_SAVED_LOCALLY)!!
 
+    private val _leaveChat = MutableLiveData<Boolean>(false)
+    val leaveChat :LiveData<Boolean> = _leaveChat
     private val _showDialogLeaveUser = MutableStateFlow(false)
     val showDialogLeaveUser = _showDialogLeaveUser.asStateFlow()
 
@@ -63,9 +65,7 @@ class MessageViewModel @Inject constructor(
     }
 
     override fun onLeaveChat() {
-        logcat {
-            "called onLeaveChat"
-        }
+        _leaveChat.postValue(true)
     }
 
     override fun onFriendAccepted() {

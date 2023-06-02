@@ -28,5 +28,6 @@ fun UserDto.localizeToUserStatus(): UserStatus {
         )
 
         UserStatusDto.TYPING -> UserStatus.TYPING
+        else -> UserStatus.Online
     }
 }
