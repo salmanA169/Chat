@@ -39,9 +39,10 @@ fun Preview() {
         }
     }
 }
-
-val maleGradient: List<Color> = listOf(Color(0xFF6D6DFF), Color.Blue)
-val femaleGradient: List<Color> = listOf(Color(0xFFEA76FF), Color.Magenta)
+val maleColor = Color(0xFF6D6DFF)
+val femaleColor = Color(0xFFEA76FF)
+val maleGradient: List<Color> = listOf(maleColor, Color.Blue)
+val femaleGradient: List<Color> = listOf(femaleColor, Color.Magenta)
 
 @Stable
 class GenderState {
@@ -343,6 +344,13 @@ enum class Gender(val gender: String) {
             FEMALE -> Brush.linearGradient(colors = femaleGradient)
             MALE -> Brush.linearGradient(colors = maleGradient)
         }
+    }
 
+    @Composable
+    fun getSolidColorByGender(): Color {
+        return when (this) {
+            FEMALE -> femaleColor
+            MALE -> maleColor
+        }
     }
 }

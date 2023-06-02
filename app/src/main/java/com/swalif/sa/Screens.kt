@@ -29,6 +29,7 @@ sealed class Screens(val route: String) {
         object RegistrationScreen : OnBoardingScreen("registration_rout"){
             override val args: List<NamedNavArgument>
                 get() = emptyList()
+
         }
         object InformationScreen : OnBoardingScreen("information_rout"){
             val formattedInfoRout = "$route/{$EMAIL_ARG}/{$PHOTO_ARG}/{$MY_UID_ARG}/{$USERNAME_ARG}"

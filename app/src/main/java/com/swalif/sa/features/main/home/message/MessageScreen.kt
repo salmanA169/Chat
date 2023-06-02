@@ -3,7 +3,6 @@ package com.swalif.sa.features.main.home.message
 import android.content.res.Configuration
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -26,8 +25,6 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterEnd
@@ -35,12 +32,9 @@ import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Alignment.Companion.CenterStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.layout.FirstBaseline
-import androidx.compose.ui.layout.LastBaseline
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -51,7 +45,6 @@ import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
@@ -66,9 +59,7 @@ import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
 import com.swalif.sa.model.RequestFriendStatus
 import com.swalif.sa.ui.theme.ChatAppTheme
-import com.swalif.sa.utils.formatShortTime
-import com.swalif.sa.utils.toTimeStamp
-import logcat.logcat
+import com.swalif.sa.utils.formatSortTime
 
 fun NavGraphBuilder.messageDest(navController: NavController) {
     composable(
@@ -474,7 +465,7 @@ fun ContentMessage(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = message.dateTime.toTimeStamp(),
+                text = message.dateTime.formatSortTime(),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(horizontal = 3.dp)
             )

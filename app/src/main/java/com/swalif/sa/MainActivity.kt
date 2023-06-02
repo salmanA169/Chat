@@ -1,40 +1,27 @@
 package com.swalif.sa
 
-import android.content.ContentUris
 import android.os.Bundle
-import android.provider.MediaStore
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.storage.ktx.storage
 import com.swalif.sa.component.*
-import com.swalif.sa.core.storage.FilesManager
+import com.swalif.sa.features.main.account.accountScreen
 import com.swalif.sa.features.main.explore.exploreDestination
 import com.swalif.sa.features.main.home.homeDest
 import com.swalif.sa.features.main.home.message.messageDest
@@ -42,19 +29,7 @@ import com.swalif.sa.features.main.home.message.previewImage.previewNavDest
 import com.swalif.sa.features.main.explore.search.searchScreen
 import com.swalif.sa.features.onboarding.onBoardingNavigation
 import com.swalif.sa.ui.theme.ChatAppTheme
-import com.swalif.sa.utils.toTimeStamp
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import logcat.logcat
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.time.OffsetDateTime
-import java.time.ZonedDateTime
-import java.util.Date
-import java.util.Locale
-import java.util.TimeZone
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -87,6 +62,9 @@ class MainActivity : ComponentActivity() {
                     it.route == (currentDest?.route ?: "")
                 }
                 val scrollTopBar = TopAppBarDefaults.enterAlwaysScrollBehavior()
+                var titleBar by remember{
+                    mutableStateOf(R.string.home)
+                }
                 LaunchedEffect(key1 = isUserAvailable) {
                     isUserAvailable?.let { isAvailable ->
                         if (!isAvailable) {
@@ -102,7 +80,7 @@ class MainActivity : ComponentActivity() {
                     topBar = {
                         AnimatedVisibility(visible = isMainDest, modifier = Modifier.wrapContentSize()) {
                             MediumTopAppBar(scrollBehavior = scrollTopBar, title = {
-                                Text(text = "Main screen")
+                                Text(text = stringResource(id = titleBar))
                             })
                         }
                     },
@@ -123,6 +101,7 @@ class MainActivity : ComponentActivity() {
                                                 launchSingleTop = true
                                                 restoreState = true
                                             }
+                                            titleBar = screen.name
                                         },
                                         icon = {
                                             Icon(imageVector = screen.icon, contentDescription = "")
@@ -144,13 +123,7 @@ class MainActivity : ComponentActivity() {
                         previewNavDest(navController)
                         searchScreen(navController)
                         exploreDestination(navController)
-                        composable(Screens.MainScreens.AccountScreen.route){
-                            Button(modifier = Modifier.padding(paddingValues),onClick = {
-                                viewModel.signOut()
-                            }) {
-                                Text(text = "sign out")
-                            }
-                        }
+                        accountScreen(navController,paddingValues)
                     }
                 }
             }

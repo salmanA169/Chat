@@ -2,10 +2,8 @@ package com.swalif.sa.utils
 
 import android.icu.text.SimpleDateFormat
 import com.google.firebase.Timestamp
-import java.text.DateFormat
 import java.time.LocalDateTime
 import java.time.ZoneOffset
-import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import java.util.Date
@@ -13,11 +11,14 @@ import java.util.Locale
 
 private const val SHORT_TIME_FORMAT = "hh:mm a"
 fun Long.toLocalDateTime(): LocalDateTime = LocalDateTime.ofEpochSecond(this, 0, ZoneOffset.UTC)
-fun Long.toTimeStamp(): String {
+fun Long.formatSortTime(): String {
     val toDate = Timestamp(Date(this)).toDate()
     return SimpleDateFormat(SHORT_TIME_FORMAT, Locale.getDefault()).format(toDate)
 }
-
+fun Long.formatDate(): String {
+    val toDate = Timestamp(Date(this)).toDate()
+    return SimpleDateFormat(SimpleDateFormat.YEAR_MONTH_DAY, Locale.getDefault()).format(toDate)
+}
 fun LocalDateTime.toSeconds() = toEpochSecond(ZoneOffset.UTC)
 
 /**

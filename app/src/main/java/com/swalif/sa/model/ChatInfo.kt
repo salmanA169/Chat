@@ -3,9 +3,7 @@ package com.swalif.sa.model
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import com.swalif.sa.R
-import com.swalif.sa.utils.formatDateTime
-import com.swalif.sa.utils.toTimeStamp
-import java.time.LocalDateTime
+import com.swalif.sa.utils.formatSortTime
 
 data class ChatInfo(
     val userName: String = "",
@@ -20,7 +18,7 @@ data class ChatInfo(
         return when (userStatus) {
             is UserStatus.Offline -> stringResource(
                 id = R.string.last_seen,
-                userStatus.lastSeen.toTimeStamp()
+                userStatus.lastSeen.formatSortTime()
             )
             UserStatus.Online -> {
                 stringResource(id = R.string.online)

@@ -20,4 +20,10 @@
     <string name="confirm">confirm</string>
     <string name="dismiss">dismiss</string>
     <string name="sure">are you sure to leave chat?</string>
+    <string name="username">username: </string>
+    <string name="email">email: </string>
+    <string name="gender">gender: </string>
+    <string name="createAt">createdAt: </string>
+    <string name="uniqueId">"uniqueid: "</string>
+    <string name="signOut">sign out</string>
 </resources>
