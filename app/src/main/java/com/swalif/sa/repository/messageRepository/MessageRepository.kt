@@ -10,6 +10,7 @@ interface MessageRepository {
     fun observeMessageByChatId(chatId:String):Flow<ChatWithMessages>
     suspend fun updateMessage(message: Message)
     suspend fun deleteMessages(message: List<Message>)
+    suspend fun deleteMessagesByChatId(chatId: String)
     suspend fun deleteMessage(message: Message)
     suspend fun getMessagesByChatID(chatId: String):List<Message>
     suspend fun getAllMessages():List<Message>

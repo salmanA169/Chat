@@ -99,6 +99,12 @@ class MessageRepositoryImpl @Inject constructor(
         messageDao.deleteMessage(message.toMessageEntity())
     }
 
+    override suspend fun deleteMessagesByChatId(chatId: String) {
+        // TODO: also delete medial files
+        val getMessage = messageDao.getMessageByChatId(chatId)
+        deleteMessages(getMessage.toMessageList())
+    }
+
     override suspend fun deleteMessages(message: List<Message>) {
         message.forEach {
             // TODO: also delete medial files

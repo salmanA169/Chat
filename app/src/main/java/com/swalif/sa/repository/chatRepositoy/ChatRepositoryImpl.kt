@@ -23,8 +23,8 @@ class ChatRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getChatById(chatId: String): Chat {
-        return chatDao.getChatById(chatId)!!.toChat()
+    override suspend fun getChatById(chatId: String): Chat? {
+        return chatDao.getChatById(chatId)?.toChat()
     }
 
     override suspend fun insertChat(chat: ChatEntity) {
@@ -53,7 +53,7 @@ class ChatRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateChat(chatID: String, text: String, messageType: MessageType) {
-        val getChat = chatDao.getChatById(chatID)
+        val getChat = chatDao.getChatById(chatID)?: return
         val message: String
         when (messageType) {
             MessageType.TEXT -> {
@@ -68,7 +68,7 @@ class ChatRepositoryImpl @Inject constructor(
             }
         }
         chatDao.updateChat(
-            getChat!!.copy(
+            getChat.copy(
                 lastMessage = message,
                 messagesUnread = getChat.messagesUnread.plus(1),
                 lastMessageDate = Timestamp.now().toDate().time

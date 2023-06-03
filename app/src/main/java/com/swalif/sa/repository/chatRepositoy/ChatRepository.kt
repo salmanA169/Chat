@@ -12,7 +12,7 @@ interface ChatRepository {
     suspend fun readMessages(chatId:String)
     suspend fun updateChat(chatID: String, text: String, messageType: MessageType)
 
-    suspend fun getChatById(chatId: String):Chat
+    suspend fun getChatById(chatId: String):Chat?
 
     suspend fun readAllChatMessages(chatId:String)
 }

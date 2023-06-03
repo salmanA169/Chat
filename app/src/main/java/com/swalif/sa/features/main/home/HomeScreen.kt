@@ -58,12 +58,12 @@ fun HomeScreen(
         }
     }
     val rememberOnNavigate = remember {
-        { chatId: String ->
+        { chatId: String ,isSave:Boolean->
             navController.navigate(
                 Screens.MessageScreen.navigateToMessageScreen(
                     homeState.myUid!!,
                     chatId,
-                    true
+                    isSave
                 )
             )
         }
@@ -109,7 +109,7 @@ fun Preview1() {
 fun ChatItem(
     chat: Chat,
     onDelete: (ChatId: String) -> Unit = {},
-    onNavigate: (String) -> Unit = {}
+    onNavigate: (String,Boolean) -> Unit = {id,isSave->}
 ) {
     val deleteAction = SwipeAction(
         onSwipe = {
@@ -129,7 +129,7 @@ fun ChatItem(
         endActions = listOf(deleteAction)
     ) {
         ElevatedCard(onClick = {
-            onNavigate(chat.chatId)
+            onNavigate(chat.chatId,chat.isSaveLocally)
 
         }, shape = RoundedCornerShape(0.dp)) {
             Box(

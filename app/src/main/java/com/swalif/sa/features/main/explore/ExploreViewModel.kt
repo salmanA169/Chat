@@ -6,6 +6,7 @@ import com.swalif.sa.Screens
 import com.swalif.sa.coroutine.DispatcherProvider
 import com.swalif.sa.datasource.remote.FireStoreDatabase
 import com.swalif.sa.model.UserInfo
+import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import com.swalif.sa.repository.userRepository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 class ExploreViewModel @Inject constructor(
     private val firebaseDatabase: FireStoreDatabase,
     private val dispatchProvider: DispatcherProvider,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val chatRepository: ChatRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ExploreState())
@@ -39,9 +41,10 @@ class ExploreViewModel @Inject constructor(
             is UiExploreEvent.NavigateToChat -> {
                 viewModelScope.launch(dispatchProvider.io) {
                     val chatId = firebaseDatabase.createNewChatIfNotExist(myUser!!,exploreEvent.userInfo)
-                    // TODO: send notification when create new chat
+//                    if ()
+                    val getChatLocally = chatRepository.getChatById(chatId.chatId)
                     _event.update {
-                        ExploreEvent.NavigateToChat(chatId,myUser!!.uidUser)
+                        ExploreEvent.NavigateToChat(chatId.chatId,myUser!!.uidUser,getChatLocally!= null )
                     }
                 }
             }
@@ -74,5 +77,5 @@ sealed class UiExploreEvent {
 }
 sealed class ExploreEvent {
     class Navigate(val route: String) : ExploreEvent()
-    class NavigateToChat(val chatId: String, val myUid: String) : ExploreEvent()
+    class NavigateToChat(val chatId: String, val myUid: String,val isSavedLocally:Boolean) : ExploreEvent()
 }

@@ -103,6 +103,9 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
         currentMessagesCollection = firestore
         // TODO: fix it when app in background still observe.. use LocalViewModelStoreOwner in message screen to clear
         firestore.snapshots().collect {
+            logcat("FirestoreChatWithMessages"){
+                "is save locally : $isSavedLocally"
+            }
             if (isFirstTime && isSavedLocally) {
                 val messages = it.toObjects<MessageDto>()
                 coroutineScope.launch {
@@ -270,7 +273,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                     val usersChat = chat?.toObject(ChatDto::class.java)?:ChatDto()
                     currentChatDto = usersChat
                     val findReceiver = usersChat.users.find { it.userUid != getMyUser.uidUser }!!
-                    if (!isSavedLocally) {
+                    if (!isSavedLocally && !isFirstTime) {
                         if (usersChat.acceptRequestFriends) {
                             onMessageEventListener?.onFriendAccepted()
                             isSavedLocally = true
@@ -306,12 +309,12 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     }
 
     private suspend fun saveUserLocally(chatId: String, senderInfo: SenderInfo, maxUsers: Int) {
-        val message = mm.value.last()
+        val message = mm.value.lastOrNull()?:return
         val chatEntity = ChatEntity(
             chatId,
             senderInfo.uid,
             senderInfo.username,
-            message.message, senderInfo.image, message.dateTime, 0, message.senderUid, maxUsers
+            message.message, senderInfo.image, message.dateTime, 0, message.senderUid, maxUsers,true
         )
         addChatLocally(chatEntity)
         syncMessageLocally(mm.value)

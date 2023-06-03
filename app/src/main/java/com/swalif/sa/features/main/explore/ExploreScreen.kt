@@ -61,7 +61,7 @@ fun NavGraphBuilder.exploreDestination(navController: NavController, paddingValu
                         navController.navigate(it.route)
                     }
                     is ExploreEvent.NavigateToChat -> {
-                        navController.navigate(Screens.MessageScreen.navigateToMessageScreen(it.myUid,it.chatId))
+                        navController.navigate(Screens.MessageScreen.navigateToMessageScreen(it.myUid,it.chatId,it.isSavedLocally))
                     }
                 }
                 exploreViewModel.readEvent()

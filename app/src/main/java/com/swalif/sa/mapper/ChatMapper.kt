@@ -14,7 +14,8 @@ fun ChatEntity.toChat() = Chat(
     lastMessageDate,
     messagesUnread,
     lastSenderUid,
-    maxUsers
+    maxUsers,
+    isSaveLocally
 )
 
 fun Chat.toChatEntity() = ChatEntity(
@@ -26,7 +27,8 @@ fun Chat.toChatEntity() = ChatEntity(
     lastMessageDate,
     messagesUnread,
     lastSenderUid,
-    maxUsers
+    maxUsers,
+    isSaveLocally
 )
 
 

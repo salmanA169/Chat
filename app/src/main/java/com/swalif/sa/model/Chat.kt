@@ -12,4 +12,5 @@ data class Chat(
     val messagesUnread: Int,
     val lastSenderUid:String,
     val maxUsers:Int,
+    val isSaveLocally:Boolean = false
 )

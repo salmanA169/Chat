@@ -15,5 +15,6 @@ data class ChatEntity(
     val lastMessageDate:Long,
     val messagesUnread:Int,
     val lastSenderUid:String,
-    val maxUsers:Int
+    val maxUsers:Int,
+    val isSaveLocally :Boolean
 )
