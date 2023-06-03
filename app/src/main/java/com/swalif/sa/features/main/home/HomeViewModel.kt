@@ -3,6 +3,7 @@ package com.swalif.sa.features.main.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swalif.sa.coroutine.DispatcherProvider
+import com.swalif.sa.datasource.remote.FireStoreDatabase
 import com.swalif.sa.mapper.toChatEntity
 import com.swalif.sa.mapper.toMessageList
 import com.swalif.sa.model.Chat
@@ -19,15 +20,20 @@ class HomeViewModel @Inject constructor(
     private val chatRepository: ChatRepository,
     private val messageRepository: MessageRepository,
     private val dispatchers :DispatcherProvider,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
+    private val firebaseDatabase: FireStoreDatabase
 ) : ViewModel() {
-    private val myUid = MutableStateFlow<String?>(null)
-    val homeState = chatRepository.getChats().combine(myUid) {chats,myUid->
-        HomeChatState(chats, myUid)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), HomeChatState())
+    private var myUid :String? = null
+    private val _homeState = MutableStateFlow(HomeChatState())
+    val homeState = _homeState.asStateFlow()
 
-    fun syncChats(){
-        // TODO: check chats
+    private suspend fun syncChats(){
+        val getChats = firebaseDatabase.getChats(myUid?:return)
+        _homeState.update {
+            it.copy(
+                it.chats + getChats
+            )
+        }
     }
 
     init {
@@ -35,10 +41,26 @@ class HomeViewModel @Inject constructor(
             checkChatIsDeletedMessages()
         }
         viewModelScope.launch(dispatchers.io) {
-            myUid.update {
-                userRepository.getCurrentUser()?.uidUser
+            val getMyUser = userRepository.getCurrentUser()!!
+            myUid = getMyUser.uidUser
+            _homeState.update {
+                it.copy(
+                    myUid = myUid
+                )
+            }
+            syncChats()
+
+        }
+        viewModelScope.launch(dispatchers.io) {
+            chatRepository.getChats().collect{chats->
+                _homeState.update {
+                    it.copy(
+                        chats
+                    )
+                }
             }
         }
+
     }
     // TODO: move it to workManager
      private suspend fun checkChatIsDeletedMessages(){

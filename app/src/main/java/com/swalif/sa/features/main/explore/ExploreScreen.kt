@@ -20,10 +20,12 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -51,7 +53,21 @@ fun NavGraphBuilder.exploreDestination(navController: NavController, paddingValu
     composable(Screens.MainScreens.ExploreScreen.route) {
         val exploreViewModel = hiltViewModel<ExploreViewModel>()
         val exploreState by exploreViewModel.state.collectAsStateWithLifecycle()
-        ExploreScreen(navController, exploreState, paddingValues)
+        val exploreEvent by exploreViewModel.event.collectAsStateWithLifecycle()
+        LaunchedEffect(key1 = exploreEvent){
+            exploreEvent?.let{
+                when(it){
+                    is ExploreEvent.Navigate -> {
+                        navController.navigate(it.route)
+                    }
+                    is ExploreEvent.NavigateToChat -> {
+                        navController.navigate(Screens.MessageScreen.navigateToMessageScreen(it.myUid,it.chatId))
+                    }
+                }
+                exploreViewModel.readEvent()
+            }
+        }
+        ExploreScreen(exploreState, paddingValues,exploreViewModel::onEvent)
     }
 }
 
@@ -63,7 +79,7 @@ fun NavGraphBuilder.exploreDestination(navController: NavController, paddingValu
 fun ExploreScreenPreview() {
     ChatAppTheme {
         ExploreScreen(
-            rememberNavController(), ExploreState(
+             ExploreState(
                 listOf(
                     UserInfo("", "salman alamoudi", "", Gender.MALE, "sewd", 0, "."),
                     UserInfo("", "salman alamoudi", "", Gender.MALE, "sq", 0, "."),
@@ -80,9 +96,9 @@ fun ExploreScreenPreview() {
 
 @Composable
 fun ExploreScreen(
-    navController: NavController,
     exploreState: ExploreState,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    onEvent:(UiExploreEvent)-> Unit = {}
 ) {
 
     Column(
@@ -91,7 +107,7 @@ fun ExploreScreen(
             .padding(paddingValues)
     ) {
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-            Button(onClick = { navController.navigate(Screens.SearchScreen.route) }) {
+            Button(onClick = { onEvent(UiExploreEvent.NavigateToSearch)}) {
                 Icon(Icons.Default.Search, contentDescription = "")
                 Spacer(modifier = Modifier.size(ButtonDefaults.IconSpacing))
                 Text(text = stringResource(id = R.string.find_random_user))
@@ -109,20 +125,26 @@ fun ExploreScreen(
             items(exploreState.users, key = {
                 it.uniqueId
             }) {
-                UsersCard(userInfo = it)
+                UsersCard(userInfo = it){
+                    onEvent(UiExploreEvent.NavigateToChat(it))
+                }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UsersCard(
-    userInfo: UserInfo
+    userInfo: UserInfo,
+    onClick:(UserInfo) -> Unit
 ) {
     OutlinedCard(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
+            .wrapContentHeight(), onClick = {
+                onClick(userInfo)
+        }
     ) {
 
         AsyncImage(

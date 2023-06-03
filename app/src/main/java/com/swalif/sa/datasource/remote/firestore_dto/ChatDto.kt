@@ -1,6 +1,7 @@
 package com.swalif.sa.datasource.remote.firestore_dto
 
 import com.swalif.sa.model.RequestFriendStatus
+import com.swalif.sa.model.UserInfo
 
 data class ChatDto(
     val users:List<UsersChatDto> = listOf(),
@@ -16,6 +17,10 @@ data class UsersChatDto(
     val image:String = "",
     val username:String = "",
     val requestFriend:Boolean = false
+)
+
+fun UserInfo.toUserChat() = UsersChatDto(
+    uidUser,image = photoUri, username = userName,
 )
 
 fun List<UsersChatDto>.formatRequestFriend(myUid:String):RequestFriendStatus{
