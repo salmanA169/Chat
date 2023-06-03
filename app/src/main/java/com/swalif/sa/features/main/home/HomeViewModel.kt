@@ -35,7 +35,7 @@ class HomeViewModel @Inject constructor(
             getChats.collect{chats->
                 _homeState.update {
                     it.copy(
-                        it.chats + chats
+                        it.chats + chats // TODO: here issue
                     )
                 }
 
