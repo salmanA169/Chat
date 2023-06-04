@@ -15,6 +15,10 @@ class FakeRandomChatRoom : AbstractChatRoom() {
         TODO("Not yet implemented")
     }
 
+    override fun deleteRoom() {
+        TODO("Not yet implemented")
+    }
+
     override val maxUsers: Int
         get() = 2
     private val uidUsers = mutableListOf<String>()

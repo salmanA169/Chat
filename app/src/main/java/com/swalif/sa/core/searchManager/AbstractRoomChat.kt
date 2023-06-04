@@ -16,7 +16,7 @@ abstract class AbstractChatRoom {
     abstract fun isBothUsersAccepts():Boolean
     abstract fun updateUserStatus(userUid:String, userState: UserState)
     abstract fun getUIDUsersInRoom():List<String>
-
+    abstract fun deleteRoom()
     abstract fun getRoomEvent():RoomEvent
 }
 data class RoomEvent(

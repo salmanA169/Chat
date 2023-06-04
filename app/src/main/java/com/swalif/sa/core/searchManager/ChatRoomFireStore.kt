@@ -22,6 +22,10 @@ class ChatRoomFireStore(
 ) : AbstractChatRoom() {
 
 
+    override fun deleteRoom() {
+        currentRoomDocumentReference.delete()
+    }
+
     override var users: List<UsersDto> = mutableListOf()
     override var roomStatus: RoomStatus = RoomStatus.WAITING_USERS
 
@@ -83,10 +87,7 @@ class ChatRoomFireStore(
     override fun removeUser(UserInfoDto: UserDto) {
         val findUsers = users.find { it.user.uidUser == UserInfoDto.uidUser }!!
         val updateList = users - findUsers
-
         users = updateList
-
-
     }
 
     override fun isBothUsersAccepts(): Boolean {
@@ -95,18 +96,23 @@ class ChatRoomFireStore(
 
     override fun updateUserStatus(userUid: String, userState: UserState) {
         val getCurrentUser = users.find { it.user.uidUser == userUid }!!
+        val oldMyStatus = getCurrentUser.userState
         val getIndex = users.indexOf(getCurrentUser)
         val newData = users.toMutableList()
         val updatedUser = getCurrentUser.copy(userState = userState)
         newData[getIndex] = updatedUser
         users = newData
-        val data = mapOf("users" to newData,"shouldStartChat" to isBothUsersAccepts())
+        val data = mapOf("users" to newData, "shouldStartChat" to isBothUsersAccepts())
         currentJob?.cancel()
         currentJob = coroutineScope.launch {
             if (isBothUsersAccepts()) {
                 firestoreRoomEvent.onAllUserJoinChat(roomId)
             }
-            currentRoomDocumentReference.update(data).await()
+            if (users.all { it.userState == UserState.IGNORE }) {
+                deleteRoom()
+            } else if (oldMyStatus != UserState.ACCEPT) {
+                currentRoomDocumentReference.update(data).await()
+            }
         }
 
     }
