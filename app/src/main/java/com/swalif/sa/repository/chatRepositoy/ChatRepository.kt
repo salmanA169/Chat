@@ -10,7 +10,7 @@ interface ChatRepository {
     suspend fun insertChat(chat: ChatEntity)
     suspend fun deleteChatById(chat:ChatEntity)
     suspend fun readMessages(chatId:String)
-    suspend fun updateChat(chatID: String, text: String, messageType: MessageType)
+    suspend fun updateChat(chatID: String, text: String, messageType: MessageType,increaseCount:Boolean = false)
 
     suspend fun getChatById(chatId: String):Chat?
 

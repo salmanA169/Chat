@@ -1,5 +1,7 @@
 import com.build.Deps
 import org.jetbrains.kotlin.kapt3.base.Kapt.kapt
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -8,11 +10,30 @@ plugins {
     kotlin("kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
+    id ("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+}
+secrets {
+    // Optionally specify a different file name containing your secrets.
+    // The plugin defaults to "local.properties"
+    propertiesFileName = "secrets.properties"
+
+    // A properties file containing default secret values. This file can be
+    // checked in version control.
+    defaultPropertiesFileName = "local.properties"
+
+    // Configure which keys should be ignored by the plugin by providing regular expressions.
+    // "sdk.dir" is ignored by default.
+    ignoreList.add("keyToIgnore") // Ignore the key "keyToIgnore"
+    ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
 }
 android {
     namespace = "com.swalif.sa"
     compileSdk = 33
 
+   val localProperties =  Properties()
+    localProperties.load(FileInputStream(rootProject.file("local.properties")))
+    val getApplicationAdmob = localProperties.getProperty("APPLICATION_ADMOBE_ID")
+    val getAbmobBannerId = localProperties.getProperty("ADMOBE_BANNER_UNIT_ID")
     defaultConfig {
         applicationId = "com.swalif.sa"
         minSdk = 28
@@ -24,6 +45,11 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        buildConfigField("String","APPLICATION_ADMOBE_ID",getApplicationAdmob)
+        buildConfigField("String","ADMOBE_BANNER_UNIT_ID",getAbmobBannerId)
+        manifestPlaceholders.put("APPLICATION_ADMOBE_ID", getApplicationAdmob)
+
     }
 
     buildTypes {
@@ -105,4 +131,5 @@ dependencies {
     implementation ("com.google.firebase:firebase-firestore-ktx")
     implementation ("com.google.firebase:firebase-storage-ktx")
     implementation("androidx.compose.runtime:runtime-livedata:1.4.3")
+    implementation("com.google.android.gms:play-services-ads:22.1.0")
 }

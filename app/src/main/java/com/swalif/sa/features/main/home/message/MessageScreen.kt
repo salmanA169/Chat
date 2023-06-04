@@ -26,6 +26,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.BottomEnd
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
@@ -53,6 +54,7 @@ import coil.compose.AsyncImage
 import com.google.firebase.Timestamp
 import com.swalif.sa.R
 import com.swalif.sa.Screens
+import com.swalif.sa.component.AdmobComposable
 import com.swalif.sa.model.ChatInfo
 import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageStatus
@@ -150,6 +152,7 @@ fun MessageScreen(
     LaunchedEffect(key1 = friendEvent) {
         friendEvent?.let {
             Toast.makeText(context, messageToast, Toast.LENGTH_SHORT).show()
+            viewModel.restRequest()
         }
     }
     BackHandler {
@@ -181,6 +184,7 @@ fun MessageScreen(
             }
             .navigationBarsPadding()
     ) {
+
         ChatInfoSection(
             onClickImage = rememberPreviewScreen,
             chatInfo = state.chatInfo,
@@ -302,36 +306,40 @@ fun ChatInfoSection(
             .padding(bottom = 6.dp),
         contentAlignment = CenterStart
     ) {
-        Row(modifier = Modifier.wrapContentSize()) {
-            IconButton(onClick = onBack) {
-                Icon(rememberVectorPainter(image = Icons.Default.ArrowBack), "")
-            }
+        Column(modifier = Modifier.wrapContentSize()) {
+            AdmobComposable()
+            Row(modifier = Modifier.wrapContentSize()) {
+                IconButton(onClick = onBack) {
+                    Icon(rememberVectorPainter(image = Icons.Default.ArrowBack), "")
+                }
 
-            AsyncImage(
-                model = chatInfo.imageUri,
-                contentDescription = "",
-                modifier = Modifier
-                    .size(45.dp)
-                    .clip(CircleShape)
-                    .clickable {
-                        onClickImage(chatInfo.imageUri)
-                    },
-                contentScale = ContentScale.Crop
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(
-                modifier = Modifier.wrapContentSize(),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(text = chatInfo.userName, style = MaterialTheme.typography.titleMedium)
-                Text(
-                    text = chatInfo.localizeStatusUser(),
-                    style = MaterialTheme.typography.labelSmall
+                AsyncImage(
+                    model = chatInfo.imageUri,
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(45.dp)
+                        .clip(CircleShape)
+                        .clickable {
+                            onClickImage(chatInfo.imageUri)
+                        },
+                    contentScale = ContentScale.Crop
                 )
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(
+                    modifier = Modifier.wrapContentSize(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(text = chatInfo.userName, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = chatInfo.localizeStatusUser(),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+
+                }
             }
         }
         if (chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
-            IconButton(modifier = Modifier.align(CenterEnd), onClick = {
+            IconButton(modifier = Modifier.align(BottomEnd), onClick = {
                 if (chatInfo.requestFriendStatus == RequestFriendStatus.IDLE) {
                     onRequestFriendClick()
                 }

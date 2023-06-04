@@ -142,11 +142,11 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                             }
                             if (isSavedLocally) {
                                 messageRepository.addMessage(message.toMessageModel())
-//                                chatRepository.updateChat(
-//                                    chatId,
-//                                    message.message,
-//                                    message.messageType!!
-//                                )
+                                chatRepository.updateChat(
+                                    chatId,
+                                    message.message,
+                                    message.messageType!!
+                                )
                             } else {
                                 mm.update {
                                     list

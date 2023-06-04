@@ -30,6 +30,7 @@ import com.swalif.sa.features.main.explore.search.searchScreen
 import com.swalif.sa.features.onboarding.onBoardingNavigation
 import com.swalif.sa.ui.theme.ChatAppTheme
 import dagger.hilt.android.AndroidEntryPoint
+import logcat.logcat
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {

@@ -52,7 +52,7 @@ class ChatRepositoryImpl @Inject constructor(
         chatDao.updateChat(getChat!!.copy(messagesUnread = 0))
     }
 
-    override suspend fun updateChat(chatID: String, text: String, messageType: MessageType) {
+    override suspend fun updateChat(chatID: String, text: String, messageType: MessageType,increaseCount:Boolean) {
         val getChat = chatDao.getChatById(chatID)?: return
         val message: String
         when (messageType) {
@@ -70,7 +70,7 @@ class ChatRepositoryImpl @Inject constructor(
         chatDao.updateChat(
             getChat.copy(
                 lastMessage = message,
-                messagesUnread = getChat.messagesUnread.plus(1),
+                messagesUnread = if (increaseCount)getChat.messagesUnread.plus(1) else 0,
                 lastMessageDate = Timestamp.now().toDate().time
             )
         )

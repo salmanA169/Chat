@@ -69,6 +69,10 @@ class MessageViewModel @Inject constructor(
         // TODO: toast message
     }
 
+
+    fun restRequest(){
+        _friendEvent.value = null
+    }
     override fun onLeaveChat() {
         _leaveChat.postValue(true)
     }
