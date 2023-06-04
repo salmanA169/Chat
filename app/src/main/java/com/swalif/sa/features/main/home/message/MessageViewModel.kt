@@ -64,6 +64,11 @@ class MessageViewModel @Inject constructor(
         }
     }
 
+    override fun onChatDeleted() {
+        _leaveChat.postValue(true)
+        // TODO: toast message
+    }
+
     override fun onLeaveChat() {
         _leaveChat.postValue(true)
     }

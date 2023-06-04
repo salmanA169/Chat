@@ -3,9 +3,12 @@ package com.swalif.sa.datasource.remote
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.dataObjects
+import com.google.firebase.firestore.ktx.snapshots
+import com.google.firebase.firestore.ktx.toObject
 import com.google.firebase.firestore.ktx.toObjects
 import com.swalif.Constants
 import com.swalif.sa.datasource.remote.firestore_dto.ChatDto
+import com.swalif.sa.datasource.remote.firestore_dto.MessageDto
 import com.swalif.sa.datasource.remote.firestore_dto.UserDto
 import com.swalif.sa.datasource.remote.firestore_dto.UserStatusDto
 import com.swalif.sa.datasource.remote.firestore_dto.toUserChat
@@ -13,10 +16,12 @@ import com.swalif.sa.datasource.remote.response.ChatDataResponse
 import com.swalif.sa.mapper.toUserInfo
 import com.swalif.sa.model.Chat
 import com.swalif.sa.model.ChatInfo
+import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.UserInfo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.tasks.await
 import logcat.logcat
 import java.util.UUID
@@ -58,18 +63,35 @@ class FireStoreDatabase @Inject constructor(
         }
     }
 
-     fun getChats(myUid: String): Flow<List<Chat>> {
+    fun getChats(myUid: String): Flow<List<Chat>> {
         val chats = fireStoreDatabase.collection(Constants.CHATS_COLLECTIONS)
-            .whereEqualTo("acceptRequestFriends", false).dataObjects<ChatDto>()
-
+            .whereEqualTo("acceptRequestFriends", false).snapshots()
 
         return chats.filter {
-            it.any {
-                it.users.find { users ->
-                    users.userUid == myUid
-                }!= null
+            val chatsDto = it.toObjects(ChatDto::class.java)
+
+            if (chatsDto.isEmpty()){
+                true
+            }else{
+                chatsDto.any {
+                    it.users.find { users ->
+                        users.userUid == myUid
+                    } != null
+                }
             }
-        }.map {
+        }.onEach {
+            it.documents.forEach { documents ->
+                val messageCollection =
+                    documents.reference.collection(Constants.MESSAGES_COLLECTIONS).get().await()
+                messageCollection.documents.filter {
+                    val message = it.toObject<MessageDto>()
+                    message != null && message.senderUid != myUid&& message.statusMessage != MessageStatus.SEEN
+                }.forEach { messageDocuments ->
+                    messageDocuments.reference.update("statusMessage", MessageStatus.DELIVERED)
+                        .await()
+                }
+            }
+        }.map { it.toObjects(ChatDto::class.java) }.map {
             it.map {
                 val user = it.users.find { it.userUid != myUid }
                 Chat(

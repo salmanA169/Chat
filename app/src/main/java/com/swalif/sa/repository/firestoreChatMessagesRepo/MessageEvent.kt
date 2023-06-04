@@ -4,4 +4,5 @@ interface MessageEvent {
     fun onDataChanged()
     fun onFriendAccepted()
     fun onLeaveChat()
+    fun onChatDeleted()
 }

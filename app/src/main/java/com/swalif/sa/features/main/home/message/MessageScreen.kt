@@ -220,11 +220,7 @@ fun MessageScreen(
                     Spacer(modifier = Modifier.height(4.dp))
                 }
             }
-            item {
-                if (state.chatInfo.userIsLeft) {
-                    AnnouncementContent(content = "user has left")
-                }
-            }
+
         }
 
         EditTextField(

@@ -19,6 +19,7 @@ import com.swalif.sa.datasource.remote.firestore_dto.ChatDto
 import com.swalif.sa.datasource.remote.firestore_dto.MessageDto
 import com.swalif.sa.datasource.remote.firestore_dto.UserDto
 import com.swalif.sa.datasource.remote.firestore_dto.UserStatusDto
+import com.swalif.sa.datasource.remote.firestore_dto.UsersChatDto
 import com.swalif.sa.datasource.remote.firestore_dto.formatRequestFriend
 import com.swalif.sa.datasource.remote.firestore_dto.localizeToUserStatus
 import com.swalif.sa.mapper.toListMessageModel
@@ -28,6 +29,7 @@ import com.swalif.sa.model.ChatInfo
 import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
+import com.swalif.sa.model.RequestFriendStatus
 import com.swalif.sa.model.SenderInfo
 import com.swalif.sa.repository.chatRepositoy.ChatRepository
 import com.swalif.sa.repository.messageRepository.MessageRepository
@@ -38,6 +40,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -114,7 +117,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
             }
             it.documents.filter {
                 val message = it.toObject(MessageDto::class.java)
-                message?.statusMessage == MessageStatus.SENT && message.senderUid != myUid
+                message?.statusMessage != MessageStatus.SEEN && message!!.senderUid != myUid
             }.map {
                 it.reference
             }.forEach {
@@ -270,25 +273,29 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
             firestore.collection(Constants.CHATS_COLLECTIONS).whereEqualTo("chatId", chatId)
                 .snapshots().map {
                     val chat = it.firstOrNull()
-                    val usersChat = chat?.toObject(ChatDto::class.java)?:ChatDto()
+                    val usersChat = chat?.toObject(ChatDto::class.java)
+                    if (usersChat == null){
+                        onMessageEventListener?.onChatDeleted()
+                    }
                     currentChatDto = usersChat
-                    val findReceiver = usersChat.users.find { it.userUid != getMyUser.uidUser }!!
+                    val findReceiver = usersChat?.users?.find { it.userUid != getMyUser.uidUser }
                     if (!isSavedLocally && !isFirstTime) {
-                        if (usersChat.acceptRequestFriends) {
+                        if (usersChat?.acceptRequestFriends == true) {
                             onMessageEventListener?.onFriendAccepted()
                             isSavedLocally = true
                             saveUserLocally(
                                 usersChat.chatId,
                                 SenderInfo(
-                                    findReceiver.userUid,
-                                    findReceiver.image,
-                                    findReceiver.username
+                                    findReceiver?.userUid?:"",
+                                    findReceiver?.image?:"",
+                                    findReceiver?.username?:""
                                 ), usersChat.maxUsers
                             )
                         }
                     }
-                    findReceiver
+                    findReceiver?:UsersChatDto()
                 }
+
         val receiverUid = getReceiver.first().userUid
         val receiveStatus =
             firestore.collection(Constants.USERS_COLLECTIONS).whereEqualTo("uidUser", receiverUid)
@@ -303,7 +310,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 receiverInfo.userUid,
                 receiverInfo.image,
                 receiverInfo.left,
-                currentChatDto!!.users.formatRequestFriend(myUid!!)
+                currentChatDto?.users?.formatRequestFriend(myUid!!)?:RequestFriendStatus.IDLE
             )
         }
     }

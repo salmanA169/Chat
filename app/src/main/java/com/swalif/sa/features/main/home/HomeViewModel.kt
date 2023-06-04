@@ -14,6 +14,7 @@ import com.swalif.sa.repository.userRepository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import logcat.logcat
 import javax.inject.Inject
 
 @HiltViewModel
@@ -30,12 +31,12 @@ class HomeViewModel @Inject constructor(
 
     private fun syncChats() {
         val getChats = firebaseDatabase.getChats(myUser?.uidUser ?: return)
-        // TODO: fix it duplicated chat and throw exception because chat id 
         viewModelScope.launch(dispatchers.io) {
             getChats.collect{chats->
+
                 _homeState.update {
                     it.copy(
-                        it.chats + chats // TODO: here issue
+                        tempChats = chats
                     )
                 }
 

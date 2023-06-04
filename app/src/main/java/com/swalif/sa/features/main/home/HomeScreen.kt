@@ -75,6 +75,10 @@ fun HomeScreen(
             .nestedScroll(nestedScrollConnection),
     ) {
 
+        items(homeState.tempChats,key = {it.chatId}){
+            ChatItem(chat = it, rememberOnDelete, rememberOnNavigate)
+            Divider()
+        }
         items(homeState.chats, key = {
             it.chatId
         }) {
