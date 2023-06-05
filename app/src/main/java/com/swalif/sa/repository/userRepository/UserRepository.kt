@@ -19,4 +19,6 @@ interface UserRepository {
     suspend fun signOut(uid:String)
     suspend fun setOffline()
     suspend fun setOnline()
+    suspend fun signIn(email:String,password:String):SignInResult
+    suspend fun signUpWithEmailAndPassword(email:String,password:String,imageUri:String)
 }

@@ -11,7 +11,6 @@ import androidx.navigation.NavType
 import androidx.navigation.navArgument
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
-
 const val ON_BOARDING_SCREEN = "onboard_route"
 const val MY_UID_ARG = "my_UID"
 const val CHANNEL_ID_ARG = "channel_id"
@@ -42,7 +41,8 @@ sealed class Screens(val route: String) {
                     type = NavType.StringType
                 }, navArgument(USERNAME_ARG){
                     type = NavType.StringType
-                })
+                }
+                )
 
             fun navigateToInformation(email:String,photoArg:String,uidArg:String,userName:String): String {
                 val encodedUri = URLEncoder.encode(photoArg, StandardCharsets.UTF_8.toString())
@@ -55,7 +55,7 @@ sealed class Screens(val route: String) {
                 }
             }
         }
-        object SignInScreen : OnBoardingScreen("login_route"){
+        object SignUpScreen : OnBoardingScreen("signUp_route"){
             override val args: List<NamedNavArgument>
                 get() = emptyList()
         }

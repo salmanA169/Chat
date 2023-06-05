@@ -8,7 +8,6 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,9 +15,12 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -26,11 +28,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
-import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.Wallpapers
 import androidx.compose.ui.unit.dp
@@ -39,10 +44,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.swalif.sa.R
 import com.swalif.sa.Screens
-import com.swalif.sa.features.main.home.message.EditTextField
 import com.swalif.sa.ui.theme.ChatAppTheme
 import logcat.logcat
 
@@ -55,14 +58,16 @@ fun NavGraphBuilder.registrationDest(navController: NavController) {
         val registrationState by registrationViewModel.currentRegistrationState.collectAsStateWithLifecycle()
         RegistrationScreen(
             registrationState,
-            onSignIn = registrationViewModel::signInGoogleOneTap,
+            onGoogleSignIn = registrationViewModel::signInGoogleOneTap,
             onNavigate = {
                 navController.navigate(it) {
                     popUpTo(Screens.OnBoardingScreen.RegistrationScreen.route) {
                         inclusive = true
                     }
                 }
-            }, onSignInResult = registrationViewModel::signInResult
+            }, onSignInResult = registrationViewModel::signInResult, onSignUp = {
+                navController.navigate(it)
+            }
         )
     }
 }
@@ -81,9 +86,10 @@ fun Preview() {
 @Composable
 fun RegistrationScreen(
     registrationState: RegistrationState,
-    onSignIn: () -> Unit = {},
+    onGoogleSignIn: () -> Unit = {},
     onSignInResult: (Intent) -> Unit = {},
-    onNavigate: (route: String) -> Unit = {}
+    onNavigate: (route: String) -> Unit = {},
+    onSignUp:(String)->Unit = {}
 ) {
 
     val registerIntentSender =
@@ -123,9 +129,10 @@ fun RegistrationScreen(
             }
         }
     }
-    // TODO: continue here implement email and password for firebase
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .systemBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
@@ -147,13 +154,25 @@ fun RegistrationScreen(
                 Text(text = stringResource(id = R.string.signIn))
 
             }
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(text = "or Sign up")
+            Spacer(modifier = Modifier.size(16.dp))
+            ClickableText(
+                style = LocalTextStyle.current.copy(textDecoration = TextDecoration.Underline),
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                        append("or Sign up")
+                    }
+                },
+                onClick = {
+                    onSignUp(
+                        Screens.OnBoardingScreen.SignUpScreen.route
+                    )
+                })
+
         }
 
         Divider(Modifier.fillMaxWidth(0.9f))
         Button(modifier = Modifier, onClick = {
-            onSignIn()
+            onGoogleSignIn()
         }) {
             Image(painterResource(id = R.drawable.google_icon), contentDescription = null)
             Spacer(modifier = Modifier.size(8.dp))

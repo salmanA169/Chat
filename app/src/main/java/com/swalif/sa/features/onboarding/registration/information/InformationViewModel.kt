@@ -9,7 +9,6 @@ import com.swalif.sa.MY_UID_ARG
 import com.swalif.sa.PHOTO_ARG
 import com.swalif.sa.USERNAME_ARG
 import com.swalif.sa.component.Gender
-import com.swalif.sa.datasource.local.entity.UserEntity
 import com.swalif.sa.model.UserInfo
 import com.swalif.sa.repository.userRepository.UserRepository
 import com.swalif.sa.utils.generateUniqueId
@@ -20,9 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import logcat.logcat
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class InformationViewModel @Inject constructor(
@@ -56,15 +53,16 @@ class InformationViewModel @Inject constructor(
         if (info.checkIfHasError()) {
             checkError()
         } else {
+            val user = _infoState.value
             insertUser(
                 UserInfo(
                     myUidArg!!,
-                    userNameArg!!,
-                    emailArg!!,
+                    user.name,
+                    user.email,
                     gender,
                     generateUniqueId(),
                     Timestamp.now().toDate().time,
-                    photoArg!!
+                    user.imageUri
                 )
             )
 

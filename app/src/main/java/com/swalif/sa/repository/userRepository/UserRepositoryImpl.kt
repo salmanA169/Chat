@@ -51,6 +51,29 @@ class UserRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun signUpWithEmailAndPassword(
+        email: String,
+        password: String,
+        imageUri: String
+    ) {
+    }
+
+    override suspend fun signIn(email: String, password: String): SignInResult {
+        return try {
+            val user = firebaseAuth.signInWithEmailAndPassword(email,password).await().user!!
+            SignInResult(
+                UserData(
+                    user.displayName,user.uid,user.photoUrl.toString(),user.email,false
+                ),null
+            )
+        }catch (e:Exception){
+            logcat{
+                e.message.toString()
+            }
+            SignInResult(null,e.message)
+        }
+    }
+
     override suspend fun setOffline() {
         val getCurrentUser = getCurrentUser()?: return
         fireStore.setOffline(getCurrentUser.toUserDto())

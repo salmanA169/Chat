@@ -7,6 +7,7 @@ import com.swalif.sa.ON_BOARDING_SCREEN
 import com.swalif.sa.Screens
 import com.swalif.sa.features.onboarding.registration.information.informationDest
 import com.swalif.sa.features.onboarding.registration.registration.registrationDest
+import com.swalif.sa.features.onboarding.signup.signupDest
 
 fun NavGraphBuilder.onBoardingNavigation(navController: NavController) {
     navigation(
@@ -15,5 +16,6 @@ fun NavGraphBuilder.onBoardingNavigation(navController: NavController) {
     ) {
         registrationDest(navController)
         informationDest(navController)
+        signupDest(navController)
     }
 }

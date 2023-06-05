@@ -29,7 +29,7 @@ class RegistrationViewModel @Inject constructor(
         }
     }
 
-    suspend fun insertUser(uidUser:String){
+    private suspend fun insertUser(uidUser:String){
         val getUser = userRepository.getUserByUid(uidUser)
         if (getUser != null){
             userRepository.insertUser(getUser)
