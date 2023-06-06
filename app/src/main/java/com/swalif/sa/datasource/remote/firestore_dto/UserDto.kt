@@ -1,9 +1,10 @@
 package com.swalif.sa.datasource.remote.firestore_dto
 
+import androidx.annotation.Keep
 import com.google.firebase.Timestamp
 import com.swalif.sa.component.Gender
 import com.swalif.sa.model.UserStatus
-
+@Keep
 data class UserDto(
     val uidUser: String = "",
     val userName: String = "",
@@ -15,7 +16,7 @@ data class UserDto(
     val userStatus: UserStatusDto = UserStatusDto.OFFLINE,
     val lastSeen: Timestamp? = null
 )
-
+@Keep
 enum class UserStatusDto {
     ONLINE, OFFLINE, TYPING
 }

@@ -144,8 +144,8 @@ fun MessageScreen(
         })
     }
 
-    LaunchedEffect(key1 = leaveChat ){
-        if (leaveChat == true){
+    LaunchedEffect(key1 = leaveChat) {
+        if (leaveChat == true) {
             navController.popBackStack()
         }
     }
@@ -158,11 +158,11 @@ fun MessageScreen(
     BackHandler {
         if (state.chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
             viewModel.dialogEvent(true)
-        } else if(state.chatInfo.userIsLeft) {
+        } else if (state.chatInfo.userIsLeft) {
             navController.popBackStack()
             Toast.makeText(context, "user has left", Toast.LENGTH_SHORT).show()
             viewModel.leaveChat()
-        }else{
+        } else {
             navController.popBackStack()
         }
     }
@@ -178,6 +178,20 @@ fun MessageScreen(
             navController.navigate(Screens.PreviewScreen.navigateToPreview(image))
         }
     }
+    val rememberOnBack = remember<() -> Unit> {
+        {
+            if (state.chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
+                viewModel.dialogEvent(true)
+            } else if (state.chatInfo.userIsLeft) {
+                navController.popBackStack()
+                viewModel.leaveChat()
+                Toast.makeText(context, "user has left", Toast.LENGTH_SHORT).show()
+
+            } else {
+                navController.popBackStack()
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -191,22 +205,9 @@ fun MessageScreen(
 
         ChatInfoSection(
             onClickImage = rememberPreviewScreen,
-            chatInfo = state.chatInfo,
+            chatInfo = {state.chatInfo},
             modifier = Modifier.fillMaxWidth(),
-            onRequestFriendClick = {
-                viewModel.updateFriendRequest()
-            }, onBack = {
-                if (state.chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
-                    viewModel.dialogEvent(true)
-                }else if(state.chatInfo.userIsLeft){
-                    navController.popBackStack()
-                    viewModel.leaveChat()
-                    Toast.makeText(context, "user has left", Toast.LENGTH_SHORT).show()
-
-                } else {
-                    navController.popBackStack()
-                }
-            }
+            onRequestFriendClick = viewModel::updateFriendRequest, onBack = rememberOnBack
         )
         LazyColumn(
             state = lazyColumnState,
@@ -214,23 +215,21 @@ fun MessageScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f),
-            contentPadding = PaddingValues(6.dp)
+            contentPadding = PaddingValues(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             items(state.messages, key = {
                 it.messageId
-            }) {
+            }, contentType = { it.messageType }) {
                 if (it.messageType == MessageType.ANNOUNCEMENT) {
                     if (it.senderUid != state.myUid) {
                         AnnouncementContent(content = it.message)
                     }
                 } else {
-
                     MessageItem(
                         message = it,
                         navController,
                         state.myUid
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
                 }
             }
 
@@ -299,14 +298,17 @@ fun EditTextField(
         })
 }
 
+// TODO: continue to fix it
 @Composable
 fun ChatInfoSection(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     onClickImage: (String) -> Unit,
-    chatInfo: ChatInfo,
+    chatInfo:()-> ChatInfo,
     onRequestFriendClick: () -> Unit
 ) {
+    val rememberChatInf = chatInfo()
+
     Box(
         modifier = modifier
             .wrapContentHeight()
@@ -323,13 +325,13 @@ fun ChatInfoSection(
                 }
 
                 AsyncImage(
-                    model = chatInfo.imageUri,
+                    model = rememberChatInf.imageUri,
                     contentDescription = "",
                     modifier = Modifier
                         .size(45.dp)
                         .clip(CircleShape)
                         .clickable {
-                            onClickImage(chatInfo.imageUri)
+                            onClickImage(rememberChatInf.imageUri)
                         },
                     contentScale = ContentScale.Crop
                 )
@@ -338,25 +340,25 @@ fun ChatInfoSection(
                     modifier = Modifier.wrapContentSize(),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = chatInfo.userName, style = MaterialTheme.typography.titleMedium)
+                    Text(text = rememberChatInf.userName, style = MaterialTheme.typography.titleMedium)
                     Text(
-                        text = chatInfo.localizeStatusUser(),
+                        text = rememberChatInf.localizeStatusUser(),
                         style = MaterialTheme.typography.labelSmall
                     )
 
                 }
             }
         }
-        if (chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
+        if (rememberChatInf.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
             IconButton(modifier = Modifier.align(BottomEnd), onClick = {
-                if (chatInfo.requestFriendStatus == RequestFriendStatus.IDLE) {
+                if (rememberChatInf.requestFriendStatus == RequestFriendStatus.IDLE) {
                     onRequestFriendClick()
                 }
             }) {
                 Icon(
                     modifier = Modifier,
                     painter = painterResource(
-                        when (chatInfo.requestFriendStatus) {
+                        when (rememberChatInf.requestFriendStatus) {
                             RequestFriendStatus.IDLE -> R.drawable.request_friend_icon
                             RequestFriendStatus.SENT -> R.drawable.request_friend_pending_icon
                             RequestFriendStatus.ACCEPTED -> R.drawable.check_icon

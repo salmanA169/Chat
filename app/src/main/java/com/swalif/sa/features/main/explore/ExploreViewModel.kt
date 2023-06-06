@@ -3,6 +3,7 @@ package com.swalif.sa.features.main.explore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.swalif.sa.Screens
+import com.swalif.sa.component.Gender
 import com.swalif.sa.coroutine.DispatcherProvider
 import com.swalif.sa.datasource.remote.FireStoreDatabase
 import com.swalif.sa.model.UserInfo
@@ -31,24 +32,31 @@ class ExploreViewModel @Inject constructor(
     val event = _event.asStateFlow()
     private var myUser: UserInfo? = null
 
-    fun readEvent(){
+    fun readEvent() {
         _event.update {
             null
         }
     }
+
     fun onEvent(exploreEvent: UiExploreEvent) {
-        when(exploreEvent){
+        when (exploreEvent) {
             is UiExploreEvent.NavigateToChat -> {
                 viewModelScope.launch(dispatchProvider.io) {
-                    val chatId = firebaseDatabase.createNewChatIfNotExist(myUser!!,exploreEvent.userInfo)
+                    val chatId =
+                        firebaseDatabase.createNewChatIfNotExist(myUser!!, exploreEvent.userInfo)
 //                    if ()
                     val getChatLocally = chatRepository.getChatById(chatId.chatId)
                     _event.update {
-                        ExploreEvent.NavigateToChat(chatId.chatId,myUser!!.uidUser,getChatLocally!= null )
+                        ExploreEvent.NavigateToChat(
+                            chatId.chatId,
+                            myUser!!.uidUser,
+                            getChatLocally != null
+                        )
                     }
                 }
             }
-            UiExploreEvent.NavigateToSearch ->{
+
+            UiExploreEvent.NavigateToSearch -> {
                 _event.update {
                     ExploreEvent.Navigate(Screens.SearchScreen.route)
                 }
@@ -70,12 +78,17 @@ class ExploreViewModel @Inject constructor(
     }
 
 }
+
+
+
 sealed class UiExploreEvent {
 
     object NavigateToSearch : UiExploreEvent()
-    class NavigateToChat(val userInfo:UserInfo):UiExploreEvent()
+    class NavigateToChat(val userInfo: UserInfo) : UiExploreEvent()
 }
+
 sealed class ExploreEvent {
     class Navigate(val route: String) : ExploreEvent()
-    class NavigateToChat(val chatId: String, val myUid: String,val isSavedLocally:Boolean) : ExploreEvent()
+    class NavigateToChat(val chatId: String, val myUid: String, val isSavedLocally: Boolean) :
+        ExploreEvent()
 }

@@ -36,7 +36,7 @@ class HomeViewModel @Inject constructor(
 
                 _homeState.update {
                     it.copy(
-                        tempChats = chats
+                        tempChats = chats.distinctBy { it.chatId }
                     )
                 }
 

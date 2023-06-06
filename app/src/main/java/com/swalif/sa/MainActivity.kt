@@ -66,6 +66,18 @@ class MainActivity : ComponentActivity() {
                 var titleBar by remember{
                     mutableStateOf(R.string.home)
                 }
+                val rememberClickNav = remember{
+                    {screen:Screens.MainScreens->
+                        navController.navigate(screen.route){
+                            popUpTo(navController.graph.findStartDestination().id){
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                        titleBar = screen.name
+                    }
+                }
                 LaunchedEffect(key1 = isUserAvailable) {
                     isUserAvailable?.let { isAvailable ->
                         if (!isAvailable) {
@@ -98,14 +110,7 @@ class MainActivity : ComponentActivity() {
                                         },
                                         selected = currentDest?.hierarchy?.any { it.route == screen.route } == true,
                                         onClick = {
-                                            navController.navigate(screen.route){
-                                                popUpTo(navController.graph.findStartDestination().id){
-                                                    saveState = true
-                                                }
-                                                launchSingleTop = true
-                                                restoreState = true
-                                            }
-                                            titleBar = screen.name
+                                            rememberClickNav(screen)
                                         },
                                         icon = {
                                             Icon(imageVector = screen.icon, contentDescription = "")
