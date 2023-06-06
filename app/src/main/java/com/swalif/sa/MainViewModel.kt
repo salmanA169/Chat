@@ -7,6 +7,8 @@ import com.swalif.sa.coroutine.DispatcherProvider
 import com.swalif.sa.datasource.local.entity.UserEntity
 import com.swalif.sa.datasource.remote.FireStoreDatabase
 import com.swalif.sa.model.UserInfo
+import com.swalif.sa.repository.chatRepositoy.ChatRepository
+import com.swalif.sa.repository.messageRepository.MessageRepository
 import com.swalif.sa.repository.userRepository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -16,7 +18,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    userRepository: UserRepository
+    userRepository: UserRepository,
+    private val chatRepository: ChatRepository,
+    private val messageRepository: MessageRepository
 ) : ViewModel() {
 
     @Inject lateinit var dispatcherProvider: DispatcherProvider
@@ -27,11 +31,6 @@ class MainViewModel @Inject constructor(
             SharingStarted.WhileSubscribed(5000), null
         )
 
-    fun signOut() {
-        viewModelScope.launch {
-            userRepo.deleteUser(UserInfo("", "","", Gender.MALE, "", 50, ""))
-        }
-    }
 
     // TODO: maybe in onDestroy coroutine will be cancel before save offline data debug it later
      fun setOffline(){
@@ -40,6 +39,13 @@ class MainViewModel @Inject constructor(
          }
     }
 
+    fun nukeChatAndMessageTables(){
+        viewModelScope.launch(dispatcherProvider.io) {
+            // TODO: later remove all files and move it later to work manager
+            chatRepository.nukeTable()
+            messageRepository.nukeMessageTable()
+        }
+    }
     fun setOnline(){
         viewModelScope.launch(dispatcherProvider.io) {
             userRepo.setOnline()

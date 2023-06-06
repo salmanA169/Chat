@@ -19,6 +19,19 @@ class FakeUserRepository @Inject constructor(
         TODO("Not yet implemented")
     }
 
+    override suspend fun signIn(email: String, password: String): SignInResult {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun signUpWithEmailAndPassword(
+        username: String,
+        email: String,
+        password: String,
+        imageUri: String
+    ): SignInResult {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun saveUser(user: UserInfo) {
         TODO("Not yet implemented")
     }

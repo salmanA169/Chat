@@ -14,4 +14,5 @@ interface MessageRepository {
     suspend fun deleteMessage(message: Message)
     suspend fun getMessagesByChatID(chatId: String):List<Message>
     suspend fun getAllMessages():List<Message>
+    suspend fun nukeMessageTable()
 }

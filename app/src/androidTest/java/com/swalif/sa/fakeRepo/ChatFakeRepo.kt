@@ -15,6 +15,19 @@ class ChatFakeRepo @Inject constructor():ChatRepository {
         return chat.asStateFlow()
     }
 
+    override suspend fun updateChat(
+        chatID: String,
+        text: String,
+        messageType: MessageType,
+        increaseCount: Boolean
+    ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun nukeTable() {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun insertChat(chat: ChatEntity) {
         TODO("Not yet implemented")
     }
@@ -27,9 +40,6 @@ class ChatFakeRepo @Inject constructor():ChatRepository {
         TODO("Not yet implemented")
     }
 
-    override suspend fun updateChat(chatID: String, text: String, messageType: MessageType) {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun getChatById(chatId: String): Chat {
         TODO("Not yet implemented")

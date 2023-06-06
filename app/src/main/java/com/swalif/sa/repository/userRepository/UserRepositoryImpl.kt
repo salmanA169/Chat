@@ -3,14 +3,17 @@ package com.swalif.sa.repository.userRepository
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
+import androidx.core.net.toUri
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.ktx.userProfileChangeRequest
 import com.swalif.sa.core.data_store.getUserUidFlow
 import com.swalif.sa.core.data_store.updateIsFirstTime
+import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.datasource.local.dao.UserDao
 import com.swalif.sa.datasource.local.entity.UserEntity
 import com.swalif.sa.datasource.remote.FireStoreDatabase
@@ -34,7 +37,8 @@ class UserRepositoryImpl @Inject constructor(
     private val dataStore: DataStore<Preferences>,
     private val firebaseAuth: FirebaseAuth,
     @ApplicationContext private val context: Context,
-    private val fireStore: FireStoreDatabase
+    private val fireStore: FireStoreDatabase,
+    private val filesManager: FilesManager
 ) : UserRepository, FirebaseAuth.AuthStateListener, Closeable {
 
     private val oneTapClint = Identity.getSignInClient(context)
@@ -52,10 +56,33 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun signUpWithEmailAndPassword(
+        username:String,
         email: String,
         password: String,
         imageUri: String
-    ) {
+    ) :SignInResult{
+        return try {
+            val createAccount = firebaseAuth.createUserWithEmailAndPassword(email,password).await().user!!
+            val saveImage = filesManager.saveToFireStorage(createAccount.uid,imageUri.toUri())
+            if (saveImage!= null ){
+                val updatedProfile = userProfileChangeRequest{
+                    displayName = username
+                    photoUri = saveImage.toUri()
+                }
+                createAccount.updateProfile(updatedProfile).await()
+                SignInResult(
+                    UserData(
+                        username,createAccount.uid,saveImage,email,false
+                    )
+                    ,null
+                )
+            }else{
+                SignInResult(null,"Can not upload image")
+            }
+        }catch (e:Exception){
+            logcat { e.message.toString() }
+            SignInResult(null,e.message)
+        }
     }
 
     override suspend fun signIn(email: String, password: String): SignInResult {

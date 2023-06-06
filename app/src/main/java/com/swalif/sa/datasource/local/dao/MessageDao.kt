@@ -13,10 +13,11 @@ interface MessageDao {
     fun getMessageWithChat(chatId:String):Flow<ChatWithMessages>
 
     @Query("SELECT * FROM MessageEntity ")
-    fun observeAllMessages():Flow<MessageEntity>
+    fun observeAllMessages():Flow<List<MessageEntity>>
 
     @Query("SELECT * FROM MessageEntity")
     suspend fun getAllMessages():List<MessageEntity>
+
 
     @Query("SELECT * FROM MessageEntity WHERE chatIdMessage = :chatId")
     suspend fun getMessageByChatId(chatId: String):List<MessageEntity>
@@ -32,4 +33,7 @@ interface MessageDao {
 
     @Query("DELETE FROM MessageEntity WHERE chatIdMessage= :chatId")
     suspend fun deleteMessageByChatId(chatId: String)
+
+    @Query("DELETE FROM MessageEntity")
+    suspend fun nukeAllMessageTable()
 }

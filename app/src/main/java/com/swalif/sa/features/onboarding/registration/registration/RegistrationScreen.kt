@@ -159,7 +159,7 @@ fun RegistrationScreen(
                 style = LocalTextStyle.current.copy(textDecoration = TextDecoration.Underline),
                 text = buildAnnotatedString {
                     withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                        append("or Sign up")
+                        append("Or Sign up")
                     }
                 },
                 onClick = {

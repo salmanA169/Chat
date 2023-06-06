@@ -74,6 +74,7 @@ class MainActivity : ComponentActivity() {
                                     inclusive = true
                                 }
                             }
+                            viewModel.nukeChatAndMessageTables()
                         }
                     }
                 }

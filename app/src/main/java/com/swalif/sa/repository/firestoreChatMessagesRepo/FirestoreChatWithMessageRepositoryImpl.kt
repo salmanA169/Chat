@@ -223,7 +223,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 mm.update {
                     it + message.toMessageModel().copy(mediaUri = "")
                 }
-                val image = saveToFireStorage(myUid!!, message.mediaUri!!.toUri())
+                val image = filesManager.saveToFireStorage(myUid!!, message.mediaUri!!.toUri())
                 val messageUpdated =
                     message.copy(mediaUri = image, statusMessage = MessageStatus.SENT)
                 currentMessagesCollection!!.add(messageUpdated)
@@ -239,20 +239,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     }
 
 
-    private suspend fun saveToFireStorage(pathUidUser: String, mediaUri: Uri): String? {
-        return try {
-            val compressImage = filesManager.compressImage(mediaUri)
-            val reference = fireStorage.reference.child(pathUidUser)
-                .child(mediaUri.lastPathSegment!!.plus(".jpeg")).putBytes(compressImage).await()
-            reference.storage.downloadUrl.await().toString()
-        } catch (f: Exception) {
-            logcat("FirestoreChatMessageRepository") {
-                "save file faield : ${f.message}"
-            }
-            null
-        }
 
-    }
 
     override suspend fun addChatLocally(chat: ChatEntity) {
         chatRepository.insertChat(chat)

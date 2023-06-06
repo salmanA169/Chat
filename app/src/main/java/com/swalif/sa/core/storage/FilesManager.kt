@@ -1,15 +1,12 @@
 package com.swalif.sa.core.storage
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Bitmap.CompressFormat
 import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import androidx.core.graphics.decodeBitmap
-import androidx.core.net.toUri
-import coil.decode.BitmapFactoryDecoder
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -44,7 +41,7 @@ class FilesManager @Inject constructor(
         val file = File(context.filesDir,uri)
         return file.exists()
     }
-    suspend fun compressImage(uri: Uri):ByteArray{
+    private suspend fun compressImage(uri: Uri):ByteArray{
         return withContext(Dispatchers.Default){
             val outputStream = ByteArrayOutputStream()
             val btm = ImageDecoder.createSource(contentResolver,uri).decodeBitmap{info,source->
@@ -55,7 +52,22 @@ class FilesManager @Inject constructor(
         }
     }
 
-    suspend fun saveImage(uriReference:String,nameFile:String):Boolean{
+     suspend fun saveToFireStorage(pathUidUser: String, mediaUri: Uri): String? {
+        return try {
+            val compressImage = compressImage(mediaUri)
+            val reference = storage.reference.child(pathUidUser)
+                .child(mediaUri.lastPathSegment!!.plus(".jpeg")).putBytes(compressImage).await()
+            reference.storage.downloadUrl.await().toString()
+        } catch (f: Exception) {
+            logcat("FirestoreChatMessageRepository") {
+                "save file faield : ${f.message}"
+            }
+            null
+        }
+
+    }
+
+    suspend fun saveImageLocally(uriReference:String, nameFile:String):Boolean{
         return try {
             withContext(Dispatchers.Default){
                 val byteArray = storage.getReferenceFromUrl(uriReference).getBytes(FIFTY_MB).await()

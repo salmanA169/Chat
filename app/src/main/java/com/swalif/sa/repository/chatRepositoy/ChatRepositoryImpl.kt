@@ -23,6 +23,10 @@ class ChatRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun nukeTable() {
+       chatDao.nukeChatTable()
+    }
+
     override suspend fun getChatById(chatId: String): Chat? {
         return chatDao.getChatById(chatId)?.toChat()
     }

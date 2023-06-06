@@ -28,4 +28,8 @@
     <string name="signOut">sign out</string>
     <string name="find_random_user">find random user</string>
     <string name="signIn">Sign in</string>
+    <string name="signup">Sign up</string>
+    <string name="password">password</string>
+    <string name="email_label">email</string>
+    <string name="username_label">username</string>
 </resources>

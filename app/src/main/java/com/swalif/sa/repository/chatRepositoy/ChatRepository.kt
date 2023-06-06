@@ -15,4 +15,6 @@ interface ChatRepository {
     suspend fun getChatById(chatId: String):Chat?
 
     suspend fun readAllChatMessages(chatId:String)
+
+    suspend fun nukeTable()
 }

@@ -20,4 +20,7 @@ interface ChatDao {
 
     @Delete
     suspend fun deleteChatById(chat: ChatEntity)
+
+    @Query("DELETE FROM chatentity")
+    suspend fun nukeChatTable()
 }

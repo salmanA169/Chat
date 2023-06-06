@@ -15,6 +15,14 @@ class FakeMessageRepository @Inject constructor(
         messageDao.addMessage(message.toMessageEntity())
     }
 
+    override suspend fun deleteMessagesByChatId(chatId: String) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun nukeMessageTable() {
+        TODO("Not yet implemented")
+    }
+
     override suspend fun deleteMessages(message: List<Message>) {
         TODO("Not yet implemented")
     }
