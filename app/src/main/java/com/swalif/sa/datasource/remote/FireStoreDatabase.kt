@@ -50,6 +50,11 @@ class FireStoreDatabase @Inject constructor(
                     update("users", listUsers).await()
                 }
 
+                documentReference.collection(Constants.MESSAGES_COLLECTIONS).add(
+                    MessageDto.createAnnouncementMessage(
+                        "${getMyUser.username} has left", chatId, getMyUser.userUid
+                    )
+                )
                 if (listUsers.all { it.left }) {
                     documentReference.delete()
                 }
@@ -70,9 +75,9 @@ class FireStoreDatabase @Inject constructor(
         return chats.filter {
             val chatsDto = it.toObjects(ChatDto::class.java)
 
-            if (chatsDto.isEmpty()){
+            if (chatsDto.isEmpty()) {
                 true
-            }else{
+            } else {
                 chatsDto.any {
                     it.users.find { users ->
                         users.userUid == myUid
@@ -85,7 +90,7 @@ class FireStoreDatabase @Inject constructor(
                     documents.reference.collection(Constants.MESSAGES_COLLECTIONS).get().await()
                 messageCollection.documents.filter {
                     val message = it.toObject<MessageDto>()
-                    message != null && message.senderUid != myUid&& message.statusMessage != MessageStatus.SEEN
+                    message != null && message.senderUid != myUid && message.statusMessage != MessageStatus.SEEN
                 }.forEach { messageDocuments ->
                     messageDocuments.reference.update("statusMessage", MessageStatus.DELIVERED)
                         .await()

@@ -158,7 +158,11 @@ fun MessageScreen(
     BackHandler {
         if (state.chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
             viewModel.dialogEvent(true)
-        } else {
+        } else if(state.chatInfo.userIsLeft) {
+            navController.popBackStack()
+            Toast.makeText(context, "user has left", Toast.LENGTH_SHORT).show()
+            viewModel.leaveChat()
+        }else{
             navController.popBackStack()
         }
     }
@@ -194,6 +198,11 @@ fun MessageScreen(
             }, onBack = {
                 if (state.chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
                     viewModel.dialogEvent(true)
+                }else if(state.chatInfo.userIsLeft){
+                    navController.popBackStack()
+                    viewModel.leaveChat()
+                    Toast.makeText(context, "user has left", Toast.LENGTH_SHORT).show()
+
                 } else {
                     navController.popBackStack()
                 }

@@ -74,6 +74,8 @@ class MainActivity : ComponentActivity() {
                                     inclusive = true
                                 }
                             }
+                            // for fetch data again in viewModel
+                            navController.clearBackStack(Screens.MainScreens.ExploreScreen.route)
                             viewModel.nukeChatAndMessageTables()
                         }
                     }

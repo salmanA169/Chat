@@ -17,6 +17,7 @@ import com.swalif.sa.core.storage.FilesManager
 import com.swalif.sa.datasource.local.dao.UserDao
 import com.swalif.sa.datasource.local.entity.UserEntity
 import com.swalif.sa.datasource.remote.FireStoreDatabase
+import com.swalif.sa.datasource.remote.firestore_dto.UserStatusDto
 import com.swalif.sa.mapper.toUserDto
 import com.swalif.sa.mapper.toUserEntity
 import com.swalif.sa.mapper.toUserInfo
@@ -166,7 +167,7 @@ class UserRepositoryImpl @Inject constructor(
 
 
     override suspend fun saveUser(user: UserInfo) {
-        val savedUser = fireStore.saveUserFirstTime(user.toUserDto())
+        val savedUser = fireStore.saveUserFirstTime(user.toUserDto().copy(userStatus = UserStatusDto.ONLINE))
         if (savedUser){
             insertUser(user)
             updateUserStore(user.uidUser)

@@ -25,6 +25,11 @@ class SignupViewModel @Inject constructor(
     val event = _event.asStateFlow()
 
     fun signUp() {
+        _state.update {
+            it.copy(
+                showProgress = true
+            )
+        }
         if (checkError()) {
             viewModelScope.launch(dispatcherProvider.io) {
                 val stateSignup = _state.value
@@ -43,6 +48,11 @@ class SignupViewModel @Inject constructor(
                     _event.update {
                         SignUpEvent.Navigate(userData.username!!,userData.email!!,userData.photo!!,userData.userId!!)
                     }
+                }
+                _state.update {
+                    it.copy(
+                        showProgress = false
+                    )
                 }
             }
         }
@@ -91,7 +101,8 @@ class SignupViewModel @Inject constructor(
                 it.copy(
                     showEmailError = !it.email.isEmailValid,
                     showPasswordError = it.password.isEmpty(),
-                    showUserNameError = it.username.isEmpty()
+                    showUserNameError = it.username.isEmpty(),
+                    showProgress = false
                 )
             }
             return false

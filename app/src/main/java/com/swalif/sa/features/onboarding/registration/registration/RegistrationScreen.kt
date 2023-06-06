@@ -34,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -56,18 +57,47 @@ fun NavGraphBuilder.registrationDest(navController: NavController) {
     ) {
         val registrationViewModel: RegistrationViewModel = hiltViewModel()
         val registrationState by registrationViewModel.currentRegistrationState.collectAsStateWithLifecycle()
+        val event by registrationViewModel.event.collectAsStateWithLifecycle()
+        val context = LocalContext.current
+        LaunchedEffect(key1 = event) {
+            when (event) {
+                is RegistrationEvent.ErrorMessage -> {
+                    Toast.makeText(context, (event as RegistrationEvent.ErrorMessage).message, Toast.LENGTH_SHORT).show()
+                }
+                is RegistrationEvent.NavigateHomeScreen -> {
+                    navController.navigate(Screens.MainScreens.HomeScreen.route) {
+                        popUpTo(Screens.OnBoardingScreen.RegistrationScreen.route) {
+                            inclusive = true
+                        }
+                    }
+                    Toast.makeText(context, "Welcome back ${(event as RegistrationEvent.NavigateHomeScreen).userName}", Toast.LENGTH_SHORT).show()
+                }
+
+                is RegistrationEvent.NavigateInfo -> {
+                    val castEvent = event as RegistrationEvent.NavigateInfo
+                    navController.navigate(
+                        Screens.OnBoardingScreen.InformationScreen.navigateToInformation(
+                            castEvent.email,
+                            castEvent.photo,
+                            castEvent.uidUser,
+                            castEvent.username
+                        )
+                    )
+                }
+
+                null ->{}
+            }
+        }
         RegistrationScreen(
             registrationState,
             onGoogleSignIn = registrationViewModel::signInGoogleOneTap,
-            onNavigate = {
-                navController.navigate(it) {
-                    popUpTo(Screens.OnBoardingScreen.RegistrationScreen.route) {
-                        inclusive = true
-                    }
-                }
-            }, onSignInResult = registrationViewModel::signInResult, onSignUp = {
+            onSignInResult = registrationViewModel::signInResult,
+            onSignUp = {
                 navController.navigate(it)
-            }
+            },
+            onEmailChange = registrationViewModel::updateEmail,
+            onPasswordChange = registrationViewModel::updatePassword,
+            onSignInClick = registrationViewModel::signIn
         )
     }
 }
@@ -88,8 +118,10 @@ fun RegistrationScreen(
     registrationState: RegistrationState,
     onGoogleSignIn: () -> Unit = {},
     onSignInResult: (Intent) -> Unit = {},
-    onNavigate: (route: String) -> Unit = {},
-    onSignUp:(String)->Unit = {}
+    onSignUp: (String) -> Unit = {},
+    onEmailChange: (String) -> Unit = {},
+    onPasswordChange: (String) -> Unit = {},
+    onSignInClick: () -> Unit = {}
 ) {
 
     val registerIntentSender =
@@ -97,27 +129,6 @@ fun RegistrationScreen(
             onSignInResult(it.data ?: return@rememberLauncherForActivityResult)
         }
 
-    val context = LocalContext.current
-    LaunchedEffect(key1 = registrationState.userData) {
-        if (registrationState.userData != null) {
-            val user = registrationState.userData
-            if (user.isNewUser) {
-                onNavigate(
-                    Screens.OnBoardingScreen.InformationScreen.navigateToInformation(
-                        user.email!!,
-                        user.photo!!,
-                        user.userId!!,
-                        user.username!!
-                    )
-                )
-            } else {
-                onNavigate(
-                    Screens.MainScreens.HomeScreen.route
-                )
-                Toast.makeText(context, "Welcome back ${user.username}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
     LaunchedEffect(key1 = registrationState.showGoogleSignInt) {
         if (registrationState.showGoogleSignInt != null) {
             registerIntentSender.launch(
@@ -141,8 +152,28 @@ fun RegistrationScreen(
             contentDescription = "",
             modifier = Modifier.aspectRatio(3f)
         )
-        TextField(value = "", onValueChange = {}, modifier = Modifier.fillMaxWidth())
-        TextField(value = "", onValueChange = {}, modifier = Modifier.fillMaxWidth())
+        TextField(
+            value = registrationState.email,
+            onValueChange = onEmailChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text(text = stringResource(id = R.string.email_label))
+            }, isError = registrationState.showEmailError, supportingText = {
+                if (registrationState.showEmailError) {
+                    Text(text = "Invalid Email")
+                }
+            })
+        TextField(
+            value = registrationState.password,
+            onValueChange = onPasswordChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = {
+                Text(text = stringResource(id = R.string.password))
+            }, isError = registrationState.showPasswordError, supportingText = {
+                if (registrationState.showPasswordError) {
+                    Text(text = "Invalid Password")
+                }
+            }, visualTransformation = PasswordVisualTransformation())
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -150,7 +181,7 @@ fun RegistrationScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { onSignInClick() }) {
                 Text(text = stringResource(id = R.string.signIn))
 
             }

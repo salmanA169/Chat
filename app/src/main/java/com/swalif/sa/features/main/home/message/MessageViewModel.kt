@@ -18,6 +18,7 @@ import com.swalif.sa.repository.firestoreChatMessagesRepo.FirestoreChatWithMessa
 import com.swalif.sa.repository.firestoreChatMessagesRepo.MessageEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -127,7 +128,7 @@ class MessageViewModel @Inject constructor(
 
     fun updateTypingUser() {
         if (!isTyping) {
-            viewModelScope.launch(dispatcherProvider.io) {
+            GlobalScope.launch(dispatcherProvider.io) {
                 isTyping = true
                 firestoreChatMessageRepository.updateUserStatus(UserStatusDto.TYPING)
                 delay(2000)

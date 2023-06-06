@@ -53,7 +53,6 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     private val chatRepository: ChatRepository,
     private val firestore: FirebaseFirestore,
     private val userRepository: UserRepository,
-    private val fireStorage: FirebaseStorage,
     private val filesManager: FilesManager,
     private val dispatcherProvider: DispatcherProvider
 ) : FirestoreChatMessageRepository {
@@ -202,6 +201,9 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     override suspend fun observeMessage() {
         coroutineScope.launch {
             messageRepository.observeMessageByChatId(chatId).collect { messages ->
+                if (messages == null || messages.messages == null){
+                    return@collect
+                }
                 mm.update {
                     messages.messages.toMessageList()
                 }
@@ -377,6 +379,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                     "${receiverUser!!.username.toString()} has left",chatId,myUid!!
                 )
             )
+            chatRepository.deleteChatById(chatId)
             onMessageEventListener?.onLeaveChat()
             if (newList.all { it.left }){
                 // TODO: try to remove messages also
