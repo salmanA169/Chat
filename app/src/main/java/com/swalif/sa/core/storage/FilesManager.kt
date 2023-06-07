@@ -55,6 +55,7 @@ class FilesManager @Inject constructor(
      suspend fun saveToFireStorage(pathUidUser: String, mediaUri: Uri): String? {
         return try {
             val compressImage = compressImage(mediaUri)
+            // TODO: check if image is uploaded if yes get current uri if not upload new
             val reference = storage.reference.child(pathUidUser)
                 .child(mediaUri.lastPathSegment!!.plus(".jpeg")).putBytes(compressImage).await()
             reference.storage.downloadUrl.await().toString()

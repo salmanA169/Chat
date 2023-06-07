@@ -1,5 +1,6 @@
 package com.swalif.sa.features.main.home.message
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.ServerTimestamp
@@ -122,7 +123,9 @@ class MessageViewModel @Inject constructor(
 
     fun updateFriendRequest() {
         viewModelScope.launch(dispatcherProvider.io) {
-            firestoreChatMessageRepository.updateUserFriendRequest()
+            if (_state.value.chatInfo.requestFriendStatus == RequestFriendStatus.IDLE){
+                firestoreChatMessageRepository.updateUserFriendRequest()
+            }
         }
     }
 

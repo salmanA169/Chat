@@ -80,7 +80,8 @@ class InformationViewModel @Inject constructor(
             it.copy(
                 showEmailError = !it.email.isEmailValid,
                 showNameError = it.name.isEmpty(),
-                showGenderError = it.gender == null
+                showGenderError = it.gender == null,
+                isLoading = false
             )
         }
     }

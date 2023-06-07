@@ -38,6 +38,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextDirection
@@ -60,6 +61,7 @@ import com.swalif.sa.model.Message
 import com.swalif.sa.model.MessageStatus
 import com.swalif.sa.model.MessageType
 import com.swalif.sa.model.RequestFriendStatus
+import com.swalif.sa.model.UserStatus
 import com.swalif.sa.ui.theme.ChatAppTheme
 import com.swalif.sa.utils.formatSortTime
 
@@ -93,18 +95,18 @@ fun AnnouncementPreview() {
 @Composable
 fun Preview1() {
     ChatAppTheme() {
-        MessageItem(
-            message = Message(
-                0,
-                "",
-                "",
-                "salman",
-                Timestamp.now().toDate().time,
-                null,
-                MessageStatus.DELIVERED,
-                MessageType.TEXT
-            ), rememberNavController(), ""
-        )
+//        MessageItem(
+//            message = Message(
+//                0,
+//                "",
+//                "",
+//                "salman",
+//                Timestamp.now().toDate().time,
+//                null,
+//                MessageStatus.DELIVERED,
+//                MessageType.TEXT
+//            ), rememberNavController(), ""
+//        )
     }
 }
 
@@ -178,6 +180,15 @@ fun MessageScreen(
             navController.navigate(Screens.PreviewScreen.navigateToPreview(image))
         }
     }
+    val rememberOnImageClick = remember {
+        { image: String ->
+            navController.navigate(
+                Screens.PreviewScreen.navigateToPreview(
+                    image
+                )
+            )
+        }
+    }
     val rememberOnBack = remember<() -> Unit> {
         {
             if (state.chatInfo.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
@@ -190,6 +201,11 @@ fun MessageScreen(
             } else {
                 navController.popBackStack()
             }
+        }
+    }
+    val rememberOnClickRequestFriend = remember{
+        {
+            viewModel.updateFriendRequest()
         }
     }
     Column(
@@ -205,9 +221,14 @@ fun MessageScreen(
 
         ChatInfoSection(
             onClickImage = rememberPreviewScreen,
-            chatInfo = {state.chatInfo},
+//            chatInfo = {state.chatInfo},
             modifier = Modifier.fillMaxWidth(),
-            onRequestFriendClick = viewModel::updateFriendRequest, onBack = rememberOnBack
+            onRequestFriendClick = rememberOnClickRequestFriend,
+            onBack = rememberOnBack,
+            userStatus = state.chatInfo.localizeStatusUser(),
+            username = state.chatInfo.userName,
+            image = state.chatInfo.imageUri,
+            friendRequest = state.chatInfo.requestFriendStatus
         )
         LazyColumn(
             state = lazyColumnState,
@@ -215,7 +236,7 @@ fun MessageScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .weight(1f),
-            contentPadding = PaddingValues(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)
+            contentPadding = PaddingValues(6.dp)
         ) {
             items(state.messages, key = {
                 it.messageId
@@ -226,10 +247,13 @@ fun MessageScreen(
                     }
                 } else {
                     MessageItem(
-                        message = it,
-                        navController,
-                        state.myUid
+                        it.isMessageFromMe(state.myUid),
+//                        navController,
+                        it.statusMessage,
+                        it.messageType,
+                        it.message, it.mediaUri, it.dateTime.formatSortTime(), rememberOnImageClick
                     )
+                    Spacer(modifier = Modifier.size(4.dp))
                 }
             }
 
@@ -243,11 +267,6 @@ fun MessageScreen(
     }
 }
 
-// TODO: move list here
-@Composable
-fun MessagesList() {
-
-}
 
 @Composable
 fun EditTextField(
@@ -272,7 +291,7 @@ fun EditTextField(
             IconButton(onClick = {
                 pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             }) {
-                Icon(imageVector = Icons.Default.Email, "email")
+                Icon(painter= painterResource(id = R.drawable.image_icon), "email",modifier = Modifier.size(24.dp))
             }
         },
         trailingIcon = {
@@ -298,16 +317,26 @@ fun EditTextField(
         })
 }
 
-// TODO: continue to fix it
 @Composable
 fun ChatInfoSection(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
     onClickImage: (String) -> Unit,
-    chatInfo:()-> ChatInfo,
+//    chatInfo:()-> ChatInfo,
+    image: String,
+    username: String,
+    userStatus: String,
+    friendRequest: RequestFriendStatus,
     onRequestFriendClick: () -> Unit
 ) {
-    val rememberChatInf = chatInfo()
+    val iconFriend = remember(friendRequest) {
+        when (friendRequest) {
+            RequestFriendStatus.IDLE -> R.drawable.request_friend_icon
+            RequestFriendStatus.SENT -> R.drawable.request_friend_pending_icon
+            RequestFriendStatus.ACCEPTED -> R.drawable.check_icon
+        }
+    }
+
 
     Box(
         modifier = modifier
@@ -317,6 +346,7 @@ fun ChatInfoSection(
             .padding(bottom = 6.dp),
         contentAlignment = CenterStart
     ) {
+
         Column(modifier = Modifier.wrapContentSize()) {
             AdmobComposable()
             Row(modifier = Modifier.wrapContentSize()) {
@@ -325,13 +355,13 @@ fun ChatInfoSection(
                 }
 
                 AsyncImage(
-                    model = rememberChatInf.imageUri,
+                    model = image,
                     contentDescription = "",
                     modifier = Modifier
                         .size(45.dp)
                         .clip(CircleShape)
                         .clickable {
-                            onClickImage(rememberChatInf.imageUri)
+                            onClickImage(image)
                         },
                     contentScale = ContentScale.Crop
                 )
@@ -340,29 +370,23 @@ fun ChatInfoSection(
                     modifier = Modifier.wrapContentSize(),
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text(text = rememberChatInf.userName, style = MaterialTheme.typography.titleMedium)
+                    Text(text = username, style = MaterialTheme.typography.titleMedium)
                     Text(
-                        text = rememberChatInf.localizeStatusUser(),
+                        text = userStatus,
                         style = MaterialTheme.typography.labelSmall
                     )
 
                 }
             }
         }
-        if (rememberChatInf.requestFriendStatus != RequestFriendStatus.ACCEPTED) {
-            IconButton(modifier = Modifier.align(BottomEnd), onClick = {
-                if (rememberChatInf.requestFriendStatus == RequestFriendStatus.IDLE) {
-                    onRequestFriendClick()
-                }
-            }) {
+        if (friendRequest != RequestFriendStatus.ACCEPTED) {
+            IconButton(
+                modifier = Modifier.align(BottomEnd), onClick = onRequestFriendClick
+            ) {
                 Icon(
                     modifier = Modifier,
                     painter = painterResource(
-                        when (rememberChatInf.requestFriendStatus) {
-                            RequestFriendStatus.IDLE -> R.drawable.request_friend_icon
-                            RequestFriendStatus.SENT -> R.drawable.request_friend_pending_icon
-                            RequestFriendStatus.ACCEPTED -> R.drawable.check_icon
-                        }
+                        iconFriend
                     ), contentDescription = "Request Friend"
                 )
             }
@@ -380,13 +404,15 @@ fun getShapeMessageItemSender() = MaterialTheme.shapes.medium.copy(topStart = Co
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MessageItem(
-    message: Message,
-    navController: NavController,
-    myUid: String
+    isMessageFromMe: Boolean,
+    statusMessage: MessageStatus,
+    messageType: MessageType,
+    content: String,
+    imageUri: String? = null,
+    timeStamp: String,
+    onImageClick: (String) -> Unit
 ) {
-    val isMessageFromMe = remember(message.senderUid) {
-        message.isMessageFromMe(myUid)
-    }
+
 
     Row(
         modifier = Modifier
@@ -401,14 +427,14 @@ fun MessageItem(
                     alpha = 0.8f
                 ) else MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp)
             ),
-            onClick = {
-            }
-        ) {
+
+            ) {
             ContentMessage(
                 Modifier,
-                message,
                 isMessageFromMe,
-                navController, myUid
+//                navController,
+                onImageClick,
+                statusMessage, messageType, content, imageUri, timeStamp
             )
         }
     }
@@ -417,19 +443,41 @@ fun MessageItem(
 @Composable
 fun ContentMessage(
     modifier: Modifier = Modifier,
-    message: Message,
     isMessageFromMe: Boolean,
-    navController: NavController,
-    myUid: String
+    onImageClick: (String) -> Unit,
+    statusMessage: MessageStatus,
+    messageType: MessageType,
+    content: String,
+    imageUri: String? = null,
+    timeStamp: String,
 ) {
     val animate =
         animateColorAsState(
-            targetValue = if (message.statusMessage == MessageStatus.SEEN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
+            targetValue = if (statusMessage == MessageStatus.SEEN) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
         )
+    val rememberIconMessage = remember(statusMessage) {
+        when (statusMessage) {
+            MessageStatus.LOADING -> {
+                R.drawable.loading_message_icon
+            }
+
+            MessageStatus.SENT -> {
+                R.drawable.check_icon
+            }
+
+            MessageStatus.DELIVERED -> {
+                R.drawable.double_check_icon
+            }
+
+            MessageStatus.SEEN -> {
+                R.drawable.double_check_icon
+            }
+        }
+    }
     Column {
-        when (message.messageType) {
+        when (messageType) {
             MessageType.TEXT -> Text(
-                text = message.message,
+                text = content,
                 modifier
                     .widthIn(max = 290.dp)
                     .fillMaxWidth()
@@ -438,7 +486,7 @@ fun ContentMessage(
             )
 
             MessageType.IMAGE -> {
-                val imageUri = message.mediaUri
+
                 if (imageUri != null) {
                     if (imageUri.isEmpty()) {
                         CircularProgressIndicator(
@@ -448,17 +496,12 @@ fun ContentMessage(
                         )
                     } else {
                         AsyncImage(
-                            model = message.mediaUri,
+                            model = imageUri,
                             contentDescription = "",
                             modifier = Modifier
                                 .size(150.dp)
                                 .clickable {
-                                    navController.navigate(
-                                        Screens.PreviewScreen.navigateToPreview(
-                                            message.mediaUri ?: ""
-                                        )
-                                    )
-
+                                    onImageClick(imageUri)
                                 },
                             contentScale = ContentScale.FillBounds
                         )
@@ -480,45 +523,20 @@ fun ContentMessage(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = message.dateTime.formatSortTime(),
+                text = timeStamp,
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(horizontal = 3.dp)
             )
             if (isMessageFromMe) {
-                Crossfade(targetState = message.statusMessage) {
-                    when (it) {
-                        MessageStatus.SENT -> {
-                            Icon(
-                                painter = painterResource(id = R.drawable.check_icon),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-                        }
+                Icon(
+                    painter = painterResource(id = rememberIconMessage),
+                    contentDescription = "",
+                    tint = animate.value,
+                    modifier = Modifier.size(
+                        20.dp
+                    )
+                )
 
-                        MessageStatus.DELIVERED, MessageStatus.SEEN -> {
-                            Icon(
-                                painter = painterResource(id = R.drawable.double_check_icon),
-                                contentDescription = "",
-                                tint = animate.value,
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-                        }
-
-                        MessageStatus.LOADING -> {
-                            Icon(
-                                painter = painterResource(id = R.drawable.loading_message_icon),
-                                contentDescription = "",
-                                tint = animate.value,
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-                        }
-
-                        else -> {}
-                    }
-                }
             }
         }
     }
