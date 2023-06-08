@@ -1,5 +1,6 @@
 package com.swalif.sa.datasource.remote
 
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.dataObjects
@@ -72,44 +73,54 @@ class FireStoreDatabase @Inject constructor(
         val chats = fireStoreDatabase.collection(Constants.CHATS_COLLECTIONS)
             .whereEqualTo("acceptRequestFriends", false).snapshots()
 
-        return chats.filter {
-            val chatsDto = it.toObjects(ChatDto::class.java)
-
-            if (chatsDto.isEmpty()) {
-                true
-            } else {
-                chatsDto.any {
-                    it.users.find { users ->
-                        users.userUid == myUid
-                    } != null
-                }
-            }
-        }.onEach {
-            it.documents.forEach { documents ->
-                val messageCollection =
-                    documents.reference.collection(Constants.MESSAGES_COLLECTIONS).get().await()
-                messageCollection.documents.filter {
-                    val message = it.toObject<MessageDto>()
-                    message != null && message.senderUid != myUid && message.statusMessage != MessageStatus.SEEN
-                }.forEach { messageDocuments ->
-                    messageDocuments.reference.update("statusMessage", MessageStatus.DELIVERED)
-                        .await()
-                }
-            }
-        }.map { it.toObjects(ChatDto::class.java) }.map {
-            it.map {
-                val user = it.users.find { it.userUid != myUid }
+        return chats.map {
+            val toObject = it.toObjects<ChatDto>()
+            toObject.filter {
+                it.users.find { users ->
+                    users.userUid == myUid && !users.left
+                } != null
+            }.map {
+                val findUser = it.users.find { it.userUid == myUid }
                 Chat(
                     it.chatId,
                     "",
-                    user!!.username,
-                    "${user!!.username} wants to chat with you",
-                    user.image,
-                    0,
-                    0, "", 2
+                    findUser!!.username,
+                    "${findUser!!.username} wants to chat with you",
+                    findUser.image,
+                    Timestamp.now().toDate().time,
+                    0, "", 2, false
                 )
             }
         }
+//        return chats.onEach {
+//            it.documents.forEach { documents ->
+//                val messageCollection =
+//                    documents.reference.collection(Constants.MESSAGES_COLLECTIONS).get().await()
+//                messageCollection.documents.filter {
+//                    val message = it.toObject<MessageDto>()
+//                    message != null && message.senderUid != myUid && message.statusMessage != MessageStatus.SEEN
+//                }.forEach { messageDocuments ->
+//                    messageDocuments.reference.update("statusMessage", MessageStatus.DELIVERED)
+//                        .await()
+//                }
+//            }
+//        }.map { it.toObjects(ChatDto::class.java) }.map {
+//            it.map {
+//                logcat("FirestoreDatabase"){
+//                    it.toString()
+//                }
+//                val user = it.users.find { it.userUid != myUid }
+//                Chat(
+//                    it.chatId,
+//                    "",
+//                    user!!.username,
+//                    "${user!!.username} wants to chat with you",
+//                    user.image,
+//                    Timestamp.now().toDate().time,
+//                    0, "", 2
+//                )
+//            }
+//        }
     }
 
     /**

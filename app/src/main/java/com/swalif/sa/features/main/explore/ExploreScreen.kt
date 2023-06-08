@@ -158,9 +158,8 @@ fun UsersCard(
                 .clip(CircleShape),
             placeholder = painterResource(id = R.drawable.ic_launcher_foreground)
         )
-        Text(text = userInfo.userName, modifier = Modifier.align(CenterHorizontally))
         Row(modifier = Modifier.align(CenterHorizontally)) {
-            Text(text = userInfo.gender.gender)
+            Text(text = userInfo.userName)
             Icon(
                 painter = painterResource(id = userInfo.gender.getGenderIcon()),
                 contentDescription = "gender icon",

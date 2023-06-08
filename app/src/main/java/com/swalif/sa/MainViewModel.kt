@@ -32,7 +32,6 @@ class MainViewModel @Inject constructor(
         )
 
 
-    // TODO: maybe in onDestroy coroutine will be cancel before save offline data debug it later
      fun setOffline(){
          viewModelScope.launch(dispatcherProvider.io) {
              userRepo.setOffline()

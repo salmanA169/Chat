@@ -17,7 +17,6 @@ data class MessageDto(
     val message:String ="",
     val dateTime: Timestamp = Timestamp.now(),
     val mediaUri:String? = null,
-    // TODO: test for now
     val statusMessage: MessageStatus = MessageStatus.LOADING,
     val messageType : MessageType? = null
 ){

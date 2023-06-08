@@ -34,7 +34,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch(dispatchers.io) {
             getChats.collect{chats->
 
-                // TODO: get chat if my user is not left also
                 _homeState.update {
                     it.copy(
                         tempChats = chats.distinctBy { it.chatId }

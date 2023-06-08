@@ -29,8 +29,19 @@ class MessageFakeRepository:MessageRepository {
 //        messages.removeAll(message)
     }
 
-    override suspend fun getMessages(): List<Message> {
-        TODO()
+    override suspend fun deleteMessagesByChatId(chatId: String) {
+        TODO("Not yet implemented")
     }
 
+    override suspend fun getMessagesByChatID(chatId: String): List<Message> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getAllMessages(): List<Message> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun nukeMessageTable() {
+        TODO("Not yet implemented")
+    }
 }

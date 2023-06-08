@@ -232,11 +232,11 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
                 currentMessagesCollection!!.add(messageUpdated)
             }
 
-            MessageType.AUDIO -> TODO()
+            MessageType.AUDIO -> Unit
             MessageType.ANNOUNCEMENT -> {
 
             }
-            null -> TODO()
+            null -> Unit
         }
 
     }
@@ -390,7 +390,7 @@ class FirestoreChatWithMessageRepositoryImpl @Inject constructor(
     }
 
     override fun close() {
-        // TODO: check last user to delete chat if not accept as friend
+
         job.cancel()
         currentMessagesCollection = null
         currentChatDto = null

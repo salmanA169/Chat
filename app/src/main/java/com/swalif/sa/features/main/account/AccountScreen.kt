@@ -141,7 +141,7 @@ fun AccountScreen(
                         Text(text = stringResource(id = R.string.uniqueId))
                     },
                     trailingIcon = {
-                        IconButton(onClick = { onCopyText(accountState.userInfo.uniqueId)/*TODO*/ }) {
+                        IconButton(onClick = { onCopyText(accountState.userInfo.uniqueId) }) {
                             Icon(
                                 modifier = Modifier.size(24.dp),
                                 painter = painterResource(id = R.drawable.copy_icon),

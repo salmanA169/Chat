@@ -129,7 +129,7 @@ fun ChatItem(
         },
         background = MaterialTheme.colorScheme.errorContainer
     )
-    SwipeableActionsBox(
+    SwipeableActionsBox(swipeThreshold = 100.dp ,
         endActions = listOf(deleteAction)
     ) {
         ElevatedCard(onClick = {

@@ -61,7 +61,7 @@ class SearchViewModel @Inject constructor(
                 UserState.IGNORE -> {
                     searchRepository.ignoreUser()
                 }
-                UserState.LEFT -> TODO()
+                UserState.LEFT -> Unit
             }
         }
     }

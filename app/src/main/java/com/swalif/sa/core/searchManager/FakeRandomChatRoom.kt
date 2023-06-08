@@ -12,11 +12,11 @@ class FakeRandomChatRoom : AbstractChatRoom() {
         set(value) {}
 
     override fun getRoomEvent(): RoomEvent {
-        TODO("Not yet implemented")
+        TODO("Not yet implemented")//
     }
 
     override fun deleteRoom() {
-        TODO("Not yet implemented")
+        //
     }
 
     override val maxUsers: Int
