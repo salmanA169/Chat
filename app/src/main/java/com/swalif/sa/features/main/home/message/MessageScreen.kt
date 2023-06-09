@@ -432,7 +432,6 @@ fun MessageItem(
             ContentMessage(
                 Modifier,
                 isMessageFromMe,
-//                navController,
                 onImageClick,
                 statusMessage, messageType, content, imageUri, timeStamp
             )
