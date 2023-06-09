@@ -29,20 +29,20 @@ class HomeViewModel @Inject constructor(
     private val _homeState = MutableStateFlow(HomeChatState())
     val homeState = _homeState.asStateFlow()
 
-    private fun syncChats() {
-        val getChats = firebaseDatabase.getChats(myUser?.uidUser ?: return)
-        viewModelScope.launch(dispatchers.io) {
-            getChats.collect{chats->
-
-                _homeState.update {
-                    it.copy(
-                        tempChats = chats.distinctBy { it.chatId }
-                    )
-                }
-
-            }
-        }
-    }
+//    private fun syncChats() {
+//        val getChats = firebaseDatabase.getChats(myUser?.uidUser ?: return)
+//        viewModelScope.launch(dispatchers.io) {
+//            getChats.collect{chats->
+//
+//                _homeState.update {
+//                    it.copy(
+//                        tempChats = chats.distinctBy { it.chatId }
+//                    )
+//                }
+//
+//            }
+//        }
+//    }
 
     init {
         viewModelScope.launch(dispatchers.io) {
@@ -56,7 +56,7 @@ class HomeViewModel @Inject constructor(
                     myUid = getMyUser.uidUser
                 )
             }
-            syncChats()
+//            syncChats()
 
         }
         viewModelScope.launch(dispatchers.io) {

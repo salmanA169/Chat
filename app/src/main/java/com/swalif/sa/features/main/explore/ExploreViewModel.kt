@@ -64,18 +64,18 @@ class ExploreViewModel @Inject constructor(
         }
     }
 
-    init {
-        viewModelScope.launch(dispatchProvider.io) {
-            val getMyUser = userRepository.getCurrentUser()
-            myUser = getMyUser
-            val getUsers = firebaseDatabase.getUsers()
-            _state.update {
-                it.copy(
-                    getUsers.filter { it.uidUser != myUser!!.uidUser }
-                )
-            }
-        }
-    }
+//    init {
+////        viewModelScope.launch(dispatchProvider.io) {
+////            val getMyUser = userRepository.getCurrentUser()
+////            myUser = getMyUser
+////            val getUsers = firebaseDatabase.getUsers()
+////            _state.update {
+////                it.copy(
+////                    getUsers.filter { it.uidUser != myUser!!.uidUser }
+////                )
+////            }
+////        }
+//    }
 
 }
 

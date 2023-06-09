@@ -135,22 +135,22 @@ fun AccountScreen(
                         Text(text = stringResource(id = R.string.createAt))
                     }
                 )
-                ReadEditText(
-                    text = accountState.userInfo.uniqueId,
-                    prefix = {
-                        Text(text = stringResource(id = R.string.uniqueId))
-                    },
-                    trailingIcon = {
-                        IconButton(onClick = { onCopyText(accountState.userInfo.uniqueId) }) {
-                            Icon(
-                                modifier = Modifier.size(24.dp),
-                                painter = painterResource(id = R.drawable.copy_icon),
-                                contentDescription = "copy",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                )
+//                ReadEditText(
+//                    text = accountState.userInfo.uniqueId,
+//                    prefix = {
+//                        Text(text = stringResource(id = R.string.uniqueId))
+//                    },
+//                    trailingIcon = {
+//                        IconButton(onClick = { onCopyText(accountState.userInfo.uniqueId) }) {
+//                            Icon(
+//                                modifier = Modifier.size(24.dp),
+//                                painter = painterResource(id = R.drawable.copy_icon),
+//                                contentDescription = "copy",
+//                                tint = MaterialTheme.colorScheme.primary
+//                            )
+//                        }
+//                    }
+//                )
                 ReadEditText(
                     text = accountState.userInfo.gender.gender,
                     prefix = {
