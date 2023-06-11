@@ -38,8 +38,8 @@ android {
         applicationId = "com.swalif.sa"
         minSdk = 28
         targetSdk = 33
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "com.swalif.sa.CustomTestRunner"
         vectorDrawables {
@@ -54,11 +54,9 @@ android {
 
     buildTypes {
         getByName("release") {
-
             isMinifyEnabled = true
             proguardFiles (getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.getByName("debug")
-            versionNameSuffix = "release"
         }
     }
     compileOptions {

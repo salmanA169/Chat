@@ -6,8 +6,8 @@
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
-        <item name="windowSplashScreenBackground">#987</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/chat_mipmap_round</item>
+        <item name="windowSplashScreenBackground">#BEC2E6</item>
         <item name="windowSplashScreenAnimationDuration">200</item>
         <item name="postSplashScreenTheme">@style/Theme.ChatApp</item>
     </style>
